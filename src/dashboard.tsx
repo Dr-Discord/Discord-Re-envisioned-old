@@ -1,6 +1,5 @@
 import { React } from "./react"
 import { findInReactTree, findInTree, waitUntil, getOwnerInstance } from "./util"
-import { register, dispatch, unregister } from "./actions"
 import getModule from "./getModule"
 import patcher from "./patcher"
 import i18n from "./i18n"
@@ -19,7 +18,7 @@ const DrIcon = React.memo(() => (
   </svg>
 ))
 
-const PanelDispatchSymbol = Symbol("PanelDispatch")
+let PanelDispatch:Function = () => {}
 
 const { LinkButton } = getModule(["LinkButton"])
 interface DrDashboardButton {
@@ -27,10 +26,9 @@ interface DrDashboardButton {
 }
 const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
   const [isSelected, setSelected] = React.useState(false)
-  register(PanelDispatchSymbol, (val:boolean) => {
-    setSelected(val)
-    unregister(PanelDispatchSymbol)
-  })
+  PanelDispatch = (val:boolean) => setSelected(val)
+  const selectedChild:any = children.find((e:any) => e?.props?.selected)
+  
   return (
     <LinkButton 
       text={i18n.name}
@@ -38,7 +36,6 @@ const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
       route="/dr_dashboard"
       selected={isSelected}
       onFocus={() => {
-        const selectedChild:any = children.find((e:any) => e?.props?.selected)
         if (selectedChild) selectedChild.props.selected = false
       }}
     />
@@ -70,7 +67,7 @@ const SwitchItem = React.memo((props:SwitchItemProps) => {
 
 patcher.after("router-routes", getModule("ConnectedPrivateChannelsList"), "default", (_:unknown, res:any) => {
   const children = res.props.children.props.children
-  dispatch("drdash-button-selected", /^\/dr_dashboard/.test(location.pathname))
+  PanelDispatch(/^\/dr_dashboard/.test(location.pathname))
   if (children.find((e:any) => e && e.key === "drdashLinkButton")) return
   children.unshift(<DrDashboardButton key="drdashLinkButton">{children}</DrDashboardButton>)
 })
