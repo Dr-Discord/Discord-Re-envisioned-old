@@ -1,16 +1,22 @@
 const { join } = require("path")
 const electron = require("electron")
 const Module = require("module")
-const { readFileSync, existsSync } = require("fs")
 
 electron.app.commandLine.appendSwitch("no-force-async-hooks-checks")
 
 class BrowserWindow extends electron.BrowserWindow {
   constructor(opt) {
     if (opt.title != "Discord") return super(opt)
-    
+    opt.transparent = true
+    opt.backgroundColor = "#00000000"
+    const oldPreload = opt.webPreferences.preload
+
+    opt.webPreferences.preload = join(__dirname, "preload.js")
+
+    electron.ipcMain.on("DR_DISCORD_PRELOAD", (event) => event.returnValue = oldPreload)
+
     const win = new electron.BrowserWindow(opt)
-    
+
     async function starting() {
       win.webContents.executeJavaScript("(() => DiscordNative.window.setDevtoolsCallbacks(null, null))()")
       win.webContents.on("did-finish-load", () => {
@@ -28,6 +34,19 @@ class BrowserWindow extends electron.BrowserWindow {
   }
 }
 
+// Enable DevTools on Stable.
+let fakeAppSettings;
+Object.defineProperty(global, "appSettings", {
+  get() {
+    return fakeAppSettings;
+  },
+  set(value) {
+    if (!value.hasOwnProperty("settings")) value.settings = {};
+    value.settings.DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
+    fakeAppSettings = value;
+  },
+})
+
 electron.app.once("ready", () => {
   electron.session.defaultSession.webRequest.onHeadersReceived(function({ responseHeaders }, callback) {
     delete responseHeaders["content-security-policy-report-only"]
@@ -41,6 +60,7 @@ electron.app.once("ready", () => {
   try {
     const { default: installExtension, REACT_DEVELOPER_TOOLS } = require("electron-devtools-installer")
     installExtension(REACT_DEVELOPER_TOOLS)
+    console.log(REACT_DEVELOPER_TOOLS);
   } catch (error) {}
 })
 
@@ -57,13 +77,4 @@ function LoadDiscord() {
   electron.app.name = pkg.name
   Module._load(join(basePath, pkg.main), null, true)
 }
-const appOld = join(process.resourcesPath, "app-old")
-if (existsSync(appOld)) {
-  if (existsSync(join(appOld, "index.js"))) {
-    const js = readFileSync(join(appOld, "index.js"), "utf8")
-    if (js.startsWith(`require("${join(__dirname).replace(/(\/|\\)/g, "/")}")`)) LoadDiscord()
-    else require(join(process.resourcesPath, "app-old"))
-  }
-  else require(appOld)
-}
-else LoadDiscord()
+LoadDiscord()

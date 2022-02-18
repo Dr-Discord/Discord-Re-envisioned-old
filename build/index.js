@@ -18,8 +18,8 @@
         return mod && mod.__esModule ? mod : { "default": mod };
       };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.showConfirmationModal = exports.getOwnerInstance = exports.getReactInstance = exports.waitUntil = exports.sleep = void 0;
-      var react_1 = __importDefault(require_react());
+      exports.restart = exports.findInReactTree = exports.findInTree = exports.prompt = exports.showConfirmationModal = exports.getOwnerInstance = exports.getReactInstance = exports.waitUntil = exports.sleep = void 0;
+      var react_1 = require_react();
       var getModule_1 = __importDefault(require_getModule());
       var sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
       exports.sleep = sleep;
@@ -31,6 +31,8 @@
       }
       exports.waitUntil = waitUntil;
       function getReactInstance(element) {
+        if (!element)
+          return;
         if (element.__reactInternalInstance$)
           return element.__reactInternalInstance$;
         return element[Object.keys(element).find((k) => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber"))] || null;
@@ -55,10 +57,85 @@
         const { onConfirm = emptyFunction, onCancel = emptyFunction, confirmText = Messages.OKAY, cancelText = Messages.CANCEL, danger = false } = opts;
         if (!Array.isArray(content))
           content = [content];
-        content = content.map((c) => typeof c === "string" ? react_1.default.createElement(Markdown, null, c) : c);
-        openModal((props) => react_1.default.createElement(ConfirmationModal, { ...props, header: title, content, onConfirm, onCancel, confirmText, cancelText, confirmButtonColor: danger ? Button.ButtonColors.RED : Button.ButtonColors.BRAND }, content));
+        content = content.map((c) => typeof c === "string" ? react_1.React.createElement(Markdown, null, c) : c);
+        openModal((props) => react_1.React.createElement(ConfirmationModal, { ...props, header: title, content, onConfirm, onCancel, confirmText, cancelText, confirmButtonColor: danger ? Button.ButtonColors.RED : Button.ButtonColors.BRAND }, content));
       }
       exports.showConfirmationModal = showConfirmationModal;
+      function prompt(title, defaultValue) {
+        const TextInput = (0, getModule_1.default)("TextInput").default;
+        const ConfirmationModal = (0, getModule_1.default)("ConfirmModal").default;
+        const Button = (0, getModule_1.default)(["ButtonColors"]);
+        const { Messages } = (0, getModule_1.default)(["Messages"], false)[1];
+        const { openModal } = (0, getModule_1.default)(["openModal", "openModalLazy"]);
+        let toReturn = "";
+        return new Promise((resolve) => {
+          openModal((props) => {
+            if (props.transitionState === 3)
+              resolve(null);
+            return react_1.React.createElement(ConfirmationModal, Object.assign({
+              header: title,
+              confirmButtonColor: Button.ButtonColors.BRAND,
+              confirmText: Messages.OKAY,
+              cancelText: Messages.CANCEL,
+              onConfirm: () => resolve(toReturn),
+              onCancel: () => resolve(null),
+              children: react_1.React.createElement(react_1.React.memo(() => {
+                const [value, setValue] = react_1.React.useState(defaultValue);
+                return react_1.React.createElement(TextInput, {
+                  value,
+                  onChange: (value2) => {
+                    setValue(value2);
+                    toReturn = value2;
+                  }
+                });
+              }))
+            }, props));
+          });
+        });
+      }
+      exports.prompt = prompt;
+      function findInTree(tree, filter, opts = {}) {
+        const { walkable = null, ignore = [] } = opts;
+        if (!tree || typeof tree !== "object")
+          return null;
+        if (typeof filter === "string") {
+          if (tree.hasOwnProperty(filter))
+            return tree[filter];
+          return;
+        } else if (filter(tree))
+          return tree;
+        let returnValue = null;
+        if (Array.isArray(tree)) {
+          for (const value of tree) {
+            returnValue = findInTree(value, filter, { walkable, ignore });
+            if (returnValue)
+              return returnValue;
+          }
+        } else {
+          const walkables = !walkable ? Object.keys(tree) : walkable;
+          for (const key of walkables) {
+            if (!tree.hasOwnProperty(key) || ignore.includes(key))
+              continue;
+            returnValue = findInTree(tree[key], filter, { walkable, ignore });
+            if (returnValue)
+              return returnValue;
+          }
+        }
+        return returnValue;
+      }
+      exports.findInTree = findInTree;
+      function findInReactTree(tree, searchFilter) {
+        return findInTree(tree, searchFilter, {
+          walkable: ["props", "children", "child", "sibling"]
+        });
+      }
+      exports.findInReactTree = findInReactTree;
+      function restart(full) {
+        if (window.__DR__BACKEND__.app && full)
+          return window.__DR__BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART");
+        return location.reload();
+      }
+      exports.restart = restart;
     }
   });
 
@@ -282,12 +359,12 @@
         };
       }
       function getClasses(css) {
-        const matches = css.match(/#{(("[A-z]+")((, )|)){1,3}}/g);
+        const matches = css.match(/#{(("[A-z]+")((, )|)){1,}}/g);
         if (!matches)
           return css;
         for (const styl of matches) {
           const arr = JSON.parse(styl.replace("#{", "[").replace("}", "]"));
-          css = css.replace(styl, `.${(0, getModule_1.default)(arr, true)[arr[0]].replaceAll(" ", ".")}`);
+          css = css.replace(styl, `.${(0, getModule_1.default)(arr, true)?.[arr[0]].replaceAll(" ", ".")}`);
         }
         return css;
       }
@@ -331,17 +408,10 @@
   flex-grow: 1;
   opacity: 1;
   transition: opacity 0.3s ease-in-out;
-  width: fit-content;
+  width: fit-content
 }
-.dr-toast.adding {
-  opacity: 0
-}
-.dr-toast.removing {
-  opacity: 0
-}
-.dr-toast:not(:last-child) {
-  margin-bottom: 5px
-}
+.dr-toast:is(.adding, .removing) { opacity: 0 }
+.dr-toast:not(:last-child) {  margin-bottom: 5px }
 .dr-toast-container {
   position: absolute;
   bottom: 0;
@@ -384,26 +454,18 @@
   height: 100%;
   right: -3px;
 }
-.dr-toast-type.success {
-  background-color: var(--info-positive-foreground);
-}
-.dr-toast-type.error {
-  background-color: var(--info-danger-foreground);
-}
-.dr-toast-type.info {
-  background-color: var(--brand-experiment);
-}
-.dr-toast-type.warning {
-  background-color: var(--info-warning-foreground);
-}
+.dr-toast-type.success { background-color: var(--info-positive-foreground) }
+.dr-toast-type.error { background-color: var(--info-danger-foreground) }
+.dr-toast-type.info { background-color: var(--brand-experiment) }
+.dr-toast-type.warning { background-color: var(--info-warning-foreground) }
 .dr-toast-message {
   display: inline-block;
-  user-select: text;
+  user-select: text
 }
 .dr-toast-message-wrapper {
   flex: 1;
   padding: 12px 6px 12px 3px;
-  position: relative;
+  position: relative
 }
 .dr-toast-close {
   cursor: pointer;
@@ -413,11 +475,11 @@
   user-select: none;
   color: var(--interactive-normal);
   position: relative;
-  font-size: 14px;
+  font-size: 14px
 }
 .dr-toast-close:hover {
   color: var(--interactive-hover);
-  background-color: var(--background-modifier-hover);
+  background-color: var(--background-modifier-hover)
 }`);
       var toastContainer = document.createElement("div");
       toastContainer.className = "dr-toast-container";
@@ -444,8 +506,6 @@
       }
       function createToast(text, opts) {
         const { type = "success", duration = 3e3, autoClose = true, closeButton = true } = opts;
-        if (!autoClose && !closeButton)
-          throw new Error("You can't have autoClose and closeButton disabled");
         const toast = document.createElement("div");
         toast.className = "dr-toast adding";
         setTimeout(() => toast.classList.remove("adding"), 300);
@@ -525,236 +585,6 @@
           exports.localStorage.setItem("dr-storage", JSON.stringify(storage));
         }
       };
-    }
-  });
-
-  // tsBuild/i18n.js
-  var require_i18n = __commonJS({
-    "tsBuild/i18n.js"(exports) {
-      "use strict";
-      Object.defineProperty(exports, "__esModule", { value: true });
-      exports.languages = void 0;
-      exports.languages = {
-        global: {
-          name: "Discord Re-envisioned",
-          version: "0.0.1"
-        },
-        en: {
-          minimalMode: {
-            title: "Minimal Mode",
-            note: "Minimal mode makes discord more compact."
-          },
-          devMode: {
-            title: "Toggle Developer Mode",
-            note: "Warning you can get banned from Discord if you do this (not a 100% chance)!"
-          },
-          settingTabs: {
-            general: "General",
-            plugins: "Plugins",
-            themes: "Themes"
-          },
-          uninstall: "Uninstall",
-          settings: "Settings",
-          installing: {
-            alreadyInstalled: {
-              content: "Plugin '{{name}}' is already installed",
-              replace: function(name) {
-                return this.content.replace("{{name}}", name);
-              }
-            },
-            installed: {
-              content: "Installed '{{name}}'! Refresh the page to see it.",
-              replace: function(name) {
-                return this.content.replace("{{name}}", name);
-              }
-            },
-            notValid: {
-              content: "'{{url}}' is not a valid plugin URL",
-              replace: function(url) {
-                return this.content.replace("{{url}}", url);
-              }
-            },
-            install: "Install"
-          }
-        }
-      };
-      var i18n = new Proxy(exports.languages[navigator.language.split("-", 1)[0]], {
-        get: (target, key) => {
-          const lang = navigator.language.split("-", 1)[0];
-          return exports.languages.global[key] || exports.languages[lang][key] || exports.languages.en[key] || key;
-        }
-      });
-      exports.default = i18n;
-    }
-  });
-
-  // tsBuild/ui/settings.js
-  var require_settings = __commonJS({
-    "tsBuild/ui/settings.js"(exports) {
-      "use strict";
-      var __importDefault = exports && exports.__importDefault || function(mod) {
-        return mod && mod.__esModule ? mod : { "default": mod };
-      };
-      Object.defineProperty(exports, "__esModule", { value: true });
-      var react_1 = __importDefault(require_react());
-      var getModule_1 = __importDefault(require_getModule());
-      var patcher_1 = __importDefault(require_patcher());
-      var storage_1 = require_storage();
-      var styling_1 = require_styling();
-      var i18n_1 = __importDefault(require_i18n());
-      styling_1.internalStyling.inject("settings", `
-.dr-addons-list {
-  padding: 16px 0
-}
-.dr-addon-card {
-  border: 2px solid var(--background-floating);
-  border-radius: 8px;
-  padding: 8px;
-  background-color: var(--background-secondary);
-}
-.dr-addon-card:hover {
-  background-color: var(--background-secondary-alt);
-}
-
-.dr-addon-card-header-top {
-  display: flex;
-  position: relative;
-  width: fit-content;
-}
-.dr-addon-card-header-name {
-  font-size: 23px;
-  color: var(--text-normal);
-}
-.dr-addon-card-header-version {
-  color: var(--text-muted);
-  position: absolute;
-  right: 0;
-  transform: translateX(calc(100% + 8px));
-  bottom: 0;
-}
-.dr-addon-card-header-bottom {
-  color: var(--text-normal);
-  padding-top: 3px;
-  font-size: 14px;
-}
-.dr-addon-card-body {
-  padding: 8px 0
-}
-.dr-addon-card-footer {
-  display: flex;
-}
-.dr-addon-card-footer-right {
-  margin-left: auto;
-}
-.dr-addon-card-footer-right {
-  display: flex;
-}
-.dr-addon-card-footer-settings {
-  margin-right: 8px;
-}
-.dr-addon-card-footer-toggle {
-  transform: translateY(calc(50% - 12px));
-}
-`);
-      var FluxDispatcher = (0, getModule_1.default)(["dirtyDispatch", "dispatch"]);
-      var FormSection = (0, getModule_1.default)("FormSection").default;
-      var Text = (0, getModule_1.default)("Text").default;
-      var SwitchOrig = (0, getModule_1.default)("SwitchItem").default;
-      var Switch = (0, getModule_1.default)("Switch").default;
-      var Flex = (0, getModule_1.default)("Flex").default;
-      var TextInput = (0, getModule_1.default)("TextInput").default;
-      var Tooltip = (0, getModule_1.default)("Tooltip").default;
-      var Button = (0, getModule_1.default)(["ButtonColors"]).default;
-      var Trash = (0, getModule_1.default)("Trash").default;
-      var Gear = (0, getModule_1.default)("Gear").default;
-      var Markdown = (0, getModule_1.default)((m) => m.default?.displayName === "Markdown" && m.default.rules).default;
-      var { ActionTypes } = (0, getModule_1.default)(["ActionTypes"]);
-      function openUserModal(userId) {
-        if (!userId)
-          return;
-        FluxDispatcher.dirtyDispatch({
-          type: ActionTypes.USER_PROFILE_MODAL_OPEN,
-          userId
-        });
-      }
-      function readMeta(contents) {
-        let meta = {};
-        let jsdoc = contents.match(/\/\*\*([\s\S]*?)\*\//);
-        if (!jsdoc?.[1])
-          return meta;
-        for (let ite of jsdoc[1].match(/\*\s([^\n]*)/g)) {
-          ite = ite.replace(/\*( +|)@/, "");
-          let split = ite.split(" ");
-          let key = split[0];
-          let value = split.slice(1).join(" ");
-          meta[key] = value;
-        }
-        return meta;
-      }
-      var SwitchItem = react_1.default.memo((props) => {
-        const { value, onChange = () => {
-        }, title, note, disabled = false, initialChange = true } = props;
-        const [checked, setChecked] = react_1.default.useState(value);
-        return react_1.default.createElement(SwitchOrig, { value: checked, onChange: () => {
-          if (initialChange)
-            setChecked(!checked);
-          onChange(!checked, setChecked);
-        }, note, disabled }, title);
-      });
-      var AddonCard = react_1.default.memo((props) => {
-        const [enabled, setEnabled] = react_1.default.useState(DrApi.Plugins.isEnabled(props.name));
-        return react_1.default.createElement("div", { className: "dr-addon-card" }, react_1.default.createElement("div", { className: "dr-addon-card-header" }, react_1.default.createElement("div", { className: "dr-addon-card-header-top" }, react_1.default.createElement("div", { className: "dr-addon-card-header-name" }, props.name), react_1.default.createElement("div", { className: "dr-addon-card-header-version" }, props.version)), react_1.default.createElement("div", { className: "dr-addon-card-header-bottom" }, react_1.default.createElement("div", { className: "dr-addon-card-header-Author", onClick: () => Boolean(props.authorId) && openUserModal(props.authorId) }, props.author))), react_1.default.createElement("div", { className: "dr-addon-card-body" }, react_1.default.createElement(Markdown, { className: "dr-addon-card-body-description" }, props.description)), react_1.default.createElement("div", { className: "dr-addon-card-footer" }, react_1.default.createElement("div", { className: "dr-addon-card-footer-left" }, react_1.default.createElement(Tooltip, { text: i18n_1.default.uninstall }, (ttProps) => react_1.default.createElement(Button, { ...ttProps, size: Button.Sizes.ICON, color: Button.Colors.RED }, react_1.default.createElement(Trash, null)))), react_1.default.createElement("div", { className: "dr-addon-card-footer-right" }, react_1.default.createElement("div", { className: "dr-addon-card-footer-settings" }, react_1.default.createElement(Tooltip, { text: i18n_1.default.settings }, (ttProps) => react_1.default.createElement(Button, { ...ttProps, size: Button.Sizes.ICON, color: Button.Colors.BRAND_NEW }, react_1.default.createElement(Gear, null)))), react_1.default.createElement("div", { className: "dr-addon-card-footer-toggle" }, react_1.default.createElement(Switch, { checked: enabled, onChange: (val) => {
-          setEnabled(val);
-          DrApi.Plugins.toggle(props.name);
-        } })))));
-      });
-      function tab(name, Element) {
-        return {
-          section: `DR_SETTINGS_${name.toUpperCase()}`,
-          label: name,
-          element: () => react_1.default.createElement(FormSection, { title: name, tag: FormSection.Tags.H1 }, react_1.default.createElement(Element, null))
-        };
-      }
-      patcher_1.default.after("DrInternal-Settings-Patch", (0, getModule_1.default)("SettingsView").default.prototype, "getPredicateSections", (_, res) => {
-        const num = res.indexOf(res.find((e) => e && e.section === "Connections")) + 1;
-        if (num === 0)
-          return;
-        res.splice(num, 0, ...[
-          { section: "DIVIDER" },
-          { section: "HEADER", label: i18n_1.default.name },
-          tab(i18n_1.default.settingTabs.general, react_1.default.memo(() => {
-            return react_1.default.createElement(react_1.default.Fragment, null, react_1.default.createElement(SwitchItem, { value: document.body.classList.contains("dr-minimal-mode"), title: i18n_1.default.minimalMode.title, note: i18n_1.default.minimalMode.note, onChange: (val) => {
-              storage_1.internal.set("minimalMode", val);
-              document.body.classList.toggle("dr-minimal-mode");
-            } }), react_1.default.createElement(SwitchItem, { value: storage_1.internal.get("devMode") ?? false, title: i18n_1.default.devMode.title, note: i18n_1.default.devMode.note, onChange: (val) => {
-              storage_1.internal.set("devMode", val);
-              (0, getModule_1.default)(["isDeveloper"]).isDeveloper = val;
-            } }));
-          })),
-          tab(i18n_1.default.settingTabs.plugins, react_1.default.memo(() => {
-            const [pluginURL, setPluginURL] = react_1.default.useState("");
-            return react_1.default.createElement(react_1.default.Fragment, null, react_1.default.createElement(Flex, null, react_1.default.createElement(Flex.Child, { grow: 2 }, react_1.default.createElement("div", null, react_1.default.createElement(TextInput, { placeholder: "https://example.com/plugin.js", value: pluginURL, onChange: setPluginURL }))), react_1.default.createElement(Flex.Child, { grow: 0 }, react_1.default.createElement(Button, { onClick: async () => {
-              if (!/(https|http):\/\/([A-z]+\.|)([A-z]+(:[0-9]+|\.[A-z]+))(\/\S+){1,}(\.js)/.test(pluginURL))
-                return setPluginURL(i18n_1.default.installing.notValid.replace(pluginURL));
-              const text = await fetch(pluginURL).then((res2) => res2.text());
-              const meta = readMeta(text);
-              if (!meta)
-                return setPluginURL("ERROR");
-              const urls = storage_1.internal.get("addonURLS") ?? [];
-              if (!urls.plugins)
-                urls.plugins = [];
-              if (urls.plugins.includes(pluginURL))
-                return setPluginURL(i18n_1.default.installing.alreadyInstalled.replace(pluginURL));
-              urls.plugins.push(pluginURL);
-              storage_1.internal.set("addonURLS", { ...urls });
-              setPluginURL(i18n_1.default.installing.installed.replace(meta.name));
-            } }, i18n_1.default.installing.install))), react_1.default.createElement("div", { className: "dr-addons-list" }, Array.from(DrApi.Plugins.getAll().map((e) => react_1.default.createElement(AddonCard, { ...e })))));
-          })),
-          tab(i18n_1.default.settingTabs.themes, react_1.default.memo(() => {
-            return react_1.default.createElement(Text, null, "Themes");
-          }))
-        ]);
-      });
     }
   });
 
@@ -968,6 +798,171 @@
     }
   });
 
+  // tsBuild/actions.js
+  var require_actions = __commonJS({
+    "tsBuild/actions.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.dispatch = exports.unregister = exports.register = exports.Actions = void 0;
+      exports.Actions = {};
+      function register(name, callback) {
+        if (!exports.Actions[name])
+          exports.Actions[name] = [];
+        exports.Actions[name].push({ name, callback });
+        return () => this.unregister(name);
+      }
+      exports.register = register;
+      function unregister(name) {
+        if (!exports.Actions[name])
+          return;
+        exports.Actions[name] = exports.Actions[name].filter((x) => x.name !== name);
+      }
+      exports.unregister = unregister;
+      function dispatch(name, ...args) {
+        let returnValue = [];
+        if (!exports.Actions[name])
+          return void 0;
+        for (const { callback } of exports.Actions[name])
+          returnValue.push(callback(...args));
+        return returnValue.length ? returnValue : void 0;
+      }
+      exports.dispatch = dispatch;
+    }
+  });
+
+  // tsBuild/i18n.js
+  var require_i18n = __commonJS({
+    "tsBuild/i18n.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.languages = void 0;
+      exports.languages = {
+        global: {
+          name: "Discord Re-envisioned",
+          version: "0.0.1"
+        },
+        en: {
+          devMode: {
+            title: "Toggle Developer Mode",
+            note: "Warning you can get banned from Discord if you do this (not a 100% chance)!"
+          },
+          settingTabs: {
+            general: "General",
+            plugins: "Plugins",
+            themes: "Themes"
+          },
+          uninstall: "Uninstall",
+          settings: "Settings",
+          installing: {
+            alreadyInstalled: {
+              content: "Plugin '{{name}}' is already installed",
+              replace: function(name) {
+                return this.content.replace("{{name}}", name);
+              }
+            },
+            installed: {
+              content: "Installed '{{name}}'! Refresh the page to see it.",
+              replace: function(name) {
+                return this.content.replace("{{name}}", name);
+              }
+            },
+            notValid: {
+              content: "'{{url}}' is not a valid plugin URL",
+              replace: function(url) {
+                return this.content.replace("{{url}}", url);
+              }
+            },
+            install: "Install"
+          }
+        }
+      };
+      var i18n = new Proxy(exports.languages[navigator.language.split("-", 1)[0]], {
+        get: (target, key) => {
+          const lang = navigator.language.split("-", 1)[0];
+          return exports.languages.global[key] || exports.languages[lang][key] || exports.languages.en[key] || key;
+        }
+      });
+      exports.default = i18n;
+    }
+  });
+
+  // tsBuild/dashboard.js
+  var require_dashboard = __commonJS({
+    "tsBuild/dashboard.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var react_1 = require_react();
+      var util_1 = require_util();
+      var actions_1 = require_actions();
+      var getModule_1 = __importDefault(require_getModule());
+      var patcher_1 = __importDefault(require_patcher());
+      var i18n_1 = __importDefault(require_i18n());
+      var storage_1 = require_storage();
+      var DrIcon = react_1.React.memo(() => react_1.React.createElement("svg", { width: 24, height: 24, viewBox: "0 0 22 22" }, react_1.React.createElement("path", { d: "M11.1903 7.802C11.1903 8.426 11.1003 9.092 10.9203 9.8C10.7403 10.496 10.4883 11.192 10.1643 11.888C9.84032 12.572 9.43832 13.232 8.95832 13.868C8.49032 14.492 7.95632 15.044 7.35632 15.524C6.75632 15.992 6.09632 16.37 5.37632 16.658C4.66832 16.946 3.91232 17.09 3.10832 17.09C2.94032 17.09 2.77232 17.078 2.60432 17.054C2.43632 17.042 2.26832 17.024 2.10032 17C2.42432 15.344 2.74232 13.73 3.05432 12.158C3.17432 11.498 3.30032 10.814 3.43232 10.106C3.56432 9.386 3.69032 8.678 3.81032 7.982C3.93032 7.286 4.04432 6.62 4.15232 5.984C4.27232 5.348 4.36832 4.772 4.44032 4.256C4.95632 4.16 5.47832 4.07 6.00632 3.986C6.53432 3.902 7.07432 3.86 7.62632 3.86C8.27432 3.86 8.82032 3.962 9.26432 4.166C9.72032 4.37 10.0863 4.652 10.3623 5.012C10.6503 5.372 10.8603 5.792 10.9923 6.272C11.1243 6.752 11.1903 7.262 11.1903 7.802ZM6.94232 6.398C6.81032 7.106 6.67232 7.784 6.52832 8.432C6.38432 9.08 6.24032 9.734 6.09632 10.394C5.95232 11.054 5.80832 11.744 5.66432 12.464C5.52032 13.184 5.38232 13.97 5.25032 14.822C5.53832 14.63 5.81432 14.372 6.07832 14.048C6.35432 13.712 6.61232 13.328 6.85232 12.896C7.09232 12.464 7.30832 12.008 7.50032 11.528C7.70432 11.048 7.87832 10.58 8.02232 10.124C8.16632 9.668 8.27432 9.242 8.34632 8.846C8.43032 8.45 8.47232 8.108 8.47232 7.82C8.47232 7.376 8.34632 7.028 8.09432 6.776C7.85432 6.524 7.47032 6.398 6.94232 6.398ZM10.0456 17.018C10.3696 15.422 10.6816 13.862 10.9816 12.338C11.0896 11.69 11.2096 11.018 11.3416 10.322C11.4736 9.614 11.5936 8.918 11.7016 8.234C11.8216 7.538 11.9296 6.872 12.0256 6.236C12.1336 5.588 12.2176 5 12.2776 4.472C12.9616 4.256 13.6996 4.1 14.4916 4.004C15.2836 3.896 16.0696 3.842 16.8496 3.842C17.3176 3.842 17.7016 3.896 18.0016 4.004C18.3136 4.112 18.5536 4.268 18.7216 4.472C18.9016 4.664 19.0276 4.892 19.0996 5.156C19.1716 5.42 19.2076 5.714 19.2076 6.038C19.2076 6.518 19.1236 6.992 18.9556 7.46C18.7876 7.916 18.5596 8.354 18.2716 8.774C17.9956 9.182 17.6716 9.56 17.2996 9.908C16.9396 10.244 16.5496 10.52 16.1296 10.736C16.3456 11.216 16.5736 11.744 16.8136 12.32C17.0656 12.884 17.2996 13.424 17.5156 13.94C17.7556 14.54 18.0016 15.14 18.2536 15.74L15.4636 16.712C15.2236 15.944 15.0076 15.224 14.8156 14.552C14.7316 14.276 14.6476 13.994 14.5636 13.706C14.4796 13.406 14.4016 13.124 14.3296 12.86C14.2576 12.596 14.1976 12.362 14.1496 12.158C14.1016 11.942 14.0716 11.768 14.0596 11.636L13.8256 11.708C13.7536 12.092 13.6636 12.542 13.5556 13.058C13.4596 13.574 13.3696 14.072 13.2856 14.552C13.1776 15.116 13.0696 15.686 12.9616 16.262L10.0456 17.018ZM14.2756 9.206C14.5036 9.182 14.7796 9.086 15.1036 8.918C15.4396 8.75 15.7576 8.552 16.0576 8.324C16.3576 8.084 16.6156 7.838 16.8316 7.586C17.0476 7.334 17.1556 7.112 17.1556 6.92C17.1556 6.788 17.1136 6.686 17.0296 6.614C16.9456 6.53 16.8256 6.47 16.6696 6.434C16.5256 6.386 16.3636 6.356 16.1836 6.344C16.0036 6.332 15.8176 6.326 15.6256 6.326C15.4936 6.326 15.3556 6.332 15.2116 6.344C15.0796 6.344 14.9596 6.344 14.8516 6.344L14.2756 9.206Z", fill: "currentcolor" })));
+      var PanelDispatchSymbol = Symbol("PanelDispatch");
+      var { LinkButton } = (0, getModule_1.default)(["LinkButton"]);
+      var DrDashboardButton = react_1.React.memo(({ children }) => {
+        const [isSelected, setSelected] = react_1.React.useState(false);
+        (0, actions_1.register)(PanelDispatchSymbol, (val) => {
+          setSelected(val);
+          (0, actions_1.unregister)(PanelDispatchSymbol);
+        });
+        return react_1.React.createElement(LinkButton, { text: i18n_1.default.name, icon: () => react_1.React.createElement(DrIcon, null), route: "/dr_dashboard", selected: isSelected, onFocus: () => {
+          const selectedChild = children.find((e) => e?.props?.selected);
+          if (selectedChild)
+            selectedChild.props.selected = false;
+        } });
+      });
+      var SwitchOrig = (0, getModule_1.default)("SwitchItem").default;
+      var SwitchItem = react_1.React.memo((props) => {
+        const { value, onChange = () => {
+        }, title, note, disabled = false, initialChange = true } = props;
+        const [checked, setChecked] = react_1.React.useState(value);
+        return react_1.React.createElement(SwitchOrig, { value: checked, onChange: () => {
+          if (initialChange)
+            setChecked(!checked);
+          onChange(!checked, setChecked);
+        }, note, disabled }, title);
+      });
+      patcher_1.default.after("router-routes", (0, getModule_1.default)("ConnectedPrivateChannelsList"), "default", (_, res) => {
+        const children = res.props.children.props.children;
+        (0, actions_1.dispatch)("drdash-button-selected", /^\/dr_dashboard/.test(location.pathname));
+        if (children.find((e) => e && e.key === "drdashLinkButton"))
+          return;
+        children.unshift(react_1.React.createElement(DrDashboardButton, { key: "drdashLinkButton" }, children));
+      });
+      var Views = (0, getModule_1.default)("FluxContainer(ViewsWithMainInterface)").default?.prototype?.render?.call({ memoizedGetStateFromStores: () => ({}) })?.type;
+      patcher_1.default.after("router-routes", Views?.prototype, "render", (_, res) => {
+        const routes = res.props.children[0].props.children[1];
+        routes[routes.length - 1].props.path.push("/dr_dashboard");
+      });
+      var { content } = (0, getModule_1.default)(["chat", "uploadArea", "threadSidebarOpen"]);
+      var { auto } = (0, getModule_1.default)(["scrollerBase"]);
+      var { container } = (0, getModule_1.default)(["container", "downloadProgressCircle"]);
+      (0, util_1.waitUntil)(() => document.querySelector(`.${container}`)).then((domNode) => {
+        const Router = (0, util_1.getOwnerInstance)(domNode);
+        const Route = (0, getModule_1.default)("RouteWithImpression").default;
+        patcher_1.default.after("router-routes", Router?.props?.children, "type", (_, res) => {
+          const { children } = (0, util_1.findInReactTree)(res, (m) => Array.isArray(m.children) && m.children.length > 5);
+          const Header = (0, getModule_1.default)(["Caret", "Icon", "defaultProps"]);
+          children.push(react_1.React.createElement(Route, { path: "/dr_dashboard", impressionName: "dr_dashboard", disableTrack: true, render: () => react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, null) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name)), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(SwitchItem, { value: storage_1.internal.get("devMode") ?? false, title: i18n_1.default.devMode.title, note: i18n_1.default.devMode.note, onChange: (val) => {
+            storage_1.internal.set("devMode", val);
+            (0, getModule_1.default)(["isDeveloper"]).isDeveloper = val;
+          } })))) }));
+        });
+        Router.forceUpdate();
+        const { app } = (0, getModule_1.default)(["app"]);
+        (0, util_1.waitUntil)(() => document.querySelector(`.${app}`)).then((domNode2) => {
+          domNode2 = (0, util_1.getOwnerInstance)(domNode2)?._reactInternals;
+          (0, util_1.findInTree)(domNode2, (n) => n?.historyUnlisten, { walkable: ["child", "stateNode"] }).forceUpdate();
+        });
+      });
+    }
+  });
+
   // tsBuild/index.js
   var require_tsBuild = __commonJS({
     "tsBuild/index.js"(exports) {
@@ -1004,6 +999,8 @@
         return mod && mod.__esModule ? mod : { "default": mod };
       };
       Object.defineProperty(exports, "__esModule", { value: true });
+      if (location.pathname.startsWith("/dr_dashboard"))
+        location.pathname = "/app";
       if (Boolean(window.DrApi))
         throw new Error("Discord Re-envisioned is already loaded.");
       var react_1 = require_react();
@@ -1013,72 +1010,22 @@
       var toast_1 = __importDefault(require_toast());
       var util_1 = require_util();
       var storage_1 = require_storage();
-      require_settings();
       var addonManager_1 = __importDefault(require_addonManager());
-      styling_1.internalStyling.inject("minimal-mode", styling_1.internalStyling.getClasses(`
-.dr-minimal-mode #{"panels", "container", "downloadProgressCircle"} > #{"container", "godlike", "avatar"} #{"_flex", "flex", "_horizontal"} > :not(:last-child) {
-  opacity: 0% !important;
-  width: 0px;
-  transition: all 0.2s ease-in-out
-}
-.dr-minimal-mode #{"panels", "container", "downloadProgressCircle"} > #{"container", "godlike", "avatar"} #{"_flex", "flex", "_horizontal"}:hover > :not(:last-child) {
-  opacity: 100% !important;
-  width: 32px
-}
-.dr-minimal-mode #{"privateChannels", "desaturate", "tabBadge"} > #{"scroller", "empty", "scroller"} > #{"content", "scrollerBase", "thin"} {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start
-}
-.dr-minimal-mode #{"privateChannels", "desaturate", "tabBadge"} > #{"scroller", "empty", "scroller"} > #{"content", "scrollerBase", "thin"} > a:not([href*="/channels/@me/"]) {
-  flex-grow: 1;
-  margin-top: 8px !important;
-  margin-left: 0
-}
-.dr-minimal-mode #{"privateChannels", "desaturate", "tabBadge"} > #{"scroller", "empty", "scroller"} > #{"content", "scrollerBase", "thin"} > a:not([href*="/channels/@me/"]):first-of-type { margin-left: 8px !important }
-.dr-minimal-mode #{"privateChannels", "desaturate", "tabBadge"} > #{"scroller", "empty", "scroller"} > #{"content", "scrollerBase", "thin"} > a:not([href*="/channels/@me/"]) #{"content", "container", "muted"} { display: none }
-.dr-minimal-mode #{"privateChannels", "desaturate", "tabBadge"} > #{"scroller", "empty", "scroller"} > #{"content", "scrollerBase", "thin"} > a:not([href*="/channels/@me/"]) #{"avatar", "container", "muted"} { margin: 0 !important }
-.dr-minimal-mode #{"privateChannels", "desaturate", "tabBadge"} > #{"scroller", "empty", "scroller"} > #{"content", "scrollerBase", "thin"} > a:not([href*="/channels/@me/"]) #{"children", "container", "muted"} {
-  position: absolute;
-  transform: translate(4px, 8px);
-  box-shadow: 0 0 0 3px var(--background-secondary);
-  border-radius: 100px
-}
-.dr-minimal-mode #{"privateChannels", "desaturate", "tabBadge"} > #{"scroller", "empty", "scroller"} > #{"content", "scrollerBase", "thin"} > a[href*="/channels/@me/"] { width: 100% }
-.dr-minimal-mode #{"privateChannels", "desaturate", "tabBadge"} > #{"scroller", "empty", "scroller"} > #{"content", "scrollerBase", "thin"} > h2 { width: 100% }
-.dr-minimal-mode #{"membersWrap", "container", "membersWrap"}{ min-width: 200px }
-.dr-minimal-mode #{"membersWrap", "container", "membersWrap"} #{"members", "container", "membersWrap"} { width: 200px }
-.dr-minimal-mode #{"sidebar", "container", "downloadProgressCircle"} { width: 200px }
-.dr-minimal-mode #{"sidebar", "container", "downloadProgressCircle"} #{"bannerVisible", "container", "clickable"} ~ #{"scroller", "scroller", "unread"} [style="height: 84px;"] { height: 47.25px !important }
-.dr-minimal-mode #{"sidebar", "container", "downloadProgressCircle"} #{"bannerImage", "container", "clickable"}, 
-.dr-minimal-mode #{"sidebar", "container", "downloadProgressCircle"} #{"animatedContainer", "container", "clickable"}, 
-.dr-minimal-mode #{"sidebar", "container", "downloadProgressCircle"} #{"bannerImg", "container", "clickable"} {
-  width: 200px;
-  height: 112.5px
-}
-.dr-minimal-mode #{"container", "container", "progressBar"} { margin-top: 7px }
-.dr-minimal-mode #{"container", "container", "avatar"}:hover { transform: translateY(-18px) }
-.dr-minimal-mode #{"container", "container", "avatar"}:hover > button:not(:last-child):not(:first-child) { display: block}
-.dr-minimal-mode #{"container", "container", "avatar"} > button:first-child { order: 1 }
-.dr-minimal-mode #{"container", "container", "avatar"} > button:last-child { order: 2 }
-.dr-minimal-mode #{"container", "container", "avatar"} > button:not(:last-child):not(:first-child) { display: none }
-.dr-minimal-mode #{"standardSidebarView", "sidebarContentWidth", "standardPadding"} #{"sidebarRegion", "sidebarContentWidth", "standardPadding"} { flex: 0 0 218px }
-.dr-minimal-mode #{"standardSidebarView", "sidebarContentWidth", "standardPadding"} #{"contentColumn", "sidebarContentWidth", "standardPadding"}, 
-.dr-minimal-mode #{"standardSidebarView", "sidebarContentWidth", "standardPadding"} #{"customColumn", "sidebarContentWidth", "standardPadding"} {
-  flex: 0 0 calc(100% - 80px);
-  max-width: 100%;
-  min-width: 460px
-}`));
+      var actions_1 = require_actions();
+      require_dashboard();
       Start();
-      var backend = {
-        devMode: storage_1.internal.get("devMode") ?? false
-      };
+      var __DR__BACKEND__ = Object.assign({
+        devMode: storage_1.internal.get("devMode") ?? false,
+        require: function() {
+          throw new Error("tried using require on WEB!");
+        },
+        app: false
+      }, window.__DR__BACKEND__ || {});
+      window.__DR__BACKEND__ = __DR__BACKEND__;
       async function Start() {
-        if (storage_1.internal.get("minimalMode") ?? false)
-          document.body.classList.toggle("dr-minimal-mode");
         Object.defineProperty((0, getModule_1.default)(["isDeveloper"]), "isDeveloper", {
-          get: () => backend.devMode,
-          set: (val) => backend.devMode = val
+          get: () => __DR__BACKEND__.devMode,
+          set: (val) => __DR__BACKEND__.devMode = val
         });
         await (0, util_1.waitUntil)(() => document.querySelector(".container-YkUktl"));
         const Plugins = await addonManager_1.default.plugins();
@@ -1086,47 +1033,117 @@
         window.DrApi = {
           getModule: getModule_1.default,
           asyncGetModule: getModule_1.asyncGetModule,
+          findInReactTree: util_1.findInReactTree,
+          findInTree: util_1.findInTree,
           patcher: {
-            before: (id, module2, functionToPatch, callback, opts = {}) => patcher_1.default.before(id, module2, functionToPatch, callback, Object.assign({}, opts)),
-            instead: (id, module2, functionToPatch, callback, opts = {}) => patcher_1.default.instead(id, module2, functionToPatch, callback, Object.assign({}, opts)),
-            after: (id, module2, functionToPatch, callback, opts = {}) => patcher_1.default.after(id, module2, functionToPatch, callback, Object.assign({}, opts)),
-            patch: (id, module2, functionToPatch, callback, opts = {}) => patcher_1.default.patch(id, module2, functionToPatch, callback, Object.assign({}, opts)),
-            quick: (module2, functionToPatch, callback, opts = {}) => patcher_1.default.quick(module2, functionToPatch, callback, opts),
-            unpatchAll: (id) => patcher_1.default.unpatchAll(id),
+            before: function(id, module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.before(id, module2, functionToPatch, callback, Object.assign({}, opts));
+            },
+            instead: function(id, module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.instead(id, module2, functionToPatch, callback, Object.assign({}, opts));
+            },
+            after: function(id, module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.after(id, module2, functionToPatch, callback, Object.assign({}, opts));
+            },
+            patch: function(id, module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.patch(id, module2, functionToPatch, callback, Object.assign({}, opts));
+            },
+            quick: function(module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.quick(module2, functionToPatch, callback, opts);
+            },
+            unpatchAll: function(id) {
+              return patcher_1.default.unpatchAll(id);
+            },
             patches: patcher_1.default.patches
           },
+          actions: {
+            dispatch: function(name, ...args) {
+              return (0, actions_1.dispatch)(name, ...args);
+            },
+            register: function(name, callback) {
+              return (0, actions_1.register)(name, callback);
+            },
+            unregister: function(name) {
+              return (0, actions_1.unregister)(name);
+            }
+          },
           styling: {
-            inject: (id, css) => styling_1.pluginStyling.inject(id, css),
-            update: (id, css) => styling_1.pluginStyling.update(id, css),
-            uninject: (id) => styling_1.pluginStyling.uninject(id),
-            getClasses: (css) => styling_1.pluginStyling.getClasses(css)
+            inject: function(id, css) {
+              return styling_1.pluginStyling.inject(id, css);
+            },
+            update: function(id, css) {
+              return styling_1.pluginStyling.update(id, css);
+            },
+            uninject: function(id) {
+              return styling_1.pluginStyling.uninject(id);
+            },
+            getClasses: function(css) {
+              return styling_1.pluginStyling.getClasses(css);
+            }
           },
           Plugins: {
-            get: (name) => Plugins.get(name),
+            get: function(name) {
+              return Plugins.get(name);
+            },
             getAll: () => Plugins.getAll(),
-            isEnabled: (name) => Plugins.isEnabled(name),
-            disable: (name) => Plugins.disable(name),
-            enable: (name) => Plugins.enable(name),
-            toggle: (name) => Plugins.toggle(name)
+            isEnabled: function(name) {
+              return Plugins.isEnabled(name);
+            },
+            disable: function(name) {
+              return Plugins.disable(name);
+            },
+            enable: function(name) {
+              return Plugins.enable(name);
+            },
+            toggle: function(name) {
+              return Plugins.toggle(name);
+            }
           },
           Themes: {
-            get: (name) => themes.get(name),
+            get: function(name) {
+              return themes.get(name);
+            },
             getAll: () => themes.getAll(),
-            isEnabled: (name) => themes.isEnabled(name),
-            disable: (name) => themes.disable(name),
-            enable: (name) => themes.enable(name),
-            toggle: (name) => themes.toggle(name)
+            isEnabled: function(name) {
+              return themes.isEnabled(name);
+            },
+            disable: function(name) {
+              return themes.disable(name);
+            },
+            enable: function(name) {
+              return themes.enable(name);
+            },
+            toggle: function(name) {
+              return themes.toggle(name);
+            }
           },
-          showConfirmationModal: (title, content, opts = {}) => (0, util_1.showConfirmationModal)(title, content, opts),
-          toast: (text, opts = {}) => (0, toast_1.default)(text, opts),
+          showConfirmationModal: function(title, content, opts = {}) {
+            return (0, util_1.showConfirmationModal)(title, content, opts);
+          },
+          prompt: async function(title, defaultValue) {
+            return await (0, util_1.prompt)(title, defaultValue);
+          },
+          toast: function(text, opts = {}) {
+            return (0, toast_1.default)(text, opts);
+          },
           React: react_1.React,
           ReactDOM: react_1.ReactDOM,
           storage: {
-            get: (plugin, key) => storage_1.plugins.get(plugin, key),
-            set: (plugin, key, data) => storage_1.plugins.set(plugin, key, data)
+            get: function(plugin, key) {
+              return storage_1.plugins.get(plugin, key);
+            },
+            set: function(plugin, key, data) {
+              return storage_1.plugins.set(plugin, key, data);
+            }
           },
-          getOwnerInstance: (element) => (0, util_1.getOwnerInstance)(element),
-          getReactInstance: (element) => (0, util_1.getReactInstance)(element)
+          getInstance: {
+            owner: function(element) {
+              return (0, util_1.getOwnerInstance)(element);
+            },
+            react: function(element) {
+              return (0, util_1.getReactInstance)(element);
+            }
+          }
         };
       }
     }

@@ -4,10 +4,6 @@ export const languages:any = {
     version: "0.0.1"
   },
   en: {
-    minimalMode: {
-      title: "Minimal Mode",
-      note: "Minimal mode makes discord more compact."
-    },
     devMode: {
       title: "Toggle Developer Mode",
       note: "Warning you can get banned from Discord if you do this (not a 100% chance)!"

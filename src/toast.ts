@@ -12,17 +12,10 @@ internalStyling.inject("toasts", `.dr-toast {
   flex-grow: 1;
   opacity: 1;
   transition: opacity 0.3s ease-in-out;
-  width: fit-content;
+  width: fit-content
 }
-.dr-toast.adding {
-  opacity: 0
-}
-.dr-toast.removing {
-  opacity: 0
-}
-.dr-toast:not(:last-child) {
-  margin-bottom: 5px
-}
+.dr-toast:is(.adding, .removing) { opacity: 0 }
+.dr-toast:not(:last-child) {  margin-bottom: 5px }
 .dr-toast-container {
   position: absolute;
   bottom: 0;
@@ -65,26 +58,18 @@ internalStyling.inject("toasts", `.dr-toast {
   height: 100%;
   right: -3px;
 }
-.dr-toast-type.success {
-  background-color: var(--info-positive-foreground);
-}
-.dr-toast-type.error {
-  background-color: var(--info-danger-foreground);
-}
-.dr-toast-type.info {
-  background-color: var(--brand-experiment);
-}
-.dr-toast-type.warning {
-  background-color: var(--info-warning-foreground);
-}
+.dr-toast-type.success { background-color: var(--info-positive-foreground) }
+.dr-toast-type.error { background-color: var(--info-danger-foreground) }
+.dr-toast-type.info { background-color: var(--brand-experiment) }
+.dr-toast-type.warning { background-color: var(--info-warning-foreground) }
 .dr-toast-message {
   display: inline-block;
-  user-select: text;
+  user-select: text
 }
 .dr-toast-message-wrapper {
   flex: 1;
   padding: 12px 6px 12px 3px;
-  position: relative;
+  position: relative
 }
 .dr-toast-close {
   cursor: pointer;
@@ -94,11 +79,11 @@ internalStyling.inject("toasts", `.dr-toast {
   user-select: none;
   color: var(--interactive-normal);
   position: relative;
-  font-size: 14px;
+  font-size: 14px
 }
 .dr-toast-close:hover {
   color: var(--interactive-hover);
-  background-color: var(--background-modifier-hover);
+  background-color: var(--background-modifier-hover)
 }`)
 
 // container
@@ -134,7 +119,6 @@ interface ToastOpts {
 }
 function createToast(text:string, opts:ToastOpts):Node {
   const { type = "success", duration = 3000, autoClose = true, closeButton = true } = opts
-  if (!autoClose && !closeButton) throw new Error("You can't have autoClose and closeButton disabled")
   const toast = document.createElement("div")
   toast.className = "dr-toast adding"
   setTimeout(() => toast.classList.remove("adding"), 300)

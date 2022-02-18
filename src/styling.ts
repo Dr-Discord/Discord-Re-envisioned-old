@@ -32,11 +32,11 @@ function uninject(type:string) {
   }
 }
 function getClasses(css:string):string {
-  const matches:Array<string>|null = css.match(/#{(("[A-z]+")((, )|)){1,3}}/g)
+  const matches:Array<string>|null = css.match(/#{(("[A-z]+")((, )|)){1,}}/g)
   if (!matches) return css
   for (const styl of matches) {
     const arr = JSON.parse(styl.replace("#{", "[").replace("}", "]"))
-    css = css.replace(styl, `.${getModule(arr, true)[arr[0]].replaceAll(" ", ".")}`)
+    css = css.replace(styl, `.${getModule(arr, true)?.[arr[0]].replaceAll(" ", ".")}`)
   }
   return css
 }

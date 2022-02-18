@@ -2,7 +2,7 @@
   "name": "drdiscord",
   "version": "1.0.0",
   "description": "A simple client mod",
-  "main": "index.js",
+  "main": "./inject/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc && npx esbuild ./tsBuild/index.js --bundle --outfile=./build/index.js",

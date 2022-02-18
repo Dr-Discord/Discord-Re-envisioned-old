@@ -17,6 +17,9 @@ interface toastOpts {
   closeButton?: boolean
 }
 
+type React = typeof import("react")
+type ReactDOM = typeof import("react-dom")
+
 interface addonApi {
   get: (name:string) => any
   getAll: () => Array<any>
@@ -27,9 +30,10 @@ interface addonApi {
 }
 
 interface DrApi {
-  [x:string]:any
   getModule: (filter:Function|string|number|Array<string>, first?:boolean) => any|null
   asyncGetModule: (filter:Function|string|number|Array<string>) => Promise<any>
+  findInReactTree: (tree:any, searchFilter:Function) => any
+  findInTree: (tree:any, filter:Function, opts:findInTreeOpts = {}) => any
   patcher: {
     unpatchAll: (id:string|symbol) => void
     patch: (id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => Function
@@ -39,8 +43,13 @@ interface DrApi {
     quick: (module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => Function
     patches: {}
   }
-  React: typeof import("react"),
-  ReactDOM: typeof import("react-dom"),
+  actions: {
+    register: (name:string, callback:Function) => Function
+    unregister: (name:string) => void
+    dispatch: (name:string, ...args:any) => any
+  }
+  React: React,
+  ReactDOM: ReactDOM,
   styling: {
     inject: (id:string, css:string) => void
     update: (id:string, css:string) => void
@@ -49,14 +58,17 @@ interface DrApi {
   }
   Plugins:addonApi
   Themes:addonApi
-  showConfirmationModal: (title:string|any, content:string|any|Array<string|any>, opts:showConfirmationModalProps) => void
+  showConfirmationModal: (title:string|React.ReactElement, content:string|React.ReactElement|Array<string|React.ReactElement>, opts:showConfirmationModalProps) => void
+  prompt: (title:string, defaultValue:string) => Promise<string|null>
   toast: (text:string, opts:toastOpts) => Node
   storage: {
     get: (plugin:string, key:string) => any
     set: (plugin:string, key:string, data:any) => void
   }
-  getOwnerInstance: (element:HTMLElement) => any
-  getReactInstance: (element:HTMLElement) => any
+  getInstance: {
+    owner: (element:HTMLElement) => any
+    react: (element:HTMLElement) => any
+  }
 }
 
 interface localStorage {
@@ -76,6 +88,11 @@ interface Window {
   DrApi:DrApi
   webpackChunkdiscord_app:webpackChunkdiscord_app
   localStorage?:localStorage|null
+  __DR__BACKEND__: {
+    app:boolean 
+    require:(module:string) => any
+    devMode:boolean
+  }
   [x:string]:any
 }
 
@@ -86,4 +103,5 @@ declare const localStorage:localStorage|null
 interface Element {
   __reactInternalInstance$?:any
   __reactFiber$?:any
+  _reactInternals?:any
 }
