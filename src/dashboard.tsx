@@ -4,6 +4,7 @@ import getModule from "./getModule"
 import patcher from "./patcher"
 import i18n from "./i18n"
 import { internal } from "./storage"
+import { register, dispatch } from "./actions"
 
 const DrIcon = React.memo(() => (
   <svg
@@ -18,7 +19,7 @@ const DrIcon = React.memo(() => (
   </svg>
 ))
 
-let PanelDispatch:Function = () => {}
+let selectedChild:any = () => {}
 
 const { LinkButton } = getModule(["LinkButton"])
 interface DrDashboardButton {
@@ -26,9 +27,18 @@ interface DrDashboardButton {
 }
 const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
   const [isSelected, setSelected] = React.useState(false)
-  PanelDispatch = (val:boolean) => setSelected(val)
-  const selectedChild:any = children.find((e:any) => e?.props?.selected)
-  
+  let _selectedChild = children.find((e:any) => e?.props?.selected)
+  if (_selectedChild) selectedChild = _selectedChild
+
+  register("DrDashboardButtonOnRender", function(val:boolean) {
+    if (!val) {
+      const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`)
+      if (!domNode) return setSelected(val)
+      selectedChild.props.selected = getOwnerInstance(domNode)._reactInternals.return.key === selectedChild.key      
+    }
+    setSelected(val)
+  })
+
   return (
     <LinkButton 
       text={i18n.name}
@@ -67,7 +77,7 @@ const SwitchItem = React.memo((props:SwitchItemProps) => {
 
 patcher.after("router-routes", getModule("ConnectedPrivateChannelsList"), "default", (_:unknown, res:any) => {
   const children = res.props.children.props.children
-  PanelDispatch(/^\/dr_dashboard/.test(location.pathname))
+  dispatch("DrDashboardButtonOnRender", /^\/dr_dashboard/.test(location.pathname))
   if (children.find((e:any) => e && e.key === "drdashLinkButton")) return
   children.unshift(<DrDashboardButton key="drdashLinkButton">{children}</DrDashboardButton>)
 })
@@ -120,7 +130,6 @@ waitUntil(() => document.querySelector(`.${container}`)).then((domNode:Element) 
   Router.forceUpdate()
   const { app } = getModule(["app"])
   waitUntil(() => document.querySelector(`.${app}`)).then((domNode:Element) => {
-    domNode = getOwnerInstance(domNode)?._reactInternals
-    findInTree(domNode, (n:any) => n?.historyUnlisten, { walkable: [ "child", "stateNode" ] }).forceUpdate()
+    findInTree(getOwnerInstance(domNode)?._reactInternals, (n:any) => n?.historyUnlisten, { walkable: [ "child", "stateNode" ] }).forceUpdate()
   })
 })

@@ -12,13 +12,16 @@ import { internal, plugins } from "./storage"
 import addonManager from "./addonManager"
 import { dispatch, register, unregister } from "./actions"
 import "./dashboard"
+import logger from "./logger"
 
+logger.log("Loading...")
 Start()
 
 const __DR__BACKEND__ = Object.assign({
   devMode: internal.get("devMode") ?? false,
   require: (function() { throw new Error("tried using require on WEB!") }),
-  app: false
+  app: false,
+  logger
 }, window.__DR__BACKEND__|| {})
 window.__DR__BACKEND__ = __DR__BACKEND__
 

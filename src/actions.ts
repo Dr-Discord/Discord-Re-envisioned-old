@@ -1,17 +1,30 @@
-interface Actions { [x:string|symbol]:Array<{ name: string|symbol, callback: Function }> }
-export const Actions:Actions = {}
-export function register(this:any, name:string|symbol, callback:Function):Function {
-  if (!Actions[name]) Actions[name] = []
-  Actions[name].push({ name, callback })
-  return () => this.unregister(name)
+import patcher from "./patcher"
+
+const actionsSymbol = Symbol("DrApi.actions")
+
+export const Actions:{ [x:string|symbol]:Function } = {}
+
+export function register(name:string, callback:Function):Function {
+  Actions[name] = callback
+  return () => unregister(name)
 }
-export function unregister(name:string|symbol):void { 
+export function unregister(name:string):void { 
   if (!Actions[name]) return
-  Actions[name] = Actions[name].filter(x => x.name !== name)
+  delete Actions[name]
 }
-export function dispatch(name:string, ...args:any[]):Array<unknown>|undefined {
-  let returnValue:Array<unknown> = []
-  if (!Actions[name]) return undefined
-  for (const { callback } of Actions[name]) returnValue.push(callback(...args))
-  return returnValue.length ? returnValue : undefined
+
+const _Actions:any = []
+
+export function subscribe(name:string, callback:Function):Function {
+  _Actions.push({ callback, undo: patcher.after(actionsSymbol, Actions, name, callback) })
+  return () => unsubscibe(callback)
+}
+export function unsubscibe(callback:Function):void { 
+  _Actions.find(({ callback:_callback }:any) => _callback === callback)?.undo?.()
+}
+
+export function dispatch(name:string, ...args:any[]):any {
+  const action = Actions[name]
+  if (!action) return
+  return action(...args)
 }
