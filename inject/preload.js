@@ -13,7 +13,11 @@ const path = require("path")
   }
   async function start() {
     const data = await fs.readFile(path.join(__dirname, "../build/index.js"), "utf-8")
-    window.eval(data) 
+    try {
+      setTimeout(() => window.eval(data), 1500)
+    } catch (error) {
+      console.error(error)
+    }
   }
   if (window.document.readyState == "loading") window.document.addEventListener("DOMContentLoaded", start)
   else start()

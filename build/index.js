@@ -1,6 +1,563 @@
-(()=>{var w=(e,n)=>()=>(n||e((n={exports:{}}).exports,n),n.exports);var W=w(O=>{"use strict";Object.defineProperty(O,"__esModule",{value:!0});O.languages=void 0;O.languages={global:{name:"Discord Re-envisioned",version:"0.0.1"},en:{devMode:{title:"Toggle Developer Mode",note:"Warning you can get banned from Discord if you do this (not a 100% chance)!"},settingTabs:{general:"General",plugins:"Plugins",themes:"Themes",customcss:"Custom CSS"},customCSS:{title:"Custom CSS",popout:"Popout",settings:"CSS Settings",changeTheme:"Change Theme"},uninstall:"Uninstall",settings:"Settings",installing:{alreadyInstalled:{content:"Plugin '{{name}}' is already installed",replace:function(e){return this.content.replace("{{name}}",e)}},installed:{content:"Installed '{{name}}'! Refresh the page to see it.",replace:function(e){return this.content.replace("{{name}}",e)}},notValid:{content:"'{{url}}' is not a valid plugin URL",replace:function(e){return this.content.replace("{{url}}",e)}},install:"Install"}}};var Ne=new Proxy(O.languages[navigator.language.split("-",1)[0]],{get:(e,n)=>{let t=navigator.language.split("-",1)[0];return O.languages.global[n]||O.languages[t][n]||O.languages.en[n]||n}});O.default=Ne});var Re=w(D=>{"use strict";var Pe=D&&D.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(D,"__esModule",{value:!0});D.cache=void 0;var $e=Pe(W());function Ue(e){let n=console[e];return n?.__sentry_original__?n.__sentry_original__:n?.__REACT_DEVTOOLS_ORIGINAL_METHOD__?n.__REACT_DEVTOOLS_ORIGINAL_METHOD__:n}function ze(e){return btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path d="M11.1903 7.802C11.1903 8.426 11.1003 9.092 10.9203 9.8C10.7403 10.496 10.4883 11.192 10.1643 11.888C9.84032 12.572 9.43832 13.232 8.95832 13.868C8.49032 14.492 7.95632 15.044 7.35632 15.524C6.75632 15.992 6.09632 16.37 5.37632 16.658C4.66832 16.946 3.91232 17.09 3.10832 17.09C2.94032 17.09 2.77232 17.078 2.60432 17.054C2.43632 17.042 2.26832 17.024 2.10032 17C2.42432 15.344 2.74232 13.73 3.05432 12.158C3.17432 11.498 3.30032 10.814 3.43232 10.106C3.56432 9.386 3.69032 8.678 3.81032 7.982C3.93032 7.286 4.04432 6.62 4.15232 5.984C4.27232 5.348 4.36832 4.772 4.44032 4.256C4.95632 4.16 5.47832 4.07 6.00632 3.986C6.53432 3.902 7.07432 3.86 7.62632 3.86C8.27432 3.86 8.82032 3.962 9.26432 4.166C9.72032 4.37 10.0863 4.652 10.3623 5.012C10.6503 5.372 10.8603 5.792 10.9923 6.272C11.1243 6.752 11.1903 7.262 11.1903 7.802ZM6.94232 6.398C6.81032 7.106 6.67232 7.784 6.52832 8.432C6.38432 9.08 6.24032 9.734 6.09632 10.394C5.95232 11.054 5.80832 11.744 5.66432 12.464C5.52032 13.184 5.38232 13.97 5.25032 14.822C5.53832 14.63 5.81432 14.372 6.07832 14.048C6.35432 13.712 6.61232 13.328 6.85232 12.896C7.09232 12.464 7.30832 12.008 7.50032 11.528C7.70432 11.048 7.87832 10.58 8.02232 10.124C8.16632 9.668 8.27432 9.242 8.34632 8.846C8.43032 8.45 8.47232 8.108 8.47232 7.82C8.47232 7.376 8.34632 7.028 8.09432 6.776C7.85432 6.524 7.47032 6.398 6.94232 6.398ZM10.0456 17.018C10.3696 15.422 10.6816 13.862 10.9816 12.338C11.0896 11.69 11.2096 11.018 11.3416 10.322C11.4736 9.614 11.5936 8.918 11.7016 8.234C11.8216 7.538 11.9296 6.872 12.0256 6.236C12.1336 5.588 12.2176 5 12.2776 4.472C12.9616 4.256 13.6996 4.1 14.4916 4.004C15.2836 3.896 16.0696 3.842 16.8496 3.842C17.3176 3.842 17.7016 3.896 18.0016 4.004C18.3136 4.112 18.5536 4.268 18.7216 4.472C18.9016 4.664 19.0276 4.892 19.0996 5.156C19.1716 5.42 19.2076 5.714 19.2076 6.038C19.2076 6.518 19.1236 6.992 18.9556 7.46C18.7876 7.916 18.5596 8.354 18.2716 8.774C17.9956 9.182 17.6716 9.56 17.2996 9.908C16.9396 10.244 16.5496 10.52 16.1296 10.736C16.3456 11.216 16.5736 11.744 16.8136 12.32C17.0656 12.884 17.2996 13.424 17.5156 13.94C17.7556 14.54 18.0016 15.14 18.2536 15.74L15.4636 16.712C15.2236 15.944 15.0076 15.224 14.8156 14.552C14.7316 14.276 14.6476 13.994 14.5636 13.706C14.4796 13.406 14.4016 13.124 14.3296 12.86C14.2576 12.596 14.1976 12.362 14.1496 12.158C14.1016 11.942 14.0716 11.768 14.0596 11.636L13.8256 11.708C13.7536 12.092 13.6636 12.542 13.5556 13.058C13.4596 13.574 13.3696 14.072 13.2856 14.552C13.1776 15.116 13.0696 15.686 12.9616 16.262L10.0456 17.018ZM14.2756 9.206C14.5036 9.182 14.7796 9.086 15.1036 8.918C15.4396 8.75 15.7576 8.552 16.0576 8.324C16.3576 8.084 16.6156 7.838 16.8316 7.586C17.0476 7.334 17.1556 7.112 17.1556 6.92C17.1556 6.788 17.1136 6.686 17.0296 6.614C16.9456 6.53 16.8256 6.47 16.6696 6.434C16.5256 6.386 16.3636 6.356 16.1836 6.344C16.0036 6.332 15.8176 6.326 15.6256 6.326C15.4936 6.326 15.3556 6.332 15.2116 6.344C15.0796 6.344 14.9596 6.344 14.8516 6.344L14.2756 9.206Z" fill="${e}"></path></svg>`)}function Se(e,n,t){function r(a){return a?e:n}return r(typeof t=="boolean"?t:matchMedia("(prefers-color-scheme: dark)").matches)}D.cache={};D.default=new Proxy(D.cache,{get:(e,n)=>{let t=(...r)=>{let o=typeof r[0]=="string"?[`
-${r[0]}`,...r.slice(1)]:[`
-`,...r];Ue(n)(`%cDR%c${$e.default.name}`,`background-image:url(data:image/svg+xml;base64,${ze(Se("#202124","#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: rgb(31, 173, 78); border-radius: 4px`,`background: rgb(31, 173, 78); margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${Se("#202124","#fff")}`,...o)};return D.cache[n]=t,t}})});var J=w(f=>{"use strict";var Fe=f&&f.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(f,"__esModule",{value:!0});f.restart=f.findInReactTree=f.findInTree=f.prompt=f.showConfirmationModal=f.getOwnerInstance=f.getReactInstance=f.waitUntil=f.sleep=void 0;var I=P(),R=Fe(B()),We=e=>new Promise(n=>setTimeout(n,e));f.sleep=We;async function Ge(e){let n;for(;!(n=e());)await(0,f.sleep)(1);return n}f.waitUntil=Ge;function Me(e){if(!!e)return e.__reactInternalInstance$?e.__reactInternalInstance$:e[Object.keys(e).find(n=>n.startsWith("__reactInternalInstance")||n.startsWith("__reactFiber"))]||null}f.getReactInstance=Me;function Je(e){for(let n=Me(e);n;n=n.return){let t=n.stateNode;if(typeof t?.forceUpdate=="function")return t}}f.getOwnerInstance=Je;function Ve(e,n,t){let r=(0,R.default)(y=>y.default?.displayName==="Markdown"&&y.default.rules).default,a=(0,R.default)("ConfirmModal").default,o=(0,R.default)(["ButtonColors"]),{openModal:s}=(0,R.default)(["openModal","openModalLazy"]),l=(0,R.default)(["Messages"],!1)[1].Messages,d=()=>{},{onConfirm:c=d,onCancel:u=d,confirmText:C=l.OKAY,cancelText:S=l.CANCEL,danger:F=!1}=t;Array.isArray(n)||(n=[n]),n=n.map(y=>typeof y=="string"?I.React.createElement(r,null,y):y),s(y=>I.React.createElement(a,{...y,header:e,content:n,onConfirm:c,onCancel:u,confirmText:C,cancelText:S,confirmButtonColor:F?o.ButtonColors.RED:o.ButtonColors.BRAND},n))}f.showConfirmationModal=Ve;function He(e,n){let t=(0,R.default)("TextInput").default,r=(0,R.default)("ConfirmModal").default,a=(0,R.default)(["ButtonColors"]),{Messages:o}=(0,R.default)(["Messages"],!1)[1],{openModal:s}=(0,R.default)(["openModal","openModalLazy"]),l="";return new Promise(d=>{s(c=>(c.transitionState===3&&d(null),I.React.createElement(r,Object.assign({header:e,confirmButtonColor:a.ButtonColors.BRAND,confirmText:o.OKAY,cancelText:o.CANCEL,onConfirm:()=>d(l),onCancel:()=>d(null),children:I.React.createElement(I.React.memo(()=>{let[u,C]=I.React.useState(n);return I.React.createElement(t,{value:u,onChange:S=>{C(S),l=S}})}))},c))))})}f.prompt=He;function G(e,n,t={}){let{walkable:r=null,ignore:a=[]}=t;if(!e||typeof e!="object")return null;if(typeof n=="string")return e.hasOwnProperty(n)?e[n]:void 0;if(n(e))return e;let o=null;if(Array.isArray(e)){for(let s of e)if(o=G(s,n,{walkable:r,ignore:a}),o)return o}else{let s=r||Object.keys(e);for(let l of s)if(!(!e.hasOwnProperty(l)||a.includes(l))&&(o=G(e[l],n,{walkable:r,ignore:a}),o))return o}return o}f.findInTree=G;function Ke(e,n){return G(e,n,{walkable:["props","children","child","sibling"]})}f.findInReactTree=Ke;function Ze(e){return window.__DR__BACKEND__.app&&e?window.__DR__BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART"):location.reload()}f.restart=Ze});var B=w($=>{"use strict";Object.defineProperty($,"__esModule",{value:!0});$.asyncGetModule=void 0;var Ye=J(),V=webpackChunkdiscord_app.webpackExports?webpackChunkdiscord_app.webpackExports:webpackChunkdiscord_app.push([[Symbol("Discord Re-envisioned")],{},e=>(webpackChunkdiscord_app.pop(),webpackChunkdiscord_app.webpackExports=e,e)]);function L(e){let n=[];for(let t in V.c){if(!Object.hasOwnProperty.call(V.c,t))continue;let r=V.c[t].exports;!r||e(r)&&n.push(r)}return n}function ie(e,n=!0){let t=[];function r(...o){let s=L(d=>o.every(c=>typeof d[c]!="undefined")),l=[];for(let d of L(c=>o.every(u=>typeof c.default?.[u]!="undefined")))l.push(d.default);return[...s,...l]}function a(o){let s=L(c=>c.default?.displayName===o),l=L(c=>c.default?.type?.displayName===o),d=L(c=>c.default?.type?.render?.displayName===o);return[...s,...l,...d]}return Array.isArray(e)?t=r(...e):typeof e=="string"?t=a(e):typeof e=="number"?t=[V.c[e]]:typeof e=="function"&&(t=L(e)),n?t[0]:t}$.default=ie;async function Qe(e){return await new Promise(async n=>await(0,Ye.waitUntil)(()=>{!ie(e)||n(ie(e))}))}$.asyncGetModule=Qe});var P=w(M=>{"use strict";var Xe=M&&M.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(M,"__esModule",{value:!0});M.ReactDOM=M.React=void 0;var Ee=Xe(B());M.React=(0,Ee.default)(["createElement","Component"]);M.ReactDOM=(0,Ee.default)(["render","findDOMNode"]);M.default=M.React});var H=w(ce=>{"use strict";Object.defineProperty(ce,"__esModule",{value:!0});var se=Symbol("DrApi.patch"),et=Symbol("DrApi.patch.quick"),le=Symbol("DrInternal"),b={};function U(e,n,t,r,a){let{method:o="after",id:s,once:l=!1,index:d=0}=a,c=n[t];if(c||(n[t]=()=>{},c=n[t]),o=o.toLowerCase(),!(o==="before"||o==="after"||o==="instead"))throw new Error(`'${o}' is a invalid patch type`);let u=n?.[t]?.[se]?.patches??{before:[],after:[],instead:[]},C=Symbol(),S={unpatch:y,patchName:s??e,moduleToPatch:n,functionToPatch:t,callback:r,method:o,Symbol:C};u[o].splice(d,0,Object.assign(r,{unpatch:y,Symbol:C}));let F=!1;function y(){if(F)return;F=!0;let g=u[o].find(_=>_.Symbol===S.Symbol),q=u[o].indexOf(g);u[o].splice(q,1),g=b[e].find(_=>_.Symbol===S.Symbol),q=b[e].indexOf(g),b[e].splice(q,1),b[e].length||delete b[e]}return n[t][se]||(n[t]=function(){for(let _=Object.keys(u.before).length;_>0;_--)u.before[_-1]();let g=c;for(let _=Object.keys(u.instead).length;_>0;_--)g=u.instead[_-1]([...arguments],g,this)??g;let q=g.apply(this,[...arguments]);for(let _=Object.keys(u.after).length;_>0;_--)u.after[_-1]([...arguments],q,this);return l&&y(),q},n[t][se]={original:c,module:n,function:t,patches:u,unpatchAll:()=>{for(let g=Object.keys(u.before).length;g>0;g--)u.before[g-1].unpatch();for(let g=Object.keys(u.instead).length;g>0;g--)u.instead[g-1].unpatch();for(let g=Object.keys(u.after).length;g>0;g--)u.after[g-1].unpatch();n[t]=c}},Object.assign(n[t],c,{toString:()=>c.toString()})),typeof e=="string"&&/DrInternal-([A-z]+)-Patch/.test(e)?b[le]?b[le].push(S):b[le]=[S]:b[e]?b[e].push(S):b[e]=[S],y}ce.default={patch:U,quick:(e,n,t,r)=>U(et,e,n,t,Object.assign({},r)),before:(e,n,t,r,a)=>U(e,n,t,r,Object.assign({},a,{method:"before"})),instead:(e,n,t,r,a)=>U(e,n,t,r,Object.assign({},a,{method:"instead"})),after:(e,n,t,r,a)=>U(e,n,t,r,Object.assign({},a,{method:"after"})),unpatchAll:e=>{if(!!b[e])for(let n of b[e])n.unpatch()},patches:b}});var K=w(m=>{"use strict";Object.defineProperty(m,"__esModule",{value:!0});m.internal=m.plugins=m.localStorage=void 0;m.localStorage=(()=>{if(window.localStorage)return window.localStorage;let e=document.createElement("frame");e.src="about:blank",document.body.appendChild(e);let n=Object.getOwnPropertyDescriptor(e.contentWindow,"localStorage");return e.remove(),Object.defineProperty(window,"localStorage",n),n=window.localStorage,delete window.localStorage,n})();m.localStorage.setItem("dr-storage",(()=>{let e=JSON.parse(m.localStorage.getItem("dr-storage")??"{}");for(let n of["themeData","pluginData","internalData"])e[n]=e[n]??{};return JSON.stringify(e)})());m.plugins={get:(e,n)=>JSON.parse(m.localStorage.getItem("dr-storage")??"{}").pluginData?.[e]?.[n],set:(e,n,t)=>{let r=JSON.parse(m.localStorage.getItem("dr-storage")??"{}");r.pluginData[e]||(r.pluginData[e]={}),r.pluginData[e][n]=t,m.localStorage.setItem("dr-storage",JSON.stringify(r))}};m.internal={get:e=>JSON.parse(m.localStorage.getItem("dr-storage")??"{}").internalData?.[e],set:(e,n)=>{let t=JSON.parse(m.localStorage.getItem("dr-storage")??"{}");t.internalData[e]=n,m.localStorage.setItem("dr-storage",JSON.stringify(t))}}});var Y=w(v=>{"use strict";var tt=v&&v.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(v,"__esModule",{value:!0});v.customcss=v.internalStyling=v.themeStyling=v.pluginStyling=void 0;var nt=tt(B()),rt=K(),Oe=document.createElement("dr-styles");document.head.appendChild(Oe);var Z={internal:document.createElement("dr-internal"),plugin:document.createElement("dr-plugin"),theme:document.createElement("dr-theme"),customcss:Object.assign(document.createElement("style"),{innerHTML:rt.internal.get("customCSS")??"",id:"dr-customcss"})};for(let e of Object.keys(Z))Oe.appendChild(Z[e]);function ue(e){return(n,t)=>{let r=document.createElement("style");r.setAttribute(`dr-${e}-css`,n),r.innerHTML=t,Z[e].appendChild(r)}}function de(e){return(n,t)=>{let r=document.querySelector(`style[dr-${e}-css="${n}"]`);r&&(r.innerHTML=t)}}function fe(e){return n=>{let t=document.querySelector(`style[dr-${e}-css="${n}"]`);t&&t.remove()}}function pe(e){let n=e.match(/#{(("[A-z]+")((, )|)){1,}}/g);if(!n)return e;for(let t of n){let r=JSON.parse(t.replace("#{","[").replace("}","]"));e=e.replace(t,`.${(0,nt.default)(r,!0)?.[r[0]].replaceAll(" ",".")}`)}return e}v.pluginStyling={inject:ue("plugin"),update:de("plugin"),uninject:fe("plugin"),getClasses:pe};v.themeStyling={inject:ue("theme"),update:de("theme"),uninject:fe("theme"),getClasses:pe};v.internalStyling={inject:ue("internal"),update:de("internal"),uninject:fe("internal"),getClasses:pe};function at(e){Z.customcss.innerHTML=e}v.customcss=at});var De=w(me=>{"use strict";Object.defineProperty(me,"__esModule",{value:!0});var ot=Y();ot.internalStyling.inject("toasts",`.dr-toast { display: inline-flex; box-sizing: border-box; border-radius: 3px; color: var(--text-normal); font-size: 16px; background-color: var(--background-floating); vertical-align: bottom; box-shadow: var(--elevation-low); margin: 0 10px 0 auto; flex-grow: 1; opacity: 1; transition: opacity 0.3s ease-in-out; width: fit-content }
+(() => {
+  var __commonJS = (cb, mod) => function __require() {
+    return mod || (0, cb[Object.keys(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+
+  // tsBuild/i18n.js
+  var require_i18n = __commonJS({
+    "tsBuild/i18n.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.languages = void 0;
+      exports.languages = {
+        global: {
+          name: "Discord Re-envisioned",
+          version: "0.0.1"
+        },
+        en: {
+          devMode: {
+            title: "Toggle Developer Mode",
+            note: "Warning you can get banned from Discord if you do this (not a 100% chance)!"
+          },
+          settingTabs: {
+            general: "General",
+            plugins: "Plugins",
+            themes: "Themes",
+            customcss: "Custom CSS"
+          },
+          customCSS: {
+            title: "Custom CSS",
+            popout: "Popout",
+            settings: "CSS Settings",
+            changeTheme: "Change Theme"
+          },
+          uninstall: "Uninstall",
+          settings: "Settings",
+          installing: {
+            alreadyInstalled: {
+              content: "Plugin '{{name}}' is already installed",
+              replace: function(name) {
+                return this.content.replace("{{name}}", name);
+              }
+            },
+            installed: {
+              content: "Installed '{{name}}'! Refresh the page to see it.",
+              replace: function(name) {
+                return this.content.replace("{{name}}", name);
+              }
+            },
+            notValid: {
+              content: "'{{url}}' is not a valid plugin URL",
+              replace: function(url) {
+                return this.content.replace("{{url}}", url);
+              }
+            },
+            install: "Install"
+          }
+        }
+      };
+      var i18n = new Proxy(exports.languages[navigator.language.split("-", 1)[0]], {
+        get: (target, key) => {
+          const lang = navigator.language.split("-", 1)[0];
+          return exports.languages.global[key] || exports.languages[lang][key] || exports.languages.en[key] || key;
+        }
+      });
+      exports.default = i18n;
+    }
+  });
+
+  // tsBuild/logger.js
+  var require_logger = __commonJS({
+    "tsBuild/logger.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.cache = void 0;
+      var i18n_1 = __importDefault(require_i18n());
+      function getOriginal(type) {
+        const original = console[type];
+        if (original?.__sentry_original__)
+          return original.__sentry_original__;
+        if (original?.__REACT_DEVTOOLS_ORIGINAL_METHOD__)
+          return original.__REACT_DEVTOOLS_ORIGINAL_METHOD__;
+        return original;
+      }
+      function getIcon(color) {
+        return btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path d="M11.1903 7.802C11.1903 8.426 11.1003 9.092 10.9203 9.8C10.7403 10.496 10.4883 11.192 10.1643 11.888C9.84032 12.572 9.43832 13.232 8.95832 13.868C8.49032 14.492 7.95632 15.044 7.35632 15.524C6.75632 15.992 6.09632 16.37 5.37632 16.658C4.66832 16.946 3.91232 17.09 3.10832 17.09C2.94032 17.09 2.77232 17.078 2.60432 17.054C2.43632 17.042 2.26832 17.024 2.10032 17C2.42432 15.344 2.74232 13.73 3.05432 12.158C3.17432 11.498 3.30032 10.814 3.43232 10.106C3.56432 9.386 3.69032 8.678 3.81032 7.982C3.93032 7.286 4.04432 6.62 4.15232 5.984C4.27232 5.348 4.36832 4.772 4.44032 4.256C4.95632 4.16 5.47832 4.07 6.00632 3.986C6.53432 3.902 7.07432 3.86 7.62632 3.86C8.27432 3.86 8.82032 3.962 9.26432 4.166C9.72032 4.37 10.0863 4.652 10.3623 5.012C10.6503 5.372 10.8603 5.792 10.9923 6.272C11.1243 6.752 11.1903 7.262 11.1903 7.802ZM6.94232 6.398C6.81032 7.106 6.67232 7.784 6.52832 8.432C6.38432 9.08 6.24032 9.734 6.09632 10.394C5.95232 11.054 5.80832 11.744 5.66432 12.464C5.52032 13.184 5.38232 13.97 5.25032 14.822C5.53832 14.63 5.81432 14.372 6.07832 14.048C6.35432 13.712 6.61232 13.328 6.85232 12.896C7.09232 12.464 7.30832 12.008 7.50032 11.528C7.70432 11.048 7.87832 10.58 8.02232 10.124C8.16632 9.668 8.27432 9.242 8.34632 8.846C8.43032 8.45 8.47232 8.108 8.47232 7.82C8.47232 7.376 8.34632 7.028 8.09432 6.776C7.85432 6.524 7.47032 6.398 6.94232 6.398ZM10.0456 17.018C10.3696 15.422 10.6816 13.862 10.9816 12.338C11.0896 11.69 11.2096 11.018 11.3416 10.322C11.4736 9.614 11.5936 8.918 11.7016 8.234C11.8216 7.538 11.9296 6.872 12.0256 6.236C12.1336 5.588 12.2176 5 12.2776 4.472C12.9616 4.256 13.6996 4.1 14.4916 4.004C15.2836 3.896 16.0696 3.842 16.8496 3.842C17.3176 3.842 17.7016 3.896 18.0016 4.004C18.3136 4.112 18.5536 4.268 18.7216 4.472C18.9016 4.664 19.0276 4.892 19.0996 5.156C19.1716 5.42 19.2076 5.714 19.2076 6.038C19.2076 6.518 19.1236 6.992 18.9556 7.46C18.7876 7.916 18.5596 8.354 18.2716 8.774C17.9956 9.182 17.6716 9.56 17.2996 9.908C16.9396 10.244 16.5496 10.52 16.1296 10.736C16.3456 11.216 16.5736 11.744 16.8136 12.32C17.0656 12.884 17.2996 13.424 17.5156 13.94C17.7556 14.54 18.0016 15.14 18.2536 15.74L15.4636 16.712C15.2236 15.944 15.0076 15.224 14.8156 14.552C14.7316 14.276 14.6476 13.994 14.5636 13.706C14.4796 13.406 14.4016 13.124 14.3296 12.86C14.2576 12.596 14.1976 12.362 14.1496 12.158C14.1016 11.942 14.0716 11.768 14.0596 11.636L13.8256 11.708C13.7536 12.092 13.6636 12.542 13.5556 13.058C13.4596 13.574 13.3696 14.072 13.2856 14.552C13.1776 15.116 13.0696 15.686 12.9616 16.262L10.0456 17.018ZM14.2756 9.206C14.5036 9.182 14.7796 9.086 15.1036 8.918C15.4396 8.75 15.7576 8.552 16.0576 8.324C16.3576 8.084 16.6156 7.838 16.8316 7.586C17.0476 7.334 17.1556 7.112 17.1556 6.92C17.1556 6.788 17.1136 6.686 17.0296 6.614C16.9456 6.53 16.8256 6.47 16.6696 6.434C16.5256 6.386 16.3636 6.356 16.1836 6.344C16.0036 6.332 15.8176 6.326 15.6256 6.326C15.4936 6.326 15.3556 6.332 15.2116 6.344C15.0796 6.344 14.9596 6.344 14.8516 6.344L14.2756 9.206Z" fill="${color}"></path></svg>`);
+      }
+      function ifDark(yes, no, force) {
+        function bool(condition) {
+          return condition ? yes : no;
+        }
+        if (typeof force === "boolean")
+          return bool(force);
+        return bool(matchMedia("(prefers-color-scheme: dark)").matches);
+      }
+      exports.cache = {};
+      exports.default = new Proxy(exports.cache, {
+        get: (_, prop) => {
+          const log = (...input) => {
+            let firstArgIsString = typeof input[0] === "string";
+            let lastArgs = firstArgIsString ? [`
+${input[0]}`, ...input.slice(1)] : ["\n", ...input];
+            getOriginal(prop)(`%cDR%c${i18n_1.default.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: rgb(31, 173, 78); border-radius: 4px`, `background: rgb(31, 173, 78); margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...lastArgs);
+          };
+          exports.cache[prop] = log;
+          return log;
+        }
+      });
+    }
+  });
+
+  // tsBuild/util.js
+  var require_util = __commonJS({
+    "tsBuild/util.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.restart = exports.findInReactTree = exports.findInTree = exports.prompt = exports.showConfirmationModal = exports.getOwnerInstance = exports.getReactInstance = exports.waitUntil = exports.sleep = void 0;
+      var react_1 = require_react();
+      var getModule_1 = __importDefault(require_getModule());
+      var sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+      exports.sleep = sleep;
+      async function waitUntil(condition) {
+        let item;
+        while (!(item = condition()))
+          await (0, exports.sleep)(1);
+        return item;
+      }
+      exports.waitUntil = waitUntil;
+      function getReactInstance(element) {
+        if (!element)
+          return;
+        if (element.__reactInternalInstance$)
+          return element.__reactInternalInstance$;
+        return element[Object.keys(element).find((k) => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber"))] || null;
+      }
+      exports.getReactInstance = getReactInstance;
+      function getOwnerInstance(element) {
+        for (let RI = getReactInstance(element); RI; RI = RI.return) {
+          const sn = RI.stateNode;
+          if (typeof sn?.forceUpdate === "function")
+            return sn;
+        }
+      }
+      exports.getOwnerInstance = getOwnerInstance;
+      function showConfirmationModal(title, content, opts) {
+        const Markdown = (0, getModule_1.default)((m) => m.default?.displayName === "Markdown" && m.default.rules).default;
+        const ConfirmationModal = (0, getModule_1.default)("ConfirmModal").default;
+        const Button = (0, getModule_1.default)(["ButtonColors"]);
+        const { openModal } = (0, getModule_1.default)(["openModal", "openModalLazy"]);
+        const Messages = (0, getModule_1.default)(["Messages"], false)[1].Messages;
+        const emptyFunction = () => {
+        };
+        const { onConfirm = emptyFunction, onCancel = emptyFunction, confirmText = Messages.OKAY, cancelText = Messages.CANCEL, danger = false } = opts;
+        if (!Array.isArray(content))
+          content = [content];
+        content = content.map((c) => typeof c === "string" ? react_1.React.createElement(Markdown, null, c) : c);
+        openModal((props) => react_1.React.createElement(ConfirmationModal, { ...props, header: title, content, onConfirm, onCancel, confirmText, cancelText, confirmButtonColor: danger ? Button.ButtonColors.RED : Button.ButtonColors.BRAND }, content));
+      }
+      exports.showConfirmationModal = showConfirmationModal;
+      function prompt(title, defaultValue) {
+        const TextInput = (0, getModule_1.default)("TextInput").default;
+        const ConfirmationModal = (0, getModule_1.default)("ConfirmModal").default;
+        const Button = (0, getModule_1.default)(["ButtonColors"]);
+        const { Messages } = (0, getModule_1.default)(["Messages"], false)[1];
+        const { openModal } = (0, getModule_1.default)(["openModal", "openModalLazy"]);
+        let toReturn = "";
+        return new Promise((resolve) => {
+          openModal((props) => {
+            if (props.transitionState === 3)
+              resolve(null);
+            return react_1.React.createElement(ConfirmationModal, Object.assign({
+              header: title,
+              confirmButtonColor: Button.ButtonColors.BRAND,
+              confirmText: Messages.OKAY,
+              cancelText: Messages.CANCEL,
+              onConfirm: () => resolve(toReturn),
+              onCancel: () => resolve(null),
+              children: react_1.React.createElement(react_1.React.memo(() => {
+                const [value, setValue] = react_1.React.useState(defaultValue);
+                return react_1.React.createElement(TextInput, {
+                  value,
+                  onChange: (value2) => {
+                    setValue(value2);
+                    toReturn = value2;
+                  }
+                });
+              }))
+            }, props));
+          });
+        });
+      }
+      exports.prompt = prompt;
+      function findInTree(tree, filter, opts = {}) {
+        const { walkable = null, ignore = [] } = opts;
+        if (!tree || typeof tree !== "object")
+          return null;
+        if (typeof filter === "string") {
+          if (tree.hasOwnProperty(filter))
+            return tree[filter];
+          return;
+        } else if (filter(tree))
+          return tree;
+        let returnValue = null;
+        if (Array.isArray(tree)) {
+          for (const value of tree) {
+            returnValue = findInTree(value, filter, { walkable, ignore });
+            if (returnValue)
+              return returnValue;
+          }
+        } else {
+          const walkables = !walkable ? Object.keys(tree) : walkable;
+          for (const key of walkables) {
+            if (!tree.hasOwnProperty(key) || ignore.includes(key))
+              continue;
+            returnValue = findInTree(tree[key], filter, { walkable, ignore });
+            if (returnValue)
+              return returnValue;
+          }
+        }
+        return returnValue;
+      }
+      exports.findInTree = findInTree;
+      function findInReactTree(tree, searchFilter) {
+        return findInTree(tree, searchFilter, {
+          walkable: ["props", "children", "child", "sibling"]
+        });
+      }
+      exports.findInReactTree = findInReactTree;
+      function restart(full) {
+        if (window.__DR__BACKEND__.app && full)
+          return window.__DR__BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART");
+        return location.reload();
+      }
+      exports.restart = restart;
+    }
+  });
+
+  // tsBuild/getModule.js
+  var require_getModule = __commonJS({
+    "tsBuild/getModule.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.asyncGetModule = void 0;
+      var util_1 = require_util();
+      var webpackExports = !webpackChunkdiscord_app.webpackExports ? webpackChunkdiscord_app.push([
+        [Symbol("Discord Re-envisioned")],
+        {},
+        (exp) => {
+          webpackChunkdiscord_app.pop();
+          webpackChunkdiscord_app.webpackExports = exp;
+          return exp;
+        }
+      ]) : webpackChunkdiscord_app.webpackExports;
+      function find(filter) {
+        let modules = [];
+        for (let ite in webpackExports.c) {
+          if (!Object.hasOwnProperty.call(webpackExports.c, ite))
+            continue;
+          let ele = webpackExports.c[ite].exports;
+          if (!ele)
+            continue;
+          if (filter(ele))
+            modules.push(ele);
+        }
+        return modules;
+      }
+      function getModule(filter, first = true) {
+        let modules = [];
+        function byPropsAll(...props) {
+          const norm = find((m) => props.every((prop) => typeof m[prop] !== "undefined"));
+          let def = [];
+          for (const module2 of find((m) => props.every((prop) => typeof m.default?.[prop] !== "undefined")))
+            def.push(module2.default);
+          return [...norm, ...def];
+        }
+        function byDisplayName(displayName) {
+          const norm = find((m) => m.default?.displayName === displayName);
+          const type = find((m) => m.default?.type?.displayName === displayName);
+          const rend = find((m) => m.default?.type?.render?.displayName === displayName);
+          return [...norm, ...type, ...rend];
+        }
+        if (Array.isArray(filter))
+          modules = byPropsAll(...filter);
+        else if (typeof filter === "string")
+          modules = byDisplayName(filter);
+        else if (typeof filter === "number")
+          modules = [webpackExports.c[filter]];
+        else if (typeof filter === "function")
+          modules = find(filter);
+        if (first)
+          return modules[0];
+        return modules;
+      }
+      exports.default = getModule;
+      async function asyncGetModule(filter) {
+        return await new Promise(async (resolve) => await (0, util_1.waitUntil)(() => {
+          if (!getModule(filter))
+            return;
+          resolve(getModule(filter));
+        }));
+      }
+      exports.asyncGetModule = asyncGetModule;
+    }
+  });
+
+  // tsBuild/react.js
+  var require_react = __commonJS({
+    "tsBuild/react.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.ReactDOM = exports.React = void 0;
+      var getModule_1 = __importDefault(require_getModule());
+      exports.React = (0, getModule_1.default)(["createElement", "Component"]);
+      exports.ReactDOM = (0, getModule_1.default)(["render", "findDOMNode"]);
+      exports.default = exports.React;
+    }
+  });
+
+  // tsBuild/patcher.js
+  var require_patcher = __commonJS({
+    "tsBuild/patcher.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var Patch_Symbol = Symbol("DrApi.patch");
+      var Quick_Symbol = Symbol("DrApi.patch.quick");
+      var Internal_Symbol = Symbol("DrInternal");
+      var ALLpatches = {};
+      function patch(patchName, moduleToPatch, functionToPatch, callback, opts) {
+        let { method = "after", id, once = false, index = 0 } = opts;
+        let originalFunction = moduleToPatch[functionToPatch];
+        if (!originalFunction) {
+          moduleToPatch[functionToPatch] = () => {
+          };
+          originalFunction = moduleToPatch[functionToPatch];
+        }
+        method = method.toLowerCase();
+        if (!(method === "before" || method === "after" || method === "instead"))
+          throw new Error(`'${method}' is a invalid patch type`);
+        let patches = moduleToPatch?.[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] };
+        let CallbackSymbol = Symbol();
+        let patchInfo = { unpatch, patchName: id ?? patchName, moduleToPatch, functionToPatch, callback, method, Symbol: CallbackSymbol };
+        patches[method].splice(index, 0, Object.assign(callback, { unpatch, Symbol: CallbackSymbol }));
+        let DidUnpatch = false;
+        function unpatch() {
+          if (DidUnpatch)
+            return;
+          DidUnpatch = true;
+          let found = patches[method].find((p) => p.Symbol === patchInfo.Symbol);
+          let index2 = patches[method].indexOf(found);
+          patches[method].splice(index2, 1);
+          found = ALLpatches[patchName].find((p) => p.Symbol === patchInfo.Symbol);
+          index2 = ALLpatches[patchName].indexOf(found);
+          ALLpatches[patchName].splice(index2, 1);
+          if (!ALLpatches[patchName].length)
+            delete ALLpatches[patchName];
+        }
+        if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
+          moduleToPatch[functionToPatch] = function() {
+            for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
+              patches.before[patch2 - 1]();
+            let insteadFunction = originalFunction;
+            for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
+              insteadFunction = patches.instead[patch2 - 1]([...arguments], insteadFunction, this) ?? insteadFunction;
+            let res = insteadFunction.apply(this, [...arguments]);
+            for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
+              patches.after[patch2 - 1]([...arguments], res, this);
+            if (once)
+              unpatch();
+            return res;
+          };
+          moduleToPatch[functionToPatch][Patch_Symbol] = {
+            original: originalFunction,
+            module: moduleToPatch,
+            function: functionToPatch,
+            patches,
+            unpatchAll: () => {
+              for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
+                patches.before[patch2 - 1].unpatch();
+              for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
+                patches.instead[patch2 - 1].unpatch();
+              for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
+                patches.after[patch2 - 1].unpatch();
+              moduleToPatch[functionToPatch] = originalFunction;
+            }
+          };
+          Object.assign(moduleToPatch[functionToPatch], originalFunction, {
+            toString: () => originalFunction.toString()
+          });
+        }
+        if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))
+          if (!ALLpatches[Internal_Symbol])
+            ALLpatches[Internal_Symbol] = [patchInfo];
+          else
+            ALLpatches[Internal_Symbol].push(patchInfo);
+        else if (!ALLpatches[patchName])
+          ALLpatches[patchName] = [patchInfo];
+        else
+          ALLpatches[patchName].push(patchInfo);
+        return unpatch;
+      }
+      exports.default = {
+        patch,
+        quick: (moduleToPatch, functionToPatch, callback, opts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
+        before: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "before" })),
+        instead: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "instead" })),
+        after: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "after" })),
+        unpatchAll: (id) => {
+          if (!ALLpatches[id])
+            return;
+          for (const patch2 of ALLpatches[id])
+            patch2.unpatch();
+          return void 0;
+        },
+        patches: ALLpatches
+      };
+    }
+  });
+
+  // tsBuild/storage.js
+  var require_storage = __commonJS({
+    "tsBuild/storage.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.internal = exports.plugins = exports.localStorage = void 0;
+      exports.localStorage = (() => {
+        if (window.localStorage)
+          return window.localStorage;
+        const frame = document.createElement("frame");
+        frame.src = "about:blank";
+        document.body.appendChild(frame);
+        let localStorage = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage");
+        frame.remove();
+        Object.defineProperty(window, "localStorage", localStorage);
+        localStorage = window.localStorage;
+        delete window.localStorage;
+        return localStorage;
+      })();
+      exports.localStorage.setItem("dr-storage", (() => {
+        let res = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
+        for (const dataType of ["themeData", "pluginData", "internalData"])
+          res[dataType] = res[dataType] ?? {};
+        return JSON.stringify(res);
+      })());
+      exports.plugins = {
+        get: (plugin, key) => JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}").pluginData?.[plugin]?.[key],
+        set: (plugin, key, value) => {
+          const storage = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
+          if (!storage.pluginData[plugin])
+            storage.pluginData[plugin] = {};
+          storage.pluginData[plugin][key] = value;
+          exports.localStorage.setItem("dr-storage", JSON.stringify(storage));
+        }
+      };
+      exports.internal = {
+        get: (key) => JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}").internalData?.[key],
+        set: (key, value) => {
+          const storage = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
+          storage.internalData[key] = value;
+          exports.localStorage.setItem("dr-storage", JSON.stringify(storage));
+        }
+      };
+    }
+  });
+
+  // tsBuild/styling.js
+  var require_styling = __commonJS({
+    "tsBuild/styling.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.customcss = exports.internalStyling = exports.themeStyling = exports.pluginStyling = void 0;
+      var getModule_1 = __importDefault(require_getModule());
+      var storage_1 = require_storage();
+      var DrHead = document.createElement("dr-styles");
+      document.head.appendChild(DrHead);
+      var Dr_ele = {
+        internal: document.createElement("dr-internal"),
+        plugin: document.createElement("dr-plugin"),
+        theme: document.createElement("dr-theme"),
+        customcss: Object.assign(document.createElement("style"), {
+          innerHTML: storage_1.internal.get("customCSS") ?? "",
+          id: "dr-customcss"
+        })
+      };
+      for (const key of Object.keys(Dr_ele))
+        DrHead.appendChild(Dr_ele[key]);
+      function inject(type) {
+        return (id, css) => {
+          const style = document.createElement("style");
+          style.setAttribute(`dr-${type}-css`, id);
+          style.innerHTML = css;
+          Dr_ele[type].appendChild(style);
+        };
+      }
+      function update(type) {
+        return (id, css) => {
+          const style = document.querySelector(`style[dr-${type}-css="${id}"]`);
+          if (style)
+            style.innerHTML = css;
+        };
+      }
+      function uninject(type) {
+        return (id) => {
+          const style = document.querySelector(`style[dr-${type}-css="${id}"]`);
+          if (style)
+            style.remove();
+        };
+      }
+      function getClasses(css) {
+        const matches = css.match(/#{(("[A-z]+")((, )|)){1,}}/g);
+        if (!matches)
+          return css;
+        for (const styl of matches) {
+          const arr = JSON.parse(styl.replace("#{", "[").replace("}", "]"));
+          css = css.replace(styl, `.${(0, getModule_1.default)(arr, true)?.[arr[0]].replaceAll(" ", ".")}`);
+        }
+        return css;
+      }
+      exports.pluginStyling = {
+        inject: inject("plugin"),
+        update: update("plugin"),
+        uninject: uninject("plugin"),
+        getClasses
+      };
+      exports.themeStyling = {
+        inject: inject("theme"),
+        update: update("theme"),
+        uninject: uninject("theme"),
+        getClasses
+      };
+      exports.internalStyling = {
+        inject: inject("internal"),
+        update: update("internal"),
+        uninject: uninject("internal"),
+        getClasses
+      };
+      function customcss(css) {
+        Dr_ele.customcss.innerHTML = css;
+      }
+      exports.customcss = customcss;
+    }
+  });
+
+  // tsBuild/toast.js
+  var require_toast = __commonJS({
+    "tsBuild/toast.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var styling_1 = require_styling();
+      styling_1.internalStyling.inject("toasts", `.dr-toast { display: inline-flex; box-sizing: border-box; border-radius: 3px; color: var(--text-normal); font-size: 16px; background-color: var(--background-floating); vertical-align: bottom; box-shadow: var(--elevation-low); margin: 0 10px 0 auto; flex-grow: 1; opacity: 1; transition: opacity 0.3s ease-in-out; width: fit-content }
 .dr-toast:is(.adding, .removing) { opacity: 0 }
 .dr-toast:not(:last-child) {  margin-bottom: 5px }
 .dr-toast-container { position: absolute; bottom: 0; right: 0; display: flex; flex-direction: column; align-items: flex-end; max-width: 100%; z-index: 999; overflow: hidden }
@@ -14,10 +571,517 @@ ${r[0]}`,...r.slice(1)]:[`
 .dr-toast-message { display: inline-block; user-select: text }
 .dr-toast-message-wrapper { flex: 1; padding: 12px 6px 12px 3px; position: relative }
 .dr-toast-close { cursor: pointer; display: flex; align-items: center; padding: 2px 10px 0; user-select: none; color: var(--interactive-normal); position: relative; font-size: 14px }
-.dr-toast-close:hover { color: var(--interactive-hover); background-color: var(--background-modifier-hover) }`);var ge=document.createElement("div");ge.className="dr-toast-container";document.body.appendChild(ge);var Q=document.createElement("div");Q.className="dr-toast-wrapper";Q.style.marginBottom="5px";ge.appendChild(Q);function it(e,n){let t,r,a=n,o=function(){window.clearTimeout(t),t=null,a-=Date.now()-r},s=function(){t||(r=Date.now(),t=window.setTimeout(e,a))};return s(),{pause:o,resume:s}}function st(e,n){let{type:t="success",duration:r=3e3,autoClose:a=!0,closeButton:o=!0}=n,s=document.createElement("div");s.className="dr-toast adding",setTimeout(()=>s.classList.remove("adding"),300),Q.appendChild(s);let l=document.createElement("span");l.className=`dr-toast-type ${t.toLowerCase()}`,s.appendChild(l);let d=document.createElement("div");d.className="dr-toast-message-wrapper",s.appendChild(d);let c=document.createElement("span");c.className="dr-toast-message",c.innerText=e,d.appendChild(c);function u(){s.classList.add("removing"),setTimeout(()=>s.remove(),300)}if(o){let C=document.createElement("span");C.className="dr-toast-close",C.innerText="\u2715",C.onclick=u,s.appendChild(C)}if(a){let C=it(()=>u(),r);s.onmouseenter=C.pause,s.onmouseleave=C.resume}return s}me.default=st});var he=w(p=>{"use strict";var lt=p&&p.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(p,"__esModule",{value:!0});p.dispatch=p.unsubscibe=p.subscribe=p.unregister=p.register=p.Actions=void 0;var ct=lt(H()),ut=Symbol("DrApi.actions");p.Actions={};function dt(e,n){return p.Actions[e]=n,()=>xe(e)}p.register=dt;function xe(e){!p.Actions[e]||delete p.Actions[e]}p.unregister=xe;var ke=[];function ft(e,n){return ke.push({callback:n,undo:ct.default.after(ut,p.Actions,e,n)}),()=>Ie(n)}p.subscribe=ft;function Ie(e){ke.find(({callback:n})=>n===e)?.undo?.()}p.unsubscibe=Ie;function pt(e,...n){let t=p.Actions[e];if(!!t)return t(...n)}p.dispatch=pt});var je=w(z=>{"use strict";var gt=z&&z.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(z,"__esModule",{value:!0});var X=gt(P());z.default=X.default.memo(({props:e={},editor:n=()=>{}})=>{let t=X.default.useRef();return X.default.useEffect(()=>{let r=ace.edit(t.current);n(r)}),X.default.createElement("div",{ref:t,...e})})});var Be=w(ne=>{"use strict";var ee=ne&&ne.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(ne,"__esModule",{value:!0});var i=P(),k=J(),h=ee(B()),_e=ee(H()),x=ee(W()),N=K(),Ae=he(),mt=ee(je()),Te=Y();Te.internalStyling.inject("customcss",`.dr-editor-header { background-color: var(--background-secondary); display: flex; flex-direction: row; padding: 2px 4px; border-radius: 6px 6px 0 0 }
+.dr-toast-close:hover { color: var(--interactive-hover); background-color: var(--background-modifier-hover) }`);
+      var toastContainer = document.createElement("div");
+      toastContainer.className = "dr-toast-container";
+      document.body.appendChild(toastContainer);
+      var toastWrapper = document.createElement("div");
+      toastWrapper.className = "dr-toast-wrapper";
+      toastWrapper.style.marginBottom = "5px";
+      toastContainer.appendChild(toastWrapper);
+      function Timer(callback, delay) {
+        let timerId, start, remaining = delay;
+        const pause = function() {
+          window.clearTimeout(timerId);
+          timerId = null;
+          remaining -= Date.now() - start;
+        };
+        const resume = function() {
+          if (timerId)
+            return;
+          start = Date.now();
+          timerId = window.setTimeout(callback, remaining);
+        };
+        resume();
+        return { pause, resume };
+      }
+      function createToast(text, opts) {
+        const { type = "success", duration = 3e3, autoClose = true, closeButton = true } = opts;
+        const toast = document.createElement("div");
+        toast.className = "dr-toast adding";
+        setTimeout(() => toast.classList.remove("adding"), 300);
+        toastWrapper.appendChild(toast);
+        const toastType = document.createElement("span");
+        toastType.className = `dr-toast-type ${type.toLowerCase()}`;
+        toast.appendChild(toastType);
+        const toastMessageWrapper = document.createElement("div");
+        toastMessageWrapper.className = "dr-toast-message-wrapper";
+        toast.appendChild(toastMessageWrapper);
+        const toastMessage = document.createElement("span");
+        toastMessage.className = "dr-toast-message";
+        toastMessage.innerText = text;
+        toastMessageWrapper.appendChild(toastMessage);
+        function removeToast() {
+          toast.classList.add("removing");
+          setTimeout(() => toast.remove(), 300);
+        }
+        if (closeButton) {
+          const toastClose = document.createElement("span");
+          toastClose.className = "dr-toast-close";
+          toastClose.innerText = "\u2715";
+          toastClose.onclick = removeToast;
+          toast.appendChild(toastClose);
+        }
+        if (autoClose) {
+          const dur = Timer(() => removeToast(), duration);
+          toast.onmouseenter = dur.pause;
+          toast.onmouseleave = dur.resume;
+        }
+        return toast;
+      }
+      exports.default = createToast;
+    }
+  });
+
+  // tsBuild/actions.js
+  var require_actions = __commonJS({
+    "tsBuild/actions.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.dispatch = exports.unsubscibe = exports.subscribe = exports.unregister = exports.register = exports.Actions = void 0;
+      var patcher_1 = __importDefault(require_patcher());
+      var actionsSymbol = Symbol("DrApi.actions");
+      exports.Actions = {};
+      function register(name, callback) {
+        exports.Actions[name] = callback;
+        return () => unregister(name);
+      }
+      exports.register = register;
+      function unregister(name) {
+        if (!exports.Actions[name])
+          return;
+        delete exports.Actions[name];
+      }
+      exports.unregister = unregister;
+      var _Actions = [];
+      function subscribe(name, callback) {
+        _Actions.push({ callback, undo: patcher_1.default.after(actionsSymbol, exports.Actions, name, callback) });
+        return () => unsubscibe(callback);
+      }
+      exports.subscribe = subscribe;
+      function unsubscibe(callback) {
+        _Actions.find(({ callback: _callback }) => _callback === callback)?.undo?.();
+      }
+      exports.unsubscibe = unsubscibe;
+      function dispatch(name, ...args) {
+        const action = exports.Actions[name];
+        if (!action)
+          return;
+        return action(...args);
+      }
+      exports.dispatch = dispatch;
+    }
+  });
+
+  // tsBuild/editor.js
+  var require_editor = __commonJS({
+    "tsBuild/editor.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var react_1 = __importDefault(require_react());
+      exports.default = react_1.default.memo(({ props = {}, editor: _editor = () => {
+      } }) => {
+        const ref = react_1.default.useRef();
+        react_1.default.useEffect(() => {
+          const editor = ace.edit(ref.current);
+          _editor(editor);
+        });
+        return react_1.default.createElement("div", { ref, ...props });
+      });
+    }
+  });
+
+  // tsBuild/dashboard.js
+  var require_dashboard = __commonJS({
+    "tsBuild/dashboard.js"(exports) {
+      "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var react_1 = require_react();
+      var util_1 = require_util();
+      var getModule_1 = __importDefault(require_getModule());
+      var patcher_1 = __importDefault(require_patcher());
+      var i18n_1 = __importDefault(require_i18n());
+      var storage_1 = require_storage();
+      var actions_1 = require_actions();
+      var editor_1 = __importDefault(require_editor());
+      var styling_1 = require_styling();
+      styling_1.internalStyling.inject("customcss", `.dr-editor-header { background-color: var(--background-secondary); display: flex; flex-direction: row; padding: 2px 4px; border-radius: 6px 6px 0 0 }
 .dr-editor-header-button { color: red; margin-right: 5px; width: 26px; height: 26px; color: var(--interactive-normal); position: relative }
 .dr-editor-header-button:hover { color: var(--interactive-hover) }
 .dr-editor-header-button:active { color: var(--interactive-active) }
 .dr-editor-header-button > * { width: 22px; height: 22px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) }
 .dr-editor-header + .ace_editor { border-radius: 0 0 6px 6px }
-.dr-select { height: 330px }`);var qe=i.React.memo(()=>i.React.createElement("svg",{width:24,height:24,viewBox:"0 0 22 22"},i.React.createElement("path",{d:"M11.1903 7.802C11.1903 8.426 11.1003 9.092 10.9203 9.8C10.7403 10.496 10.4883 11.192 10.1643 11.888C9.84032 12.572 9.43832 13.232 8.95832 13.868C8.49032 14.492 7.95632 15.044 7.35632 15.524C6.75632 15.992 6.09632 16.37 5.37632 16.658C4.66832 16.946 3.91232 17.09 3.10832 17.09C2.94032 17.09 2.77232 17.078 2.60432 17.054C2.43632 17.042 2.26832 17.024 2.10032 17C2.42432 15.344 2.74232 13.73 3.05432 12.158C3.17432 11.498 3.30032 10.814 3.43232 10.106C3.56432 9.386 3.69032 8.678 3.81032 7.982C3.93032 7.286 4.04432 6.62 4.15232 5.984C4.27232 5.348 4.36832 4.772 4.44032 4.256C4.95632 4.16 5.47832 4.07 6.00632 3.986C6.53432 3.902 7.07432 3.86 7.62632 3.86C8.27432 3.86 8.82032 3.962 9.26432 4.166C9.72032 4.37 10.0863 4.652 10.3623 5.012C10.6503 5.372 10.8603 5.792 10.9923 6.272C11.1243 6.752 11.1903 7.262 11.1903 7.802ZM6.94232 6.398C6.81032 7.106 6.67232 7.784 6.52832 8.432C6.38432 9.08 6.24032 9.734 6.09632 10.394C5.95232 11.054 5.80832 11.744 5.66432 12.464C5.52032 13.184 5.38232 13.97 5.25032 14.822C5.53832 14.63 5.81432 14.372 6.07832 14.048C6.35432 13.712 6.61232 13.328 6.85232 12.896C7.09232 12.464 7.30832 12.008 7.50032 11.528C7.70432 11.048 7.87832 10.58 8.02232 10.124C8.16632 9.668 8.27432 9.242 8.34632 8.846C8.43032 8.45 8.47232 8.108 8.47232 7.82C8.47232 7.376 8.34632 7.028 8.09432 6.776C7.85432 6.524 7.47032 6.398 6.94232 6.398ZM10.0456 17.018C10.3696 15.422 10.6816 13.862 10.9816 12.338C11.0896 11.69 11.2096 11.018 11.3416 10.322C11.4736 9.614 11.5936 8.918 11.7016 8.234C11.8216 7.538 11.9296 6.872 12.0256 6.236C12.1336 5.588 12.2176 5 12.2776 4.472C12.9616 4.256 13.6996 4.1 14.4916 4.004C15.2836 3.896 16.0696 3.842 16.8496 3.842C17.3176 3.842 17.7016 3.896 18.0016 4.004C18.3136 4.112 18.5536 4.268 18.7216 4.472C18.9016 4.664 19.0276 4.892 19.0996 5.156C19.1716 5.42 19.2076 5.714 19.2076 6.038C19.2076 6.518 19.1236 6.992 18.9556 7.46C18.7876 7.916 18.5596 8.354 18.2716 8.774C17.9956 9.182 17.6716 9.56 17.2996 9.908C16.9396 10.244 16.5496 10.52 16.1296 10.736C16.3456 11.216 16.5736 11.744 16.8136 12.32C17.0656 12.884 17.2996 13.424 17.5156 13.94C17.7556 14.54 18.0016 15.14 18.2536 15.74L15.4636 16.712C15.2236 15.944 15.0076 15.224 14.8156 14.552C14.7316 14.276 14.6476 13.994 14.5636 13.706C14.4796 13.406 14.4016 13.124 14.3296 12.86C14.2576 12.596 14.1976 12.362 14.1496 12.158C14.1016 11.942 14.0716 11.768 14.0596 11.636L13.8256 11.708C13.7536 12.092 13.6636 12.542 13.5556 13.058C13.4596 13.574 13.3696 14.072 13.2856 14.552C13.1776 15.116 13.0696 15.686 12.9616 16.262L10.0456 17.018ZM14.2756 9.206C14.5036 9.182 14.7796 9.086 15.1036 8.918C15.4396 8.75 15.7576 8.552 16.0576 8.324C16.3576 8.084 16.6156 7.838 16.8316 7.586C17.0476 7.334 17.1556 7.112 17.1556 6.92C17.1556 6.788 17.1136 6.686 17.0296 6.614C16.9456 6.53 16.8256 6.47 16.6696 6.434C16.5256 6.386 16.3636 6.356 16.1836 6.344C16.0036 6.332 15.8176 6.326 15.6256 6.326C15.4936 6.326 15.3556 6.332 15.2116 6.344C15.0796 6.344 14.9596 6.344 14.8516 6.344L14.2756 9.206Z",fill:"currentcolor"}))),j=()=>{},{LinkButton:ht}=(0,h.default)(["LinkButton"]),_t=i.React.memo(({children:e})=>{let[n,t]=i.React.useState(!1),r=e.find(a=>a?.props?.selected);return r&&(j=r),(0,Ae.register)("DrDashboardButtonOnRender",function(a){if(!a){let o=document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`);if(!o)return t(a);j.props||(j.props={}),j.props.selected=(0,k.getOwnerInstance)(o)._reactInternals.return.key===j.key}t(a)}),i.React.createElement(ht,{text:x.default.name,icon:()=>i.React.createElement(qe,null),route:"/dr_dashboard",selected:n,onFocus:()=>{j&&(j.props.selected=!1)}})}),Ct=(0,h.default)("SwitchItem").default,bt=i.React.memo(e=>{let{value:n,onChange:t=()=>{},title:r,note:a,disabled:o=!1,initialChange:s=!0}=e,[l,d]=i.React.useState(n);return i.React.createElement(Ct,{value:l,onChange:()=>{s&&d(!l),t(!l,d)},note:a,disabled:o},r)});_e.default.after("router-routes",(0,h.default)("ConnectedPrivateChannelsList"),"default",(e,n)=>{let t=n.props.children.props.children;(0,Ae.dispatch)("DrDashboardButtonOnRender",/^\/dr_dashboard/.test(location.pathname)),!t.find(r=>r&&r.key==="drdashLinkButton")&&t.unshift(i.React.createElement(_t,{key:"drdashLinkButton"},t))});var yt=(0,h.default)("FluxContainer(ViewsWithMainInterface)").default?.prototype?.render?.call({memoizedGetStateFromStores:()=>({})})?.type;_e.default.after("router-routes",yt?.prototype,"render",(e,n)=>{let t=n.props.children[0].props.children[1];t[t.length-1].props.path.push("/dr_dashboard")});var wt=(0,h.default)("Gear").default,vt=(0,h.default)("OpenExternal").default,St=["ambiance","chaos","chrome","clouds","clouds_midnight","cobalt","crimson_editor","dawn","dracula","dreamweaver","eclipse","github","gob","gruvbox","idle_fingers","iplastic","katzenmilch","kr_theme","kuroir","merbivore","merbivore_soft","mono_industrial","monokai","nord_dark","one_dark","pastel_on_dark","solarized_dark","solarized_light","sqlserver","terminal","textmate","tomorrow","tomorrow_night","tomorrow_night_blue","tomorrow_night_bright","tomorrow_night_eighties","twilight","vibrant_ink","xcode"],Rt=(0,h.default)("Tooltip").default,Mt=(0,h.default)("SelectTempWrapper").default,Et=i.React.memo(e=>{let[n,t]=i.React.useState(e.theme);return i.React.createElement(Mt,{onChange:r=>{e.setTheme(r.value),t(r.value)},className:"dr-select",options:St.map(r=>({label:r,value:r})),value:n})}),Ot={general:i.React.memo(()=>i.React.createElement(i.React.Fragment,null,i.React.createElement(bt,{value:N.internal.get("devMode")??!1,title:x.default.devMode.title,note:x.default.devMode.note,onChange:e=>{N.internal.set("devMode",e),window.__DR__BACKEND__.devMode=e}}))),customcss:i.React.memo(()=>{let[e,n]=i.React.useState(N.internal.get("editorTheme")??"monokai"),t=e;function r(a,o,s){return i.React.createElement(Rt,{text:o},l=>i.React.createElement("div",{...l,onClick:d=>{s(d),l.onClick(d)},className:"dr-editor-header-button"},a))}return i.React.createElement(i.React.Fragment,null,i.React.createElement("div",{className:"dr-editor-header"},r(i.React.createElement(vt,null),x.default.customCSS.popout,console.log),r(i.React.createElement(wt,null),x.default.customCSS.settings,console.log),r(i.React.createElement("svg",{xmlns:"http://www.w3.org/2000/svg",viewBox:"0 0 24 24"},i.React.createElement("path",{fill:"currentcolor",d:"M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z"}),i.React.createElement("path",{fill:"currentcolor",d:"M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z"})),x.default.customCSS.changeTheme,()=>{(0,k.showConfirmationModal)(x.default.customCSS.changeTheme,i.React.createElement(Et,{theme:e,setTheme:a=>t=a}),{onConfirm:()=>{n(t),N.internal.set("editorTheme",t)}})})),i.React.createElement(mt.default,{props:{style:{height:"calc(100% - 30px)"}},editor:a=>{a.setTheme(`ace/theme/${e}`),a.getSession().setMode("ace/mode/css"),a.setValue(N.internal.get("customCSS")??""),a.on("change",()=>{let o=a.getValue();(0,Te.customcss)(o),N.internal.set("customCSS",o)})}}))})},{content:Dt}=(0,h.default)(["chat","uploadArea","threadSidebarOpen"]),{auto:xt}=(0,h.default)(["scrollerBase"]),{container:kt}=(0,h.default)(["container","downloadProgressCircle"]),te=(0,h.default)(["Caret","Icon","defaultProps"]),Ce=(0,h.default)("TabBar").default,It=i.React.memo(()=>{let[e,n]=i.React.useState("general"),t=Ot[e]??i.React.memo(()=>i.React.createElement(i.React.Fragment,null,"ERROR"));return i.React.createElement("div",{className:(0,h.default)(["maxWidthWithToolbar","container","inviteToolbar"]).container},i.React.createElement(te,{toolbar:i.React.createElement(i.React.Fragment,null)},i.React.createElement(te.Icon,{icon:()=>i.React.createElement(qe,null)}),i.React.createElement(te.Title,null,x.default.name),i.React.createElement(te.Divider,null),i.React.createElement(Ce,{type:Ce.Types.TOP_PILL,onItemSelect:r=>n(r),selectedItem:e,className:"tabBar-ra-EuL"},Object.entries(x.default.settingTabs).map(([r,a])=>i.React.createElement(Ce.Item,{id:r},a)))),i.React.createElement("div",{className:Dt},i.React.createElement("div",{className:xt,style:{padding:"16px 12px"}},i.React.createElement(t,null))))});(0,k.waitUntil)(()=>document.querySelector(`.${kt}`)).then(e=>{let n=(0,k.getOwnerInstance)(e),t=(0,h.default)("RouteWithImpression").default;_e.default.after("router-routes",n?.props?.children,"type",(a,o)=>{let{children:s}=(0,k.findInReactTree)(o,l=>Array.isArray(l.children)&&l.children.length>5);s.push(i.React.createElement(t,{path:"/dr_dashboard",impressionName:"dr_dashboard",disableTrack:!0,render:()=>i.React.createElement(It,null)}))}),n.forceUpdate();let{app:r}=(0,h.default)(["app"]);(0,k.waitUntil)(()=>document.querySelector(`.${r}`)).then(a=>{(0,k.findInTree)((0,k.getOwnerInstance)(a)?._reactInternals,o=>o?.historyUnlisten,{walkable:["child","stateNode"]}).forceUpdate()})})});var Nt=w(E=>{"use strict";var jt=E&&E.__createBinding||(Object.create?function(e,n,t,r){r===void 0&&(r=t),Object.defineProperty(e,r,{enumerable:!0,get:function(){return n[t]}})}:function(e,n,t,r){r===void 0&&(r=t),e[r]=n[t]}),At=E&&E.__setModuleDefault||(Object.create?function(e,n){Object.defineProperty(e,"default",{enumerable:!0,value:n})}:function(e,n){e.default=n}),Tt=E&&E.__importStar||function(e){if(e&&e.__esModule)return e;var n={};if(e!=null)for(var t in e)t!=="default"&&Object.prototype.hasOwnProperty.call(e,t)&&jt(n,e,t);return At(n,e),n},re=E&&E.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(E,"__esModule",{value:!0});var be=re(Re());be.default.log("Loading...");if(location.pathname.startsWith("/dr_dashboard")){let e=document.querySelector("#app-mount>div");if(!e||!e.firstElementChild)throw new Error("Could not find '#app-mount>div'");let{history:n}=e.__reactFiber$.return.stateNode.props.children.props;throw n.goBack(),new Error("Prevnting further execution")}if(Boolean(window.DrApi))throw new Error("Discord Re-envisioned is already loaded.");document.body.appendChild(Object.assign(document.createElement("script"),{src:"https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js"}));var Le=P(),A=re(H()),ye=Tt(B()),ae=Y(),qt=re(De()),T=J(),we=K(),ve=he();Be();var Bt=re(W());Lt();var oe=Object.assign({devMode:we.internal.get("devMode")??!1,require:function(){throw new Error("tried using require on WEB!")},app:!1,logger:be.default,i18n:Bt.default},window.__DR__BACKEND__||{});window.__DR__BACKEND__=oe;oe.app&&window.DiscordNative.window.setDevtoolsCallbacks(null,null);async function Lt(){Object.defineProperty((0,ye.default)(["isDeveloper"]),"isDeveloper",{get:()=>oe.devMode,set:t=>oe.devMode=t}),await(0,T.waitUntil)(()=>document.querySelector(".container-YkUktl"));let e={},n={};window.DrApi={getModule:ye.default,asyncGetModule:ye.asyncGetModule,findInReactTree:T.findInReactTree,findInTree:T.findInTree,patcher:{before:function(t,r,a,o,s={}){return A.default.before(t,r,a,o,Object.assign({},s))},instead:function(t,r,a,o,s={}){return A.default.instead(t,r,a,o,Object.assign({},s))},after:function(t,r,a,o,s={}){return A.default.after(t,r,a,o,Object.assign({},s))},patch:function(t,r,a,o,s={}){return A.default.patch(t,r,a,o,Object.assign({},s))},quick:function(t,r,a,o={}){return A.default.quick(t,r,a,o)},unpatchAll:function(t){return A.default.unpatchAll(t)},patches:A.default.patches},actions:{dispatch:function(t,...r){return(0,ve.dispatch)(t,...r)},register:function(t,r){return(0,ve.register)(t,r)},unregister:function(t){return(0,ve.unregister)(t)}},styling:{inject:function(t,r){return ae.pluginStyling.inject(t,r)},update:function(t,r){return ae.pluginStyling.update(t,r)},uninject:function(t){return ae.pluginStyling.uninject(t)},getClasses:function(t){return ae.pluginStyling.getClasses(t)}},Plugins:{get:function(t){return e.get(t)},getAll:()=>e.getAll(),isEnabled:function(t){return e.isEnabled(t)},disable:function(t){return e.disable(t)},enable:function(t){return e.enable(t)},toggle:function(t){return e.toggle(t)}},Themes:{get:function(t){return n.get(t)},getAll:()=>n.getAll(),isEnabled:function(t){return n.isEnabled(t)},disable:function(t){return n.disable(t)},enable:function(t){return n.enable(t)},toggle:function(t){return n.toggle(t)}},showConfirmationModal:function(t,r,a={}){return(0,T.showConfirmationModal)(t,r,a)},prompt:async function(t,r){return await(0,T.prompt)(t,r)},toast:function(t,r={}){return(0,qt.default)(t,r)},React:Le.React,ReactDOM:Le.ReactDOM,storage:{get:function(t,r){return we.plugins.get(t,r)},set:function(t,r,a){return we.plugins.set(t,r,a)}},getInstance:{owner:function(t){return(0,T.getOwnerInstance)(t)},react:function(t){return(0,T.getReactInstance)(t)}}}}be.default.log("Loaded!")});Nt();})();
+.dr-select { height: 330px }`);
+      var DrIcon = react_1.React.memo(() => react_1.React.createElement("svg", { width: 24, height: 24, viewBox: "0 0 22 22" }, react_1.React.createElement("path", { d: "M11.1903 7.802C11.1903 8.426 11.1003 9.092 10.9203 9.8C10.7403 10.496 10.4883 11.192 10.1643 11.888C9.84032 12.572 9.43832 13.232 8.95832 13.868C8.49032 14.492 7.95632 15.044 7.35632 15.524C6.75632 15.992 6.09632 16.37 5.37632 16.658C4.66832 16.946 3.91232 17.09 3.10832 17.09C2.94032 17.09 2.77232 17.078 2.60432 17.054C2.43632 17.042 2.26832 17.024 2.10032 17C2.42432 15.344 2.74232 13.73 3.05432 12.158C3.17432 11.498 3.30032 10.814 3.43232 10.106C3.56432 9.386 3.69032 8.678 3.81032 7.982C3.93032 7.286 4.04432 6.62 4.15232 5.984C4.27232 5.348 4.36832 4.772 4.44032 4.256C4.95632 4.16 5.47832 4.07 6.00632 3.986C6.53432 3.902 7.07432 3.86 7.62632 3.86C8.27432 3.86 8.82032 3.962 9.26432 4.166C9.72032 4.37 10.0863 4.652 10.3623 5.012C10.6503 5.372 10.8603 5.792 10.9923 6.272C11.1243 6.752 11.1903 7.262 11.1903 7.802ZM6.94232 6.398C6.81032 7.106 6.67232 7.784 6.52832 8.432C6.38432 9.08 6.24032 9.734 6.09632 10.394C5.95232 11.054 5.80832 11.744 5.66432 12.464C5.52032 13.184 5.38232 13.97 5.25032 14.822C5.53832 14.63 5.81432 14.372 6.07832 14.048C6.35432 13.712 6.61232 13.328 6.85232 12.896C7.09232 12.464 7.30832 12.008 7.50032 11.528C7.70432 11.048 7.87832 10.58 8.02232 10.124C8.16632 9.668 8.27432 9.242 8.34632 8.846C8.43032 8.45 8.47232 8.108 8.47232 7.82C8.47232 7.376 8.34632 7.028 8.09432 6.776C7.85432 6.524 7.47032 6.398 6.94232 6.398ZM10.0456 17.018C10.3696 15.422 10.6816 13.862 10.9816 12.338C11.0896 11.69 11.2096 11.018 11.3416 10.322C11.4736 9.614 11.5936 8.918 11.7016 8.234C11.8216 7.538 11.9296 6.872 12.0256 6.236C12.1336 5.588 12.2176 5 12.2776 4.472C12.9616 4.256 13.6996 4.1 14.4916 4.004C15.2836 3.896 16.0696 3.842 16.8496 3.842C17.3176 3.842 17.7016 3.896 18.0016 4.004C18.3136 4.112 18.5536 4.268 18.7216 4.472C18.9016 4.664 19.0276 4.892 19.0996 5.156C19.1716 5.42 19.2076 5.714 19.2076 6.038C19.2076 6.518 19.1236 6.992 18.9556 7.46C18.7876 7.916 18.5596 8.354 18.2716 8.774C17.9956 9.182 17.6716 9.56 17.2996 9.908C16.9396 10.244 16.5496 10.52 16.1296 10.736C16.3456 11.216 16.5736 11.744 16.8136 12.32C17.0656 12.884 17.2996 13.424 17.5156 13.94C17.7556 14.54 18.0016 15.14 18.2536 15.74L15.4636 16.712C15.2236 15.944 15.0076 15.224 14.8156 14.552C14.7316 14.276 14.6476 13.994 14.5636 13.706C14.4796 13.406 14.4016 13.124 14.3296 12.86C14.2576 12.596 14.1976 12.362 14.1496 12.158C14.1016 11.942 14.0716 11.768 14.0596 11.636L13.8256 11.708C13.7536 12.092 13.6636 12.542 13.5556 13.058C13.4596 13.574 13.3696 14.072 13.2856 14.552C13.1776 15.116 13.0696 15.686 12.9616 16.262L10.0456 17.018ZM14.2756 9.206C14.5036 9.182 14.7796 9.086 15.1036 8.918C15.4396 8.75 15.7576 8.552 16.0576 8.324C16.3576 8.084 16.6156 7.838 16.8316 7.586C17.0476 7.334 17.1556 7.112 17.1556 6.92C17.1556 6.788 17.1136 6.686 17.0296 6.614C16.9456 6.53 16.8256 6.47 16.6696 6.434C16.5256 6.386 16.3636 6.356 16.1836 6.344C16.0036 6.332 15.8176 6.326 15.6256 6.326C15.4936 6.326 15.3556 6.332 15.2116 6.344C15.0796 6.344 14.9596 6.344 14.8516 6.344L14.2756 9.206Z", fill: "currentcolor" })));
+      var selectedChild = () => {
+      };
+      var { LinkButton } = (0, getModule_1.default)(["LinkButton"]);
+      var DrDashboardButton = react_1.React.memo(({ children }) => {
+        const [isSelected, setSelected] = react_1.React.useState(false);
+        let _selectedChild = children.find((e) => e?.props?.selected);
+        if (_selectedChild)
+          selectedChild = _selectedChild;
+        (0, actions_1.register)("DrDashboardButtonOnRender", function(val) {
+          if (!val) {
+            const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`);
+            if (!domNode)
+              return setSelected(val);
+            if (!selectedChild.props)
+              selectedChild.props = {};
+            selectedChild.props.selected = (0, util_1.getOwnerInstance)(domNode)._reactInternals.return.key === selectedChild.key;
+          }
+          setSelected(val);
+        });
+        return react_1.React.createElement(LinkButton, { text: i18n_1.default.name, icon: () => react_1.React.createElement(DrIcon, null), route: "/dr_dashboard", selected: isSelected, onFocus: () => {
+          if (selectedChild)
+            selectedChild.props.selected = false;
+        } });
+      });
+      var SwitchOrig = (0, getModule_1.default)("SwitchItem").default;
+      var SwitchItem = react_1.React.memo((props) => {
+        const { value, onChange = () => {
+        }, title, note, disabled = false, initialChange = true } = props;
+        const [checked, setChecked] = react_1.React.useState(value);
+        return react_1.React.createElement(SwitchOrig, { value: checked, onChange: () => {
+          if (initialChange)
+            setChecked(!checked);
+          onChange(!checked, setChecked);
+        }, note, disabled }, title);
+      });
+      patcher_1.default.after("router-routes", (0, getModule_1.default)("ConnectedPrivateChannelsList"), "default", (_, res) => {
+        const children = res.props.children.props.children;
+        (0, actions_1.dispatch)("DrDashboardButtonOnRender", /^\/dr_dashboard/.test(location.pathname));
+        if (children.find((e) => e && e.key === "drdashLinkButton"))
+          return;
+        children.unshift(react_1.React.createElement(DrDashboardButton, { key: "drdashLinkButton" }, children));
+      });
+      var Views = (0, getModule_1.default)("FluxContainer(ViewsWithMainInterface)").default?.prototype?.render?.call({ memoizedGetStateFromStores: () => ({}) })?.type;
+      patcher_1.default.after("router-routes", Views?.prototype, "render", (_, res) => {
+        const routes = res.props.children[0].props.children[1];
+        routes[routes.length - 1].props.path.push("/dr_dashboard");
+      });
+      var Gear = (0, getModule_1.default)("Gear").default;
+      var OpenExternal = (0, getModule_1.default)("OpenExternal").default;
+      var editorThemes = [
+        "ambiance",
+        "chaos",
+        "chrome",
+        "clouds",
+        "clouds_midnight",
+        "cobalt",
+        "crimson_editor",
+        "dawn",
+        "dracula",
+        "dreamweaver",
+        "eclipse",
+        "github",
+        "gob",
+        "gruvbox",
+        "idle_fingers",
+        "iplastic",
+        "katzenmilch",
+        "kr_theme",
+        "kuroir",
+        "merbivore",
+        "merbivore_soft",
+        "mono_industrial",
+        "monokai",
+        "nord_dark",
+        "one_dark",
+        "pastel_on_dark",
+        "solarized_dark",
+        "solarized_light",
+        "sqlserver",
+        "terminal",
+        "textmate",
+        "tomorrow",
+        "tomorrow_night",
+        "tomorrow_night_blue",
+        "tomorrow_night_bright",
+        "tomorrow_night_eighties",
+        "twilight",
+        "vibrant_ink",
+        "xcode"
+      ];
+      var Tooltip = (0, getModule_1.default)("Tooltip").default;
+      var Select = (0, getModule_1.default)("SelectTempWrapper").default;
+      var SelectTheme = react_1.React.memo((props) => {
+        const [theme, setTheme] = react_1.React.useState(props.theme);
+        return react_1.React.createElement(Select, { onChange: (e) => {
+          props.setTheme(e.value);
+          setTheme(e.value);
+        }, className: "dr-select", options: editorThemes.map((e) => ({ label: e, value: e })), value: theme });
+      });
+      var pages = {
+        general: react_1.React.memo(() => {
+          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement(SwitchItem, { value: storage_1.internal.get("devMode") ?? false, title: i18n_1.default.devMode.title, note: i18n_1.default.devMode.note, onChange: (val) => {
+            storage_1.internal.set("devMode", val);
+            window.__DR__BACKEND__.devMode = val;
+          } }));
+        }),
+        customcss: react_1.React.memo(() => {
+          const [theme, setTheme] = react_1.React.useState(storage_1.internal.get("editorTheme") ?? "monokai");
+          let _theme = theme;
+          function makeButton(reactElement, tooltip, onClick) {
+            return react_1.React.createElement(Tooltip, { text: tooltip }, (props) => react_1.React.createElement("div", { ...props, onClick: (e) => {
+              onClick(e);
+              props.onClick(e);
+            }, className: "dr-editor-header-button" }, reactElement));
+          }
+          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement("div", { className: "dr-editor-header" }, makeButton(react_1.React.createElement(OpenExternal, null), i18n_1.default.customCSS.popout, console.log), makeButton(react_1.React.createElement(Gear, null), i18n_1.default.customCSS.settings, console.log), makeButton(react_1.React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24" }, react_1.React.createElement("path", { fill: "currentcolor", d: "M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" }), react_1.React.createElement("path", { fill: "currentcolor", d: "M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z" })), i18n_1.default.customCSS.changeTheme, () => {
+            (0, util_1.showConfirmationModal)(i18n_1.default.customCSS.changeTheme, react_1.React.createElement(SelectTheme, { theme, setTheme: (val) => _theme = val }), {
+              onConfirm: () => {
+                setTheme(_theme);
+                storage_1.internal.set("editorTheme", _theme);
+              }
+            });
+          })), react_1.React.createElement(editor_1.default, { props: { style: { height: "calc(100% - 30px)" } }, editor: (editor) => {
+            editor.setTheme(`ace/theme/${theme}`);
+            editor.getSession().setMode("ace/mode/css");
+            editor.setValue(storage_1.internal.get("customCSS") ?? "");
+            editor.on("change", () => {
+              const value = editor.getValue();
+              (0, styling_1.customcss)(value);
+              storage_1.internal.set("customCSS", value);
+            });
+          } }));
+        })
+      };
+      var { content } = (0, getModule_1.default)(["chat", "uploadArea", "threadSidebarOpen"]);
+      var { auto } = (0, getModule_1.default)(["scrollerBase"]);
+      var { container } = (0, getModule_1.default)(["container", "downloadProgressCircle"]);
+      var Header = (0, getModule_1.default)(["Caret", "Icon", "defaultProps"]);
+      var TabBar = (0, getModule_1.default)("TabBar").default;
+      var DashPage = react_1.React.memo(() => {
+        const [page, setPage] = react_1.React.useState("general");
+        const Page = pages[page] ?? react_1.React.memo(() => react_1.React.createElement(react_1.React.Fragment, null, "ERROR"));
+        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, null) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => setPage(e), selectedItem: page, className: "tabBar-ra-EuL" }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
+      });
+      (0, util_1.waitUntil)(() => document.querySelector(`.${container}`)).then((domNode) => {
+        const Router = (0, util_1.getOwnerInstance)(domNode);
+        const Route = (0, getModule_1.default)("RouteWithImpression").default;
+        patcher_1.default.after("router-routes", Router?.props?.children, "type", (_, res) => {
+          const { children } = (0, util_1.findInReactTree)(res, (m) => Array.isArray(m.children) && m.children.length > 5);
+          children.push(react_1.React.createElement(Route, { path: "/dr_dashboard", impressionName: "dr_dashboard", disableTrack: true, render: () => react_1.React.createElement(DashPage, null) }));
+        });
+        Router.forceUpdate();
+        const { app } = (0, getModule_1.default)(["app"]);
+        (0, util_1.waitUntil)(() => document.querySelector(`.${app}`)).then((domNode2) => {
+          (0, util_1.findInTree)((0, util_1.getOwnerInstance)(domNode2)?._reactInternals, (n) => n?.historyUnlisten, { walkable: ["child", "stateNode"] }).forceUpdate();
+        });
+      });
+    }
+  });
+
+  // tsBuild/index.js
+  var require_tsBuild = __commonJS({
+    "tsBuild/index.js"(exports) {
+      "use strict";
+      var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+        if (k2 === void 0)
+          k2 = k;
+        Object.defineProperty(o, k2, { enumerable: true, get: function() {
+          return m[k];
+        } });
+      } : function(o, m, k, k2) {
+        if (k2 === void 0)
+          k2 = k;
+        o[k2] = m[k];
+      });
+      var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+      } : function(o, v) {
+        o["default"] = v;
+      });
+      var __importStar = exports && exports.__importStar || function(mod) {
+        if (mod && mod.__esModule)
+          return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k in mod)
+            if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+              __createBinding(result, mod, k);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var logger_1 = __importDefault(require_logger());
+      logger_1.default.log("Loading...");
+      if (location.pathname.startsWith("/dr_dashboard")) {
+        const node = document.querySelector("#app-mount>div");
+        if (!node || !node.firstElementChild)
+          throw new Error("Could not find '#app-mount>div'");
+        const { history } = node.__reactFiber$.return.stateNode.props.children.props;
+        history.goBack();
+        throw new Error("Prevnting further execution");
+      }
+      if (Boolean(window.DrApi))
+        throw new Error("Discord Re-envisioned is already loaded.");
+      document.body.appendChild(Object.assign(document.createElement("script"), {
+        src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js"
+      }));
+      var react_1 = require_react();
+      var patcher_1 = __importDefault(require_patcher());
+      var getModule_1 = __importStar(require_getModule());
+      var styling_1 = require_styling();
+      var toast_1 = __importDefault(require_toast());
+      var util_1 = require_util();
+      var storage_1 = require_storage();
+      var actions_1 = require_actions();
+      require_dashboard();
+      var i18n_1 = __importDefault(require_i18n());
+      Start();
+      var __DR__BACKEND__ = Object.assign({
+        devMode: storage_1.internal.get("devMode") ?? false,
+        require: function() {
+          throw new Error("tried using require on WEB!");
+        },
+        app: false,
+        logger: logger_1.default,
+        i18n: i18n_1.default
+      }, window.__DR__BACKEND__ || {});
+      window.__DR__BACKEND__ = __DR__BACKEND__;
+      if (__DR__BACKEND__.app)
+        window.DiscordNative.window.setDevtoolsCallbacks(null, null);
+      async function Start() {
+        Object.defineProperty((0, getModule_1.default)(["isDeveloper"]), "isDeveloper", {
+          get: () => __DR__BACKEND__.devMode,
+          set: (val) => __DR__BACKEND__.devMode = val
+        });
+        await (0, util_1.waitUntil)(() => document.querySelector(".container-YkUktl"));
+        const Plugins = {};
+        const themes = {};
+        window.DrApi = {
+          getModule: getModule_1.default,
+          asyncGetModule: getModule_1.asyncGetModule,
+          findInReactTree: util_1.findInReactTree,
+          findInTree: util_1.findInTree,
+          patcher: {
+            before: function(id, module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.before(id, module2, functionToPatch, callback, Object.assign({}, opts));
+            },
+            instead: function(id, module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.instead(id, module2, functionToPatch, callback, Object.assign({}, opts));
+            },
+            after: function(id, module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.after(id, module2, functionToPatch, callback, Object.assign({}, opts));
+            },
+            patch: function(id, module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.patch(id, module2, functionToPatch, callback, Object.assign({}, opts));
+            },
+            quick: function(module2, functionToPatch, callback, opts = {}) {
+              return patcher_1.default.quick(module2, functionToPatch, callback, opts);
+            },
+            unpatchAll: function(id) {
+              return patcher_1.default.unpatchAll(id);
+            },
+            patches: patcher_1.default.patches
+          },
+          actions: {
+            dispatch: function(name, ...args) {
+              return (0, actions_1.dispatch)(name, ...args);
+            },
+            register: function(name, callback) {
+              return (0, actions_1.register)(name, callback);
+            },
+            unregister: function(name) {
+              return (0, actions_1.unregister)(name);
+            }
+          },
+          styling: {
+            inject: function(id, css) {
+              return styling_1.pluginStyling.inject(id, css);
+            },
+            update: function(id, css) {
+              return styling_1.pluginStyling.update(id, css);
+            },
+            uninject: function(id) {
+              return styling_1.pluginStyling.uninject(id);
+            },
+            getClasses: function(css) {
+              return styling_1.pluginStyling.getClasses(css);
+            }
+          },
+          Plugins: {
+            get: function(name) {
+              return Plugins.get(name);
+            },
+            getAll: () => Plugins.getAll(),
+            isEnabled: function(name) {
+              return Plugins.isEnabled(name);
+            },
+            disable: function(name) {
+              return Plugins.disable(name);
+            },
+            enable: function(name) {
+              return Plugins.enable(name);
+            },
+            toggle: function(name) {
+              return Plugins.toggle(name);
+            }
+          },
+          Themes: {
+            get: function(name) {
+              return themes.get(name);
+            },
+            getAll: () => themes.getAll(),
+            isEnabled: function(name) {
+              return themes.isEnabled(name);
+            },
+            disable: function(name) {
+              return themes.disable(name);
+            },
+            enable: function(name) {
+              return themes.enable(name);
+            },
+            toggle: function(name) {
+              return themes.toggle(name);
+            }
+          },
+          showConfirmationModal: function(title, content, opts = {}) {
+            return (0, util_1.showConfirmationModal)(title, content, opts);
+          },
+          prompt: async function(title, defaultValue) {
+            return await (0, util_1.prompt)(title, defaultValue);
+          },
+          toast: function(text, opts = {}) {
+            return (0, toast_1.default)(text, opts);
+          },
+          React: react_1.React,
+          ReactDOM: react_1.ReactDOM,
+          storage: {
+            get: function(plugin, key) {
+              return storage_1.plugins.get(plugin, key);
+            },
+            set: function(plugin, key, data) {
+              return storage_1.plugins.set(plugin, key, data);
+            }
+          },
+          getInstance: {
+            owner: function(element) {
+              return (0, util_1.getOwnerInstance)(element);
+            },
+            react: function(element) {
+              return (0, util_1.getReactInstance)(element);
+            }
+          }
+        };
+      }
+      logger_1.default.log("Loaded!");
+    }
+  });
+  require_tsBuild();
+})();
