@@ -34,6 +34,7 @@ const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
     if (!val) {
       const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`)
       if (!domNode) return setSelected(val)
+      if (!selectedChild.props) selectedChild.props = {}
       selectedChild.props.selected = getOwnerInstance(domNode)._reactInternals.return.key === selectedChild.key      
     }
     setSelected(val)

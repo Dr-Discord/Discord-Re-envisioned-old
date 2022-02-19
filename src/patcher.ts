@@ -3,13 +3,8 @@ const Quick_Symbol = Symbol("DrApi.patch.quick")
 const Internal_Symbol = Symbol("DrInternal")
 const ALLpatches:any = {}
 
-interface patcherOpts {
-  method?:"before"|"after"|"instead"
-  id?:string|symbol
-}
-
 function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:string, callback:Function, opts:patcherOpts) {
-  let { method = "after", id } = opts
+  let { method = "after", id, once = false, index = 0 } = opts
   let originalFunction = moduleToPatch[functionToPatch]
   if (!originalFunction) {
     moduleToPatch[functionToPatch] = () => {}
@@ -21,7 +16,7 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
   let patches = moduleToPatch?.[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] }
   let CallbackSymbol = Symbol()
   let patchInfo = { unpatch, patchName: id ?? patchName, moduleToPatch, functionToPatch, callback, method, Symbol: CallbackSymbol }
-  patches[method].push(Object.assign(callback, { unpatch, Symbol: CallbackSymbol }))
+  patches[method].splice(index, 0, Object.assign(callback, { unpatch, Symbol: CallbackSymbol }))
   let DidUnpatch = false
   function unpatch() {
     if (DidUnpatch) return
@@ -36,11 +31,12 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
   }
   if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
     moduleToPatch[functionToPatch] = function() {
-      for (const patch of patches.before) patch([...arguments], this)
+      for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]()
       let insteadFunction = originalFunction
-      for (const patch of patches.instead) insteadFunction = patch([...arguments], insteadFunction, this)
-      let res = (insteadFunction ?? originalFunction).apply(this, [...arguments])
-      for (const patch of patches.after) patch([...arguments], res, this)
+      for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, this) ?? insteadFunction
+      let res = insteadFunction.apply(this, [...arguments])
+      for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, this)
+      if (once) unpatch()
       return res
     }
     moduleToPatch[functionToPatch][Patch_Symbol] = {
@@ -48,9 +44,9 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
       module: moduleToPatch,
       function: functionToPatch,
       patches, unpatchAll: () => {
-        for (const patch of patches.before) patch.unpatch()
-        for (const patch of patches.instead) patch.unpatch()
-        for (const patch of patches.after) patch.unpatch()
+        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1].unpatch()
+        for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) patches.instead[patch - 1].unpatch()
+        for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1].unpatch()
         moduleToPatch[functionToPatch] = originalFunction
       }
     }

@@ -1,4 +1,8 @@
-if (location.pathname.startsWith("/dr_dashboard")) location.pathname = "/app"
+if (location.pathname.startsWith("/dr_dashboard")) {
+  const node = document.querySelector("#app-mount>div")
+  if (!node || !node.firstElementChild) throw new Error("Could not find '#app-mount>div'")
+  node.__reactFiber$.return.stateNode.props.children.props.history.goBack()
+}
 
 if (Boolean(window.DrApi)) throw new Error("Discord Re-envisioned is already loaded.")
 
@@ -9,7 +13,6 @@ import { pluginStyling } from "./styling"
 import createToast from "./toast"
 import { showConfirmationModal, getOwnerInstance, waitUntil, getReactInstance, findInReactTree, findInTree, prompt } from "./util"
 import { internal, plugins } from "./storage"
-import addonManager from "./addonManager"
 import { dispatch, register, unregister } from "./actions"
 import "./dashboard"
 import logger from "./logger"
@@ -31,8 +34,8 @@ async function Start() {
     set: (val:boolean) => __DR__BACKEND__.devMode = val 
   })
   await waitUntil(() => document.querySelector(".container-YkUktl"))
-  const Plugins:any = await addonManager.plugins()
-  const themes = addonManager.themes()
+  const Plugins:any = {}
+  const themes:any = {}
   window.DrApi = {
     getModule, 
     asyncGetModule,
