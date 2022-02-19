@@ -1,10 +1,21 @@
 import { React } from "./react"
-import { findInReactTree, findInTree, waitUntil, getOwnerInstance } from "./util"
+import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal } from "./util"
 import getModule from "./getModule"
 import patcher from "./patcher"
 import i18n from "./i18n"
 import { internal } from "./storage"
 import { register, dispatch } from "./actions"
+import Editor from "./editor"
+import { ReactNode } from "react"
+import { customcss, internalStyling } from "./styling"
+
+internalStyling.inject("customcss", `.dr-editor-header { background-color: var(--background-secondary); display: flex; flex-direction: row; padding: 2px 4px; border-radius: 6px 6px 0 0 }
+.dr-editor-header-button { color: red; margin-right: 5px; width: 26px; height: 26px; color: var(--interactive-normal); position: relative }
+.dr-editor-header-button:hover { color: var(--interactive-hover) }
+.dr-editor-header-button:active { color: var(--interactive-active) }
+.dr-editor-header-button > * { width: 22px; height: 22px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) }
+.dr-editor-header + .ace_editor { border-radius: 0 0 6px 6px }
+.dr-select { height: 330px }`)
 
 const DrIcon = React.memo(() => (
   <svg
@@ -89,42 +100,159 @@ patcher.after("router-routes", Views?.prototype, "render", (_:unknown, res:any) 
   routes[routes.length - 1].props.path.push("/dr_dashboard")
 })
 
+const Gear = getModule("Gear").default
+const OpenExternal = getModule("OpenExternal").default
+const editorThemes = [
+  "ambiance",
+  "chaos",
+  "chrome",
+  "clouds",
+  "clouds_midnight",
+  "cobalt",
+  "crimson_editor",
+  "dawn",
+  "dracula",
+  "dreamweaver",
+  "eclipse",
+  "github",
+  "gob",
+  "gruvbox",
+  "idle_fingers",
+  "iplastic",
+  "katzenmilch",
+  "kr_theme",
+  "kuroir",
+  "merbivore",
+  "merbivore_soft",
+  "mono_industrial",
+  "monokai",
+  "nord_dark",
+  "one_dark",
+  "pastel_on_dark",
+  "solarized_dark",
+  "solarized_light",
+  "sqlserver",
+  "terminal",
+  "textmate",
+  "tomorrow",
+  "tomorrow_night",
+  "tomorrow_night_blue",
+  "tomorrow_night_bright",
+  "tomorrow_night_eighties",
+  "twilight",
+  "vibrant_ink",
+  "xcode"
+]
+
+const Tooltip = getModule("Tooltip").default
+const Select  = getModule("SelectTempWrapper").default
+
+const SelectTheme = React.memo((props:any) => {
+  const [theme, setTheme] = React.useState(props.theme)
+  return <Select 
+    onChange={(e:any) => {
+      props.setTheme(e.value)
+      setTheme(e.value)
+    }}
+    className="dr-select"
+    options={editorThemes.map(e => ({ label: e, value: e }))}
+    value={theme}
+  />
+})
+
+const pages:any = {
+  general: React.memo(() => {
+    return <>
+      <SwitchItem
+        value={internal.get("devMode") ?? false}
+        title={i18n.devMode.title}
+        note={i18n.devMode.note}
+        onChange={(val:boolean) => {
+          internal.set("devMode", val)
+          window.__DR__BACKEND__.devMode = val
+        }}
+      />
+    </>
+  }),
+  customcss: React.memo(() => {
+    const [theme, setTheme] = React.useState(internal.get("editorTheme") ?? "monokai")
+    let _theme = theme
+    function makeButton(reactElement:ReactNode, tooltip:string, onClick:Function) {
+      return <Tooltip text={tooltip}>{(props:any) => <div {...props} onClick={(e:any) => {
+        onClick(e)
+        props.onClick(e)
+      }} className="dr-editor-header-button">{reactElement}</div>}</Tooltip>
+    }
+
+    return <>
+      <div className="dr-editor-header">
+        {makeButton(<OpenExternal />, i18n.customCSS.popout, console.log)}
+        {makeButton(<Gear />, i18n.customCSS.settings, console.log)}
+        {makeButton(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <path fill="currentcolor" d="M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" />
+  <path fill="currentcolor" d="M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z" />
+</svg>, i18n.customCSS.changeTheme, () => {
+  showConfirmationModal(i18n.customCSS.changeTheme, <SelectTheme theme={theme} setTheme={(val:string) => _theme = val}/>, {
+    onConfirm: () => {
+      setTheme(_theme)
+      internal.set("editorTheme", _theme)
+    }
+  })
+})}
+      </div>
+      <Editor props={{ style: { height: "calc(100% - 30px)" } }} editor={(editor:any) => {
+        editor.setTheme(`ace/theme/${theme}`)
+        editor.getSession().setMode("ace/mode/css")
+        editor.setValue(internal.get("customCSS") ?? "")
+        editor.on("change", () => {
+          const value = editor.getValue()
+          customcss(value)
+          internal.set("customCSS", value)
+        })
+      }}/>
+    </>
+  })
+}
+
 const { content } = getModule(["chat", "uploadArea", "threadSidebarOpen"])
 const { auto } = getModule(["scrollerBase"])
 const { container } = getModule(["container", "downloadProgressCircle"])
+const Header = getModule(["Caret", "Icon", "defaultProps"])
+const TabBar = getModule("TabBar").default
+
+const DashPage = React.memo(() => {
+  const [page, setPage]:any = React.useState("general")
+  const Page = pages[page] ?? React.memo(() => <>ERROR</>)
+  return (
+    <div className={getModule(["maxWidthWithToolbar", "container", "inviteToolbar"]).container}>
+      <Header toolbar={<React.Fragment />}>
+        <Header.Icon icon={() => <DrIcon />}/>
+        <Header.Title>{i18n.name}</Header.Title>
+        <Header.Divider />
+        <TabBar
+          type={TabBar.Types.TOP_PILL}
+          onItemSelect={(e:string) => setPage(e)}
+          selectedItem={page}
+          className="tabBar-ra-EuL"
+        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key}>{val}</TabBar.Item>)}</TabBar>
+      </Header>
+      <div className={content}><div className={auto} style={{ padding: "16px 12px" }}><Page /></div></div>
+    </div>
+  )
+})
+
 waitUntil(() => document.querySelector(`.${container}`)).then((domNode:Element) => {
   const Router = getOwnerInstance(domNode)
   const Route = getModule("RouteWithImpression").default
   patcher.after("router-routes", Router?.props?.children, "type", (_:unknown, res:any) => {
     const { children } = findInReactTree(res, (m:any) => Array.isArray(m.children) && m.children.length > 5)
-    const Header = getModule(["Caret", "Icon", "defaultProps"])
     
     children.push(
       <Route
         path="/dr_dashboard"
         impressionName="dr_dashboard"
         disableTrack={true}
-        render={() => (
-          <div className={getModule(["maxWidthWithToolbar", "container", "inviteToolbar"]).container}>
-            <Header toolbar={<React.Fragment />}>
-              <Header.Icon icon={() => <DrIcon />}/>
-              <Header.Title>{i18n.name}</Header.Title>
-            </Header>
-            <div className={content}>
-              <div className={auto} style={{ padding: "16px 12px" }}>
-                <SwitchItem
-                  value={internal.get("devMode") ?? false}
-                  title={i18n.devMode.title}
-                  note={i18n.devMode.note}
-                  onChange={(val:boolean) => {
-                    internal.set("devMode", val)
-                    getModule(["isDeveloper"]).isDeveloper = val
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+        render={() => <DashPage />}
       />
     )
   })

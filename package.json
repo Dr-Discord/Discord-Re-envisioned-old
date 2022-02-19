@@ -7,8 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc && npx esbuild ./tsBuild/index.js --bundle --outfile=./build/index.js",
     "build:production": "npx tsc && npx esbuild ./tsBuild/index.js --bundle --outfile=./build/index.js --minify",
-    "build:watch": "npx tsc-watch --onSuccess \"npx esbuild ./tsBuild/index.js --bundle --outfile=./build/index.js\"",
-    "installTypes": "npm i --save-dev @types/react-dom @types/react"
+    "build:watch": "npx tsc-watch --onSuccess \"npx esbuild ./tsBuild/index.js --bundle --outfile=./build/index.js\""
   },
   "repository": {
     "type": "git",
@@ -21,10 +20,11 @@
   },
   "homepage": "https://github.com/Dr-Discord/DrDiscord#readme",
   "dependencies": {
-    "@types/react": "^17.0.38",
     "electron-devtools-installer": "^3.2.0"
   },
   "devDependencies": {
+    "@types/ace": "^0.0.48",
+    "@types/react": "^17.0.39",
     "@types/react-dom": "^17.0.11"
   }
 }

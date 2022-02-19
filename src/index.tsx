@@ -12,6 +12,10 @@ if (location.pathname.startsWith("/dr_dashboard")) {
 
 if (Boolean(window.DrApi)) throw new Error("Discord Re-envisioned is already loaded.")
 
+document.body.appendChild(Object.assign(document.createElement("script"), {
+  src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js"
+}))
+
 import { React, ReactDOM } from "./react"
 import patcher from "./patcher"
 import { default as getModule, asyncGetModule } from "./getModule"
@@ -21,15 +25,18 @@ import { showConfirmationModal, getOwnerInstance, waitUntil, getReactInstance, f
 import { internal, plugins } from "./storage"
 import { dispatch, register, unregister } from "./actions"
 import "./dashboard"
+import i18n from "./i18n"
 Start()
 
 const __DR__BACKEND__ = Object.assign({
   devMode: internal.get("devMode") ?? false,
   require: (function() { throw new Error("tried using require on WEB!") }),
   app: false,
-  logger
+  logger, i18n
 }, window.__DR__BACKEND__|| {})
 window.__DR__BACKEND__ = __DR__BACKEND__
+
+if (__DR__BACKEND__.app) window.DiscordNative.window.setDevtoolsCallbacks(null, null)
 
 async function Start() {
   Object.defineProperty(getModule(["isDeveloper"]), "isDeveloper", { 

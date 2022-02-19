@@ -11,7 +11,14 @@ export const languages:any = {
     settingTabs: {
       general: "General",
       plugins: "Plugins",
-      themes: "Themes"
+      themes: "Themes",
+      customcss: "Custom CSS"
+    },
+    customCSS: {
+      title: "Custom CSS",
+      popout: "Popout",
+      settings: "CSS Settings",
+      changeTheme: "Change Theme"
     },
     uninstall: "Uninstall",
     settings: "Settings",
@@ -48,9 +55,16 @@ interface _i18n {
     general:string
     plugins:string
     themes:string
+    customcss:string
   }
   uninstall:string
   settings:string
+  customCSS: {
+    title:string
+    popout:string
+    settings:string
+    changeTheme:string
+  }
   installing: {
     alreadyInstalled: {
       content:string

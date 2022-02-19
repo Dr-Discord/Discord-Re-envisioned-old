@@ -16,19 +16,6 @@ class BrowserWindow extends electron.BrowserWindow {
     electron.ipcMain.on("DR_DISCORD_PRELOAD", (event) => event.returnValue = oldPreload)
 
     const win = new electron.BrowserWindow(opt)
-
-    async function starting() {
-      win.webContents.executeJavaScript("(() => DiscordNative.window.setDevtoolsCallbacks(null, null))()")
-      win.webContents.on("did-finish-load", () => {
-        win.webContents.executeJavaScript(`(${async () => {
-          try {
-            const js = await fetch("http://127.0.0.1:5500/build/index.js", { cache: "no-cache" }).then(e => e.text())
-            eval(js)
-          } catch (e) { console.error("DrDiscord Start ERROR \n", e) }
-        }})()`)
-      })
-    }
-    starting()
     
     return win
   }
@@ -60,7 +47,6 @@ electron.app.once("ready", () => {
   try {
     const { default: installExtension, REACT_DEVELOPER_TOOLS } = require("electron-devtools-installer")
     installExtension(REACT_DEVELOPER_TOOLS)
-    console.log(REACT_DEVELOPER_TOOLS);
   } catch (error) {}
 })
 

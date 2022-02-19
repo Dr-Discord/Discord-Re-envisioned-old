@@ -1,4 +1,5 @@
 import getModule from "./getModule"
+import { internal } from "./storage"
 
 const DrHead = document.createElement("dr-styles")
 document.head.appendChild(DrHead)
@@ -7,7 +8,11 @@ interface eles { [x:string]:Element }
 const Dr_ele:eles = {
   internal: document.createElement("dr-internal"),
   plugin: document.createElement("dr-plugin"),
-  theme: document.createElement("dr-theme")
+  theme: document.createElement("dr-theme"),
+  customcss: Object.assign(document.createElement("style"), {
+    innerHTML: internal.get("customCSS") ?? "",
+    id: "dr-customcss"
+  })
 }
 for (const key of Object.keys(Dr_ele)) DrHead.appendChild(Dr_ele[key])
 
@@ -60,3 +65,5 @@ export const internalStyling = {
   uninject: uninject("internal"),
   getClasses
 }
+
+export function customcss(css:string) { Dr_ele.customcss.innerHTML = css }
