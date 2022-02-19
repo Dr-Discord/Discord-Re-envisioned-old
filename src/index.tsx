@@ -1,7 +1,13 @@
+import logger from "./logger"
+
+logger.log("Loading...")
+
 if (location.pathname.startsWith("/dr_dashboard")) {
   const node = document.querySelector("#app-mount>div")
   if (!node || !node.firstElementChild) throw new Error("Could not find '#app-mount>div'")
-  node.__reactFiber$.return.stateNode.props.children.props.history.goBack()
+  const { history } = node.__reactFiber$.return.stateNode.props.children.props
+  history.goBack()
+  throw new Error("Prevnting further execution")
 }
 
 if (Boolean(window.DrApi)) throw new Error("Discord Re-envisioned is already loaded.")
@@ -15,9 +21,6 @@ import { showConfirmationModal, getOwnerInstance, waitUntil, getReactInstance, f
 import { internal, plugins } from "./storage"
 import { dispatch, register, unregister } from "./actions"
 import "./dashboard"
-import logger from "./logger"
-
-logger.log("Loading...")
 Start()
 
 const __DR__BACKEND__ = Object.assign({
@@ -92,3 +95,5 @@ async function Start() {
     }
   }  
 }
+
+logger.log("Loaded!")
