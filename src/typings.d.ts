@@ -36,6 +36,7 @@ interface DrApi {
   asyncGetModule: (filter:Function|string|number|Array<string>) => Promise<any>
   findInReactTree: (tree:any, searchFilter:Function) => any
   findInTree: (tree:any, filter:Function, opts:findInTreeOpts = {}) => any
+  openChangeLog: (opts:any) => void
   patcher: {
     unpatchAll: (id:string|symbol) => void
     patch: (id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => Function

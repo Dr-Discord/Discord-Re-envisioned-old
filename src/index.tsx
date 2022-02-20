@@ -21,7 +21,7 @@ import patcher from "./patcher"
 import { default as getModule, asyncGetModule } from "./getModule"
 import { pluginStyling } from "./styling"
 import createToast from "./toast"
-import { showConfirmationModal, getOwnerInstance, waitUntil, getReactInstance, findInReactTree, findInTree, prompt } from "./util"
+import { showConfirmationModal, getOwnerInstance, waitUntil, getReactInstance, findInReactTree, findInTree, prompt, openChangeLog } from "./util"
 import { internal, plugins } from "./storage"
 import { dispatch, register, unregister } from "./actions"
 import "./dashboard"
@@ -51,6 +51,7 @@ async function Start() {
     asyncGetModule,
     findInReactTree, 
     findInTree,
+    openChangeLog,
     patcher: {
       before: function(id:string|symbol, module:any, functionToPatch:string, callback:Function, opts = {}) { return patcher.before(id, module, functionToPatch, callback, Object.assign({}, opts)) },
       instead: function(id:string|symbol, module:any, functionToPatch:string, callback:Function, opts = {}) { return patcher.instead(id, module, functionToPatch, callback, Object.assign({}, opts)) },

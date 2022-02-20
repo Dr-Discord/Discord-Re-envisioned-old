@@ -119,7 +119,7 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         return mod && mod.__esModule ? mod : { "default": mod };
       };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.restart = exports.findInReactTree = exports.findInTree = exports.prompt = exports.showConfirmationModal = exports.getOwnerInstance = exports.getReactInstance = exports.waitUntil = exports.sleep = void 0;
+      exports.openChangeLog = exports.restart = exports.findInReactTree = exports.findInTree = exports.prompt = exports.showConfirmationModal = exports.getOwnerInstance = exports.getReactInstance = exports.waitUntil = exports.sleep = void 0;
       var react_1 = require_react();
       var getModule_1 = __importDefault(require_getModule());
       var sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
@@ -237,6 +237,23 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         return location.reload();
       }
       exports.restart = restart;
+      var origLog = false;
+      var spoofLog = false;
+      function openChangeLog(opt, assign = false) {
+        let log = (0, getModule_1.default)(["changeLog"]);
+        if (!origLog) {
+          origLog = JSON.parse(JSON.stringify(log.changeLog));
+          Object.defineProperty(log, "changeLog", {
+            configurable: true,
+            get: () => !assign ? !spoofLog ? origLog : spoofLog : Object.assign(origLog, spoofLog || {})
+          });
+        }
+        if (opt)
+          spoofLog = opt;
+        (0, getModule_1.default)(["showChangeLog"]).showChangeLog();
+        spoofLog = false;
+      }
+      exports.openChangeLog = openChangeLog;
     }
   });
 
@@ -864,7 +881,7 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
       var DashPage = react_1.React.memo(() => {
         const [page, setPage] = react_1.React.useState("general");
         const Page = pages[page] ?? react_1.React.memo(() => react_1.React.createElement(react_1.React.Fragment, null, "ERROR"));
-        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, null) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => setPage(e), selectedItem: page, className: "tabBar-ra-EuL" }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
+        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, null) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => setPage(e), selectedItem: page, className: "tabBar-ra-EuL" }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key, disabled: key === "customcss" && !window.ace }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
       });
       (0, util_1.waitUntil)(() => document.querySelector(`.${container}`)).then((domNode) => {
         const Router = (0, util_1.getOwnerInstance)(domNode);
@@ -969,6 +986,7 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
           asyncGetModule: getModule_1.asyncGetModule,
           findInReactTree: util_1.findInReactTree,
           findInTree: util_1.findInTree,
+          openChangeLog: util_1.openChangeLog,
           patcher: {
             before: function(id, module2, functionToPatch, callback, opts = {}) {
               return patcher_1.default.before(id, module2, functionToPatch, callback, Object.assign({}, opts));

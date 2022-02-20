@@ -234,7 +234,7 @@ const DashPage = React.memo(() => {
           onItemSelect={(e:string) => setPage(e)}
           selectedItem={page}
           className="tabBar-ra-EuL"
-        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key}>{val}</TabBar.Item>)}</TabBar>
+        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key} disabled={key === "customcss" && !window.ace}>{val}</TabBar.Item>)}</TabBar>
       </Header>
       <div className={content}><div className={auto} style={{ padding: "16px 12px" }}><Page /></div></div>
     </div>

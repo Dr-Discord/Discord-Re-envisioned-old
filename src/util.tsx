@@ -133,3 +133,23 @@ export function restart(full:boolean) {
   if (window.__DR__BACKEND__.app && full) return window.__DR__BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART")
   return location.reload()
 }
+
+let origLog = false
+let spoofLog = false
+
+export function openChangeLog(opt:any, assign:boolean = false) {
+  let log = getModule(["changeLog"])
+  
+  if (!origLog) {
+    origLog = JSON.parse(JSON.stringify(log.changeLog))
+
+    Object.defineProperty(log, "changeLog", {
+      configurable: true,
+      get: () => !assign ? !spoofLog ? origLog : spoofLog : Object.assign(origLog, spoofLog || {}),
+    })
+  }
+
+  if (opt) spoofLog = opt
+  getModule(["showChangeLog"]).showChangeLog() 
+  spoofLog = false
+}
