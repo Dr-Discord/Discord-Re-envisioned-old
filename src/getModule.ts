@@ -23,9 +23,7 @@ export default function getModule(filter:Function|string|number|Array<string>, f
   let modules = []
   function byPropsAll(...props: string[]) {
     const norm:Array<any> = find((m: { [x: string]: any }) => props.every((prop) => typeof m[prop] !== "undefined"))
-    let def = []
-    for (const module of find((m: { default: { [x: string]: any } }) => props.every((prop) => typeof m.default?.[prop] !== "undefined"))) 
-      def.push(module.default)
+    const def = find((m: { default: { [x: string]: any } }) => props.every((prop) => typeof m.default?.[prop] !== "undefined")).map(m => m.default)
     return [...norm, ...def]
   }
   function byDisplayName(displayName: string) {

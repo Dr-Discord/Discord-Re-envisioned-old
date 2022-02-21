@@ -14,7 +14,13 @@ const path = require("path")
   async function start() {
     const data = await fs.readFile(path.join(__dirname, "../build/index.js"), "utf-8")
     try {
-      setTimeout(() => window.eval(data), 1500)
+      setTimeout(() => {
+        try {
+          window.eval(data)
+        } catch (error) {
+          console.error(error)
+        }
+      }, 1500)
     } catch (error) {
       console.error(error)
     }

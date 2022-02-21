@@ -290,9 +290,7 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         let modules = [];
         function byPropsAll(...props) {
           const norm = find((m) => props.every((prop) => typeof m[prop] !== "undefined"));
-          let def = [];
-          for (const module2 of find((m) => props.every((prop) => typeof m.default?.[prop] !== "undefined")))
-            def.push(module2.default);
+          const def = find((m) => props.every((prop) => typeof m.default?.[prop] !== "undefined")).map((m) => m.default);
           return [...norm, ...def];
         }
         function byDisplayName(displayName) {

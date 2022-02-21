@@ -1,29 +1,29 @@
 const { join } = require("path")
 const electron = require("electron")
 const Module = require("module")
+const { readFileSync, existsSync } = require("fs")
 
 electron.app.commandLine.appendSwitch("no-force-async-hooks-checks")
 
 class BrowserWindow extends electron.BrowserWindow {
-  constructor(opt) {
-    if (opt.title != "Discord") return super(opt)
-    opt.transparent = true
-    opt.backgroundColor = "#00000000"
-    const oldPreload = opt.webPreferences.preload
+  constructor(opts) {
+    if (opts.title != "Discord") return super(opts)
+    opts.transparent = true
+    opts.backgroundColor = "#00000000"
+    const oldPreload = opts.webPreferences.preload
 
-    opt.webPreferences.preload = join(__dirname, "preload.js")
+    opts.webPreferences.preload = join(__dirname, "preload.js")
 
     electron.ipcMain.on("DR_DISCORD_PRELOAD", (event) => event.returnValue = oldPreload)
 
-    const win = new electron.BrowserWindow(opt)
-    
-    return win
+    return super(opts)
   }
 }
 
 // Enable DevTools on Stable.
 let fakeAppSettings;
 Object.defineProperty(global, "appSettings", {
+  configurable: true,
   get() {
     return fakeAppSettings;
   },
@@ -63,4 +63,6 @@ function LoadDiscord() {
   electron.app.name = pkg.name
   Module._load(join(basePath, pkg.main), null, true)
 }
-LoadDiscord()
+const appOld = join(process.resourcesPath, "app-old")
+if (existsSync(appOld)) require(appOld)
+else LoadDiscord()
