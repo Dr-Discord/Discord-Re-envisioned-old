@@ -72,7 +72,7 @@ export default {
   unpatchAll: (id:string|symbol) => {
     if (!ALLpatches[id]) return
     for (const patch of ALLpatches[id]) patch.unpatch()
-    return void 0
+    return
   },
   patches: ALLpatches
 }

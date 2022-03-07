@@ -36,34 +36,22 @@ function uninject(type:string) {
     if (style) style.remove()
   }
 }
-function getClasses(css:string):string {
-  const matches:Array<string>|null = css.match(/#{(("[A-z]+")((, )|)){1,}}/g)
-  if (!matches) return css
-  for (const styl of matches) {
-    const arr = JSON.parse(styl.replace("#{", "[").replace("}", "]"))
-    css = css.replace(styl, `.${getModule(arr, true)?.[arr[0]].replaceAll(" ", ".")}`)
-  }
-  return css
-}
 
 // Simple method
 export const pluginStyling = {
   inject: inject("plugin"),
   update: update("plugin"),
-  uninject: uninject("plugin"),
-  getClasses
+  uninject: uninject("plugin")
 }
 export const themeStyling = {
   inject: inject("theme"),
   update: update("theme"),
-  uninject: uninject("theme"),
-  getClasses
+  uninject: uninject("theme")
 }
 export const internalStyling = {
   inject: inject("internal"),
   update: update("internal"),
-  uninject: uninject("internal"),
-  getClasses
+  uninject: uninject("internal")
 }
 
 export function customcss(css:string) { Dr_ele.customcss.innerHTML = css }

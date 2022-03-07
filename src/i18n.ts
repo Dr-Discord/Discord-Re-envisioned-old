@@ -8,6 +8,10 @@ export const languages:any = {
       title: "Toggle Developer Mode",
       note: "Warning you can get banned from Discord if you do this (not a 100% chance)!"
     },
+    badges: {
+      developer: "Dr-Developer",
+      tester: "Dr-Tester"
+    },
     settingTabs: {
       general: "General",
       plugins: "Plugins",
@@ -40,50 +44,7 @@ export const languages:any = {
   }
 }
 
-interface _i18n {
-  name:string
-  version:string
-  minimalMode: {
-    title:string
-    note:string
-  }
-  devMode: {
-    title:string
-    note:string
-  }
-  settingTabs: {
-    general:string
-    plugins:string
-    themes:string
-    customcss:string
-  }
-  uninstall:string
-  settings:string
-  customCSS: {
-    title:string
-    popout:string
-    settings:string
-    changeTheme:string
-  }
-  installing: {
-    alreadyInstalled: {
-      content:string
-      replace: (name:string) => string
-    }
-    installed: {
-      content:string
-      replace: (name:string) => string
-    }
-    notValid: {
-      content:string
-      replace: (url:string) => string
-    }
-    install:string
-  }
-  [x:string]:any
-}
-
-const i18n:_i18n = new Proxy(languages[navigator.language.split("-", 1)[0]], {
+const i18n = new Proxy(languages[navigator.language.split("-", 1)[0]], {
   get: (target, key:string) => {
     const lang = navigator.language.split("-", 1)[0]
     return languages.global[key] || languages[lang][key] || languages.en[key] || key

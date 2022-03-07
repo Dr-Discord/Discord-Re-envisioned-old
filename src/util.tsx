@@ -1,5 +1,6 @@
 import { React } from "./react"
 import getModule from "./getModule"
+import react from "react"
 
 export const sleep = (time:number):Promise<void> => new Promise(resolve => setTimeout(resolve, time))
 
@@ -31,7 +32,7 @@ interface showConfirmationModalProps {
   key?:string|undefined
 }
 
-export function showConfirmationModal (title:string|any, content:string|any|Array<string|any>, opts:showConfirmationModalProps) {
+export function showConfirmationModal (title:string|react.ReactElement, content:string|react.ReactElement|Array<string|react.ReactElement>, opts:showConfirmationModalProps) {
   const Markdown = getModule((m: { default: { displayName: string; rules: any } }) => m.default?.displayName === "Markdown" && m.default.rules).default
   const ConfirmationModal = getModule("ConfirmModal").default
   const Button = getModule(["ButtonColors"])
@@ -134,22 +135,36 @@ export function restart(full:boolean) {
   return location.reload()
 }
 
-let origLog = false
-let spoofLog = false
 
-export function openChangeLog(opt:any, assign:boolean = false) {
-  let log = getModule(["changeLog"])
-  
-  if (!origLog) {
-    origLog = JSON.parse(JSON.stringify(log.changeLog))
+export function openSetting(this:any) {
+  const { openModal } = getModule(["openModal", "openModalLazy"])
+  const { ModalRoot, ModalSize, ModalHeader, ModalContent, ModalCloseButton } = getModule(["ModalRoot", "ModalSize"])
+  const Flex = getModule("Flex").default
+  const FormTitle = getModule("FormTitle").default
+  const Text = getModule("Text").default
 
-    Object.defineProperty(log, "changeLog", {
-      configurable: true,
-      get: () => !assign ? !spoofLog ? origLog : spoofLog : Object.assign(origLog, spoofLog || {}),
-    })
+  function needsCreated(ele:any):boolean {
+    if (typeof ele === "string" || typeof ele.type === "string") return false
+    return true
   }
 
-  if (opt) spoofLog = opt
-  getModule(["showChangeLog"]).showChangeLog() 
-  spoofLog = false
+  return (title:string, lowerTitle:string, Content:any) => {
+    Content = needsCreated(Content) ? <Content /> : Content
+    openModal((props:any) => {
+      return <ModalRoot {...props} size={ModalSize.MEDIUM}>
+        <ModalHeader separator={false}>
+          <Flex>
+            <Flex.Child>
+              <FormTitle tag={FormTitle.Tags.H4}>{title}</FormTitle>
+              <Text>{lowerTitle}</Text>
+            </Flex.Child>
+            <Flex.Child>
+              <ModalCloseButton onClick={props.onClose}/>
+            </Flex.Child>
+          </Flex>
+        </ModalHeader>
+        <ModalContent>{Content}</ModalContent>
+      </ModalRoot>
+    })
+  }
 }

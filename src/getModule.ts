@@ -1,5 +1,3 @@
-import { waitUntil } from "./util"
-
 const webpackExports = !webpackChunkdiscord_app.webpackExports ? webpackChunkdiscord_app.push([
   [Symbol("Discord Re-envisioned")], {}, (exp:any) => {
     webpackChunkdiscord_app.pop()
@@ -40,9 +38,50 @@ export default function getModule(filter:Function|string|number|Array<string>, f
   return modules
 }
 
-export async function asyncGetModule(filter:Function|string|number|Array<string>):Promise<any> {
-  return await new Promise(async (resolve) => await waitUntil(() => {
-    if (!getModule(filter)) return
-    resolve(getModule(filter))
-  }))
+// Off of Zlibs/BDs async find 
+// Idk how it really works
+const listeners = new Set<Function>()
+
+let __ORIGINAL_PUSH__ = webpackChunkdiscord_app.push
+function handlePush(chunk:any) {
+  const [, modules] = chunk
+  for (const id in modules) {
+    const originalModule = modules[id]
+    modules[id] = (module:any, exports:any, require:any) => {
+      Reflect.apply(originalModule, null, [module, exports, require]);
+      for (const ite of [...listeners]) ite(exports)
+    }
+    Object.assign(modules[id], originalModule, {
+      toString: () => originalModule.toString()
+    })
+  }
+  return Reflect.apply(__ORIGINAL_PUSH__, window.webpackChunkdiscord_app, [chunk])
+}
+
+Object.defineProperty(webpackChunkdiscord_app, "push", {
+  configurable: true,
+  get: () => handlePush,
+  set: (newPush) => {
+    __ORIGINAL_PUSH__ = newPush
+    Object.defineProperty(webpackChunkdiscord_app, "push", {
+      value: handlePush,
+      configurable: true,
+      writable: true
+    })
+  }
+})
+export function asyncGetModule(filter:Function):Promise<any> {
+  return new Promise((resolve, reject) => {
+    if (typeof filter !== "function") return reject(`Filter has to be a function, cannot be '${typeof filter}'`)
+    const cached = DrApi.getModule(filter)
+    if (cached) return resolve(cached)
+  
+    function listener(m:any) {
+      const directMatch = filter(m)
+      if (!directMatch) return
+      listeners.delete(listener)
+      resolve(m)
+    }
+    listeners.add(listener)
+  })
 }

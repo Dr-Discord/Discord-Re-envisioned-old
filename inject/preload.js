@@ -8,7 +8,7 @@ const path = require("path")
 
 {((window) => {
   window.__DR__BACKEND__ = {
-    require: (module) => require(module),
+    require: (id) => require(id),
     app: true
   }
   async function start() {
@@ -16,11 +16,11 @@ const path = require("path")
     try {
       setTimeout(() => {
         try {
-          window.eval(data)
+          window.eval(`${data}\n//# sourceURL=Discord%20Re-envisioned`)
         } catch (error) {
           console.error(error)
         }
-      }, 1500)
+      }, 1750)
     } catch (error) {
       console.error(error)
     }

@@ -33,10 +33,9 @@ interface addonApi {
 
 interface DrApi {
   getModule: (filter:Function|string|number|Array<string>, first?:boolean) => any|null
-  asyncGetModule: (filter:Function|string|number|Array<string>) => Promise<any>
+  asyncGetModule: (filter:Function) => Promise<any>
   findInReactTree: (tree:any, searchFilter:Function) => any
   findInTree: (tree:any, filter:Function, opts:findInTreeOpts = {}) => any
-  openChangeLog: (opts:any) => void
   patcher: {
     unpatchAll: (id:string|symbol) => void
     patch: (id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => Function
@@ -46,18 +45,12 @@ interface DrApi {
     quick: (module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => Function
     patches: {}
   }
-  actions: {
-    register: (name:string, callback:Function) => Function
-    unregister: (name:string) => void
-    dispatch: (name:string, ...args:any) => any
-  }
   React: React,
   ReactDOM: ReactDOM,
   styling: {
     inject: (id:string, css:string) => void
     update: (id:string, css:string) => void
     uninject: (id:string) => void
-    getClasses: (css:string) => string
   }
   Plugins:addonApi
   Themes:addonApi
@@ -69,8 +62,8 @@ interface DrApi {
     set: (plugin:string, key:string, data:any) => void
   }
   getInstance: {
-    owner: (element:HTMLElement) => any
-    react: (element:HTMLElement) => any
+    owner: (element:Element) => any
+    react: (element:Element) => any
   }
 }
 
@@ -95,6 +88,7 @@ interface Window {
     app:boolean 
     require:(module:string) => any
     devMode:boolean
+    [x:string]:any
   }
   [x:string]:any
 }
@@ -107,4 +101,6 @@ interface Element {
   __reactInternalInstance$?:any
   __reactFiber$?:any
   _reactInternals?:any
+  click:()=>void
+  nonce?:string
 }

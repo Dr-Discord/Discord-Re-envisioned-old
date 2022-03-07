@@ -13,9 +13,7 @@ export const localStorage:localStorage = (() => {
   let localStorage:any = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage")
   frame.remove()
   Object.defineProperty(window, "localStorage", localStorage)
-  localStorage = window.localStorage
-  delete window.localStorage
-  return localStorage
+  return window.localStorage
 })()
 // Set base data
 localStorage.setItem("dr-storage", (() => {

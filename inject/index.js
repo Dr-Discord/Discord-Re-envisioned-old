@@ -1,7 +1,7 @@
 const { join } = require("path")
 const electron = require("electron")
 const Module = require("module")
-const { readFileSync, existsSync } = require("fs")
+const { existsSync } = require("fs")
 
 electron.app.commandLine.appendSwitch("no-force-async-hooks-checks")
 
@@ -21,18 +21,20 @@ class BrowserWindow extends electron.BrowserWindow {
 }
 
 // Enable DevTools on Stable.
-let fakeAppSettings;
-Object.defineProperty(global, "appSettings", {
-  configurable: true,
-  get() {
-    return fakeAppSettings;
-  },
-  set(value) {
-    if (!value.hasOwnProperty("settings")) value.settings = {};
-    value.settings.DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
-    fakeAppSettings = value;
-  },
-})
+try {
+  let fakeAppSettings;
+  Object.defineProperty(global, "appSettings", {
+    configurable: true,
+    get() {
+      return fakeAppSettings;
+    },
+    set(value) {
+      if (!value.hasOwnProperty("settings")) value.settings = {};
+      value.settings.DANGEROUS_ENABLE_DEVTOOLS_ONLY_ENABLE_IF_YOU_KNOW_WHAT_YOURE_DOING = true;
+      fakeAppSettings = value;
+    }
+  })
+} catch (error) {}
 
 electron.app.once("ready", () => {
   electron.session.defaultSession.webRequest.onHeadersReceived(function({ responseHeaders }, callback) {
@@ -50,6 +52,7 @@ electron.app.once("ready", () => {
   } catch (error) {}
 })
 
+Object.assign(BrowserWindow, electron.BrowserWindow)
 const Electron = new Proxy(electron, { get: (target, prop) => prop === "BrowserWindow" ? BrowserWindow : target[prop] })
 
 const electronPath = require.resolve("electron")
@@ -63,6 +66,10 @@ function LoadDiscord() {
   electron.app.name = pkg.name
   Module._load(join(basePath, pkg.main), null, true)
 }
+// Load other discord mods | 'app-old' and if the 'module.exports' is a function it runs it and with the arg to load discord
 const appOld = join(process.resourcesPath, "app-old")
-if (existsSync(appOld)) require(appOld)
+if (existsSync(appOld)) {
+  const res = require(appOld)
+  if (typeof res === "function") res(() => LoadDiscord())
+}
 else LoadDiscord()

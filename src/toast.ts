@@ -16,13 +16,18 @@ internalStyling.inject("toasts", `.dr-toast { display: inline-flex; box-sizing: 
 .dr-toast-close:hover { color: var(--interactive-hover); background-color: var(--background-modifier-hover) }`)
 
 // container
-const toastContainer = document.createElement("div")
-toastContainer.className = "dr-toast-container"
-document.body.appendChild(toastContainer)
-const toastWrapper = document.createElement("div")
-toastWrapper.className = "dr-toast-wrapper"
-toastWrapper.style.marginBottom = "5px"
-toastContainer.appendChild(toastWrapper)
+insure()
+let toastWrapper:any = null
+function insure() {
+  if (!!toastWrapper) return
+  const toastContainer = document.createElement("div")
+  toastContainer.className = "dr-toast-container"
+  document.body.appendChild(toastContainer)
+  toastWrapper = document.createElement("div")
+  toastWrapper.className = "dr-toast-wrapper"
+  toastWrapper.style.marginBottom = "5px"
+  toastContainer.appendChild(toastWrapper)
+}
 
 function Timer(callback:Function, delay:number):any {
   let timerId:any, start:any, remaining = delay
@@ -47,6 +52,7 @@ interface ToastOpts {
   closeButton?: boolean
 }
 function createToast(text:string, opts:ToastOpts):Node {
+  insure()
   const { type = "success", duration = 3000, autoClose = true, closeButton = true } = opts
   const toast = document.createElement("div")
   toast.className = "dr-toast adding"
