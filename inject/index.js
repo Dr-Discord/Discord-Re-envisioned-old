@@ -16,7 +16,12 @@ class BrowserWindow extends electron.BrowserWindow {
 
     electron.ipcMain.on("DR_DISCORD_PRELOAD", (event) => event.returnValue = oldPreload)
 
-    return super(opts)
+    const win = new electron.BrowserWindow(opts)
+    win.webContents.on("did-finish-load", () => {
+      win.webContents.executeJavaScript("window.__DR__BACKEND__.init(window.eval)")
+    })
+    
+    return win 
   }
 }
 

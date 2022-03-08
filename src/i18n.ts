@@ -29,15 +29,15 @@ export const languages:any = {
     installing: {
       alreadyInstalled: {
         content: "Plugin '{{name}}' is already installed",
-        replace: function(this:any, name:string) { return this.content.replace("{{name}}", name) }
+        replace: function(this:{ content:string, replace:Function }, name:string) { return this.content.replace("{{name}}", name) }
       },
       installed: {
         content: "Installed '{{name}}'! Refresh the page to see it.",
-        replace: function(this:any, name:string) { return this.content.replace("{{name}}", name) }
+        replace: function(this:{ content:string, replace:Function }, name:string) { return this.content.replace("{{name}}", name) }
       },
       notValid: {
         content: "'{{url}}' is not a valid plugin URL",
-        replace: function(this:any, url:string) { return this.content.replace("{{url}}", url) }
+        replace: function(this:{ content:string, replace:Function }, url:string) { return this.content.replace("{{url}}", url) }
       },
       install: "Install"
     }

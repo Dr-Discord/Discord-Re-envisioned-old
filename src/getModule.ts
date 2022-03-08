@@ -1,3 +1,5 @@
+import patcher from "./patcher"
+
 const webpackExports = !webpackChunkdiscord_app.webpackExports ? webpackChunkdiscord_app.push([
   [Symbol("Discord Re-envisioned")], {}, (exp:any) => {
     webpackChunkdiscord_app.pop()
@@ -42,7 +44,7 @@ export default function getModule(filter:Function|string|number|Array<string>, f
 // Idk how it really works
 const listeners = new Set<Function>()
 
-let __ORIGINAL_PUSH__ = webpackChunkdiscord_app.push
+let __ORIGINAL_PUSH__:Function = webpackChunkdiscord_app.push
 function handlePush(chunk:any) {
   const [, modules] = chunk
   for (const id in modules) {
@@ -55,9 +57,8 @@ function handlePush(chunk:any) {
       toString: () => originalModule.toString()
     })
   }
-  return Reflect.apply(__ORIGINAL_PUSH__, window.webpackChunkdiscord_app, [chunk])
+  return __ORIGINAL_PUSH__.apply(window.webpackChunkdiscord_app, [chunk])
 }
-
 Object.defineProperty(webpackChunkdiscord_app, "push", {
   configurable: true,
   get: () => handlePush,
