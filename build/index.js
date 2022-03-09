@@ -984,12 +984,12 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         nonce: document.querySelector("[nonce]")?.nonce
       }));
       Start();
-      var __DR__BACKEND__ = Object.assign({
+      window.__DR__BACKEND__ = {
         devMode: storage_1.internal.get("devMode") ?? false,
-        require: function() {
+        require: window?.__DR__ELECTRON__BACKEND__?.require ?? function() {
           throw new Error("tried using require on WEB!");
         },
-        app: false,
+        app: window?.__DR__ELECTRON__BACKEND__?.app ?? false,
         isPopped: false,
         openSetting: (0, util_1.openSetting)(),
         badges: {
@@ -999,18 +999,17 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         },
         logger: logger_1.default,
         i18n: i18n_1.default
-      }, window.__DR__BACKEND__ || {});
-      window.__DR__BACKEND__ = __DR__BACKEND__;
-      if (__DR__BACKEND__.app)
+      };
+      if (window.__DR__BACKEND__.app)
         window.DiscordNative.window.setDevtoolsCallbacks(null, null);
       async function Start() {
         try {
           Object.defineProperty((0, getModule_1.default)(["isDeveloper"]), "isDeveloper", {
-            get: () => __DR__BACKEND__.devMode,
-            set: (val) => __DR__BACKEND__.devMode = val
+            get: () => window.__DR__BACKEND__.devMode,
+            set: (val) => window.__DR__BACKEND__.devMode = val
           });
         } catch (error) {
-          __DR__BACKEND__.isDeveloperErrored = true;
+          window.__DR__BACKEND__.isDeveloperErrored = true;
         }
         await (0, util_1.waitUntil)(() => document.querySelector(".container-YkUktl"));
         const Plugins = {};
@@ -1123,7 +1122,7 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         }
         const badgeModule = (0, getModule_1.default)("UserProfileBadgeList");
         patcher_1.default.after("DrInternal-UserProfileBadgeList-Patch", badgeModule, "default", ([props], res) => {
-          const content = window.__DR__BACKEND__.badges[props.user.id];
+          const content = window.window.__DR__BACKEND__.badges[props.user.id];
           if (!content)
             return;
           res.props.children.push(makeBadge(content[0], content[1], Number(badgeModule.BadgeSizes[props.size].replace("SIZE_", ""))));

@@ -18,7 +18,7 @@ class BrowserWindow extends electron.BrowserWindow {
 
     const win = new electron.BrowserWindow(opts)
     win.webContents.on("did-finish-load", () => {
-      win.webContents.executeJavaScript("window.__DR__BACKEND__.init(window.eval)")
+      win.webContents.executeJavaScript("window.__DR__ELECTRON__BACKEND__.init(window.eval)")
     })
     
     return win 

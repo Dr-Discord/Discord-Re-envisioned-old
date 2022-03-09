@@ -27,10 +27,10 @@ document.body.appendChild(Object.assign(document.createElement("script"), {
 
 Start()
 
-const __DR__BACKEND__ = Object.assign({
+window.__DR__BACKEND__ = {
   devMode: internal.get("devMode") ?? false,
-  require: (function() { throw new Error("tried using require on WEB!") }),
-  app: false,
+  require: window?.__DR__ELECTRON__BACKEND__?.require ?? (function() { throw new Error("tried using require on WEB!") }),
+  app: window?.__DR__ELECTRON__BACKEND__?.app ?? false,
   isPopped: false,
   openSetting: openSetting(),
   badges: {
@@ -39,18 +39,17 @@ const __DR__BACKEND__ = Object.assign({
     "775199408638656553": [i18n.badges.tester, "#F52590"],
   },
   logger, i18n
-}, window.__DR__BACKEND__|| {})
-window.__DR__BACKEND__ = __DR__BACKEND__
+}
 
-if (__DR__BACKEND__.app) window.DiscordNative.window.setDevtoolsCallbacks(null, null)
+if (window.__DR__BACKEND__.app) window.DiscordNative.window.setDevtoolsCallbacks(null, null)
 
 async function Start() {
   try {
     Object.defineProperty(getModule(["isDeveloper"]), "isDeveloper", { 
-      get: () => __DR__BACKEND__.devMode, 
-      set: (val:boolean) => __DR__BACKEND__.devMode = val 
+      get: () => window.__DR__BACKEND__.devMode, 
+      set: (val:boolean) => window.__DR__BACKEND__.devMode = val 
     })
-  } catch (error) { __DR__BACKEND__.isDeveloperErrored = true }
+  } catch (error) { window.__DR__BACKEND__.isDeveloperErrored = true }
   // Idk good time to load
   await waitUntil(() => document.querySelector(".container-YkUktl"))
   const Plugins:any = {}
@@ -124,7 +123,7 @@ async function Start() {
   }
   const badgeModule = getModule("UserProfileBadgeList")
   patcher.after("DrInternal-UserProfileBadgeList-Patch", badgeModule, "default", ([props]:any, res:any) => {
-    const content = window.__DR__BACKEND__.badges[props.user.id]
+    const content = window.window.__DR__BACKEND__.badges[props.user.id]
     if (!content) return
     res.props.children.push(makeBadge(content[0], content[1], Number(badgeModule.BadgeSizes[props.size].replace("SIZE_", ""))))
   })

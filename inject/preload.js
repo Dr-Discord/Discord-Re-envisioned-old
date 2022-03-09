@@ -1,12 +1,12 @@
 const { ipcRenderer, contextBridge } = require("electron")
 const preload = ipcRenderer.sendSync("DR_DISCORD_PRELOAD")
-if (!preload) return
+if (!preload) throw new Error("no preload found")
 require(preload)
 
 const fs = require("fs/promises")
 const path = require("path")
 
-contextBridge.exposeInMainWorld("__DR__BACKEND__", {
+contextBridge.exposeInMainWorld("__DR__ELECTRON__BACKEND__", {
   require: (id) => require(id),
   app: true,
   init: function(eval) {
@@ -19,7 +19,7 @@ contextBridge.exposeInMainWorld("__DR__BACKEND__", {
           } catch (error) {
             console.error(error)
           }
-        }, 1750)
+        }, 1000)
       } catch (error) {
         console.error(error)
       }
