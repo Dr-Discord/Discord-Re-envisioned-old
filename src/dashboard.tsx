@@ -260,6 +260,14 @@ const pages:any = {
           window.__DR__BACKEND__.devMode = val
         }}
       />
+      {window.__DR__BACKEND__.app ? <SwitchItem
+        value={window.__DR__BACKEND__.transparent}
+        title={i18n.toggleTransparency.title}
+        note={i18n.toggleTransparency.note}
+        onChange={(val:boolean) => {
+          window.__DR__BACKEND__.toggleTransparency()
+        }}
+      /> : false}
     </>
   }),
   plugins: React.memo(() => {

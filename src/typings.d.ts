@@ -85,9 +85,6 @@ interface Window {
   webpackChunkdiscord_app:webpackChunkdiscord_app
   localStorage?:localStorage|null
   __DR__BACKEND__: {
-    app:boolean 
-    require:(module:string) => any
-    devMode:boolean
     [x:string]:any
   }
   [x:string]:any

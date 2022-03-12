@@ -1,15 +1,27 @@
 const { join } = require("path")
 const electron = require("electron")
 const Module = require("module")
-const { existsSync } = require("fs")
+const { existsSync, readFileSync, writeFileSync } = require("fs")
 
 electron.app.commandLine.appendSwitch("no-force-async-hooks-checks")
+
+if (!existsSync(join(__dirname, "settings.json"))) writeFileSync(join(__dirname, "settings.json"), "{\"transparent\":false}")
+const { transparent } = require(join(__dirname, "settings.json"))
+
+electron.ipcMain.handle("DR_TOGGLE_TRANSPARENCY", (event) => {
+  writeFileSync(join(__dirname, "settings.json"), `{"transparent":${!transparent}}`)
+  electron.app.relaunch()
+  electron.app.quit()
+})
+electron.ipcMain.on("DR_TRANSPARENT", (event) => event.returnValue = transparent)
 
 class BrowserWindow extends electron.BrowserWindow {
   constructor(opts) {
     if (opts.title != "Discord") return super(opts)
-    opts.transparent = true
-    opts.backgroundColor = "#00000000"
+    if (typeof transparent === "boolean" && transparent === true) {
+      opts.transparent = true
+      opts.backgroundColor = "#00000000"
+    }
     const oldPreload = opts.webPreferences.preload
 
     opts.webPreferences.preload = join(__dirname, "preload.js")
@@ -17,9 +29,7 @@ class BrowserWindow extends electron.BrowserWindow {
     electron.ipcMain.on("DR_DISCORD_PRELOAD", (event) => event.returnValue = oldPreload)
 
     const win = new electron.BrowserWindow(opts)
-    win.webContents.on("did-finish-load", () => {
-      win.webContents.executeJavaScript("window.__DR__ELECTRON__BACKEND__.init(window.eval)")
-    })
+    win.webContents.on("did-finish-load", () => { win.webContents.executeJavaScript("window.__DR__ELECTRON__BACKEND__.init((c) => window.eval(c))") })
     
     return win 
   }

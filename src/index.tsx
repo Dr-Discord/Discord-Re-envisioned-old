@@ -29,18 +29,16 @@ Start()
 
 window.__DR__BACKEND__ = {
   devMode: internal.get("devMode") ?? false,
-  require: window?.__DR__ELECTRON__BACKEND__?.require ?? (function() { throw new Error("tried using require on WEB!") }),
   app: window?.__DR__ELECTRON__BACKEND__?.app ?? false,
-  isPopped: false,
-  openSetting: openSetting(),
-  badges: {
-    "515780151791976453": [i18n.badges.developer, "#F52590"],
-    "359174224809689089": [i18n.badges.developer, "#F52590"],
-    "775199408638656553": [i18n.badges.tester, "#F52590"],
-  },
-  logger, i18n
+  transparent: window?.__DR__ELECTRON__BACKEND__?.transparent ?? false,
+  toggleTransparency: window?.__DR__ELECTRON__BACKEND__?.toggleTransparency ?? (function() { throw new Error("tried using toggleTransparency on WEB!") }),
+  isPopped: false
 }
-
+const badges:{ [x:string]: [string, string] } = {
+  "515780151791976453": [i18n.badges.developer, "#F52590"],
+  "359174224809689089": [i18n.badges.developer, "#F52590"],
+  "775199408638656553": [i18n.badges.tester, "#FFF"]
+}
 if (window.__DR__BACKEND__.app) window.DiscordNative.window.setDevtoolsCallbacks(null, null)
 
 async function Start() {
@@ -109,7 +107,7 @@ async function Start() {
 
   function makeBadge(text:string, color:string, size:number = 22) {
     return (
-      <Tooltip text={text}>{(props:any) => (
+      <Tooltip text={text} spacing={24}>{(props:any) => (
         <Clickable {...props}>
           <svg viewBox="0 0 22 22" width={size} height={size}>
             <path 
@@ -123,7 +121,7 @@ async function Start() {
   }
   const badgeModule = getModule("UserProfileBadgeList")
   patcher.after("DrInternal-UserProfileBadgeList-Patch", badgeModule, "default", ([props]:any, res:any) => {
-    const content = window.window.__DR__BACKEND__.badges[props.user.id]
+    const content = badges[props.user.id]
     if (!content) return
     res.props.children.push(makeBadge(content[0], content[1], Number(badgeModule.BadgeSizes[props.size].replace("SIZE_", ""))))
   })

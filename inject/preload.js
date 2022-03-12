@@ -6,25 +6,17 @@ require(preload)
 const fs = require("fs/promises")
 const path = require("path")
 
+const data = fs.readFile(path.join(__dirname, "../build/index.js"), "utf-8")
+const transparent = ipcRenderer.sendSync("DR_TRANSPARENT")
+
 contextBridge.exposeInMainWorld("__DR__ELECTRON__BACKEND__", {
   require: (id) => require(id),
   app: true,
-  init: function(eval) {
-    async function start() {
-      const data = await fs.readFile(path.join(__dirname, "../build/index.js"), "utf-8")
-      try {
-        setTimeout(() => {
-          try {
-            eval(`try {\n${data}\n}catch (e) {console.error(e)}\n//# sourceURL=Discord%20Re-envisioned`)
-          } catch (error) {
-            console.error(error)
-          }
-        }, 1000)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    if (window.document.readyState == "loading") window.document.addEventListener("DOMContentLoaded", start)
-    else start()
+  init: async function(eval) {
+    eval(`try {\n${await data}\n}catch (e) {console.error(e)}\n//# sourceURL=Discord%20Re-envisioned`)
+  },
+  transparent,
+  toggleTransparency: async function() {
+    await ipcRenderer.invoke("DR_TOGGLE_TRANSPARENCY")
   }
 })

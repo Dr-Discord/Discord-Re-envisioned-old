@@ -1,3 +1,4 @@
 plugins
 tsBuild
 node_modules
+inject/*.json
