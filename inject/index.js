@@ -74,17 +74,16 @@ const electronPath = require.resolve("electron")
 delete require.cache[electronPath].exports
 require.cache[electronPath].exports = Electron
 
-function LoadDiscord() {
-  const basePath = join(process.resourcesPath, "app.asar")
-  const pkg = require(join(basePath, "package.json"))
-  electron.app.setAppPath(basePath)
-  electron.app.name = pkg.name
-  Module._load(join(basePath, pkg.main), null, true)
-}
+const basePath = join(process.resourcesPath, "app.asar")
+const pkg = require(join(basePath, "package.json"))
+electron.app.setAppPath(basePath)
+electron.app.name = pkg.name
+
 // Load other discord mods | 'app-old' and if the 'module.exports' is a function it runs it and with the arg to load discord
 const appOld = join(process.resourcesPath, "app-old")
+const req = (path) => Module._load(path, null, true)
 if (existsSync(appOld)) {
-  const res = require(appOld)
-  if (typeof res === "function") res(() => LoadDiscord())
+  const res = req(appOld)
+  if (typeof res === "function") res(() => req(join(basePath, pkg.main)))
 }
-else LoadDiscord()
+else req(join(basePath, pkg.main))

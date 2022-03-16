@@ -1,6 +1,6 @@
 import { React } from "./react"
 import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal, openSetting as initOpenSettings } from "./util"
-import getModule from "./getModule"
+import getModule, { asyncGetModule } from "./getModule"
 import patcher from "./patcher"
 import i18n from "./i18n"
 import { internal } from "./storage"
@@ -140,11 +140,16 @@ patcher.after("DrInternal-RouterRoutes-Patch", getModule("ConnectedPrivateChanne
   children.unshift(<DrDashboardButton key="drdashLinkButton">{children}</DrDashboardButton>)
 })
 
-const Views = getModule("FluxContainer(ViewsWithMainInterface)").default?.prototype?.render?.call({ memoizedGetStateFromStores: () => ({})})?.type
-patcher.after("DrInternal-RouterRoutes-Patch", Views?.prototype, "render", (_:unknown, res:any) => {
-  const routes = res.props.children[0].props.children[1]
-  routes[routes.length - 1].props.path.push("/dr_dashboard")
-})
+
+{
+  (async () => {
+    const Views = await asyncGetModule((e: { default: { displayName: string } }) => e.default?.displayName === "ViewsWithMainInterface")
+    patcher.after("DrInternal-RouterRoutes-Patch", Views.default?.prototype, "render", (_:unknown, res:any) => {
+      const routes = res.props.children[0].props.children[1]
+      routes[routes.length - 1].props.path.push("/dr_dashboard")
+  })
+  })()
+}
 
 const Gear = getModule("Gear").default
 const OpenExternal = getModule("OpenExternal").default
@@ -163,14 +168,6 @@ const editorThemes = [
   "github",
   "gob",
   "gruvbox",
-  "idle_fingers",
-  "iplastic",
-  "katzenmilch",
-  "kr_theme",
-  "kuroir",
-  "merbivore",
-  "merbivore_soft",
-  "mono_industrial",
   "monokai",
   "nord_dark",
   "one_dark",
@@ -181,10 +178,6 @@ const editorThemes = [
   "terminal",
   "textmate",
   "tomorrow",
-  "tomorrow_night",
-  "tomorrow_night_blue",
-  "tomorrow_night_bright",
-  "tomorrow_night_eighties",
   "twilight",
   "vibrant_ink",
   "xcode"

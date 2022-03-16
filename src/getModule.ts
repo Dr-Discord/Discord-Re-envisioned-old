@@ -1,5 +1,3 @@
-import patcher from "./patcher"
-
 const webpackExports = !webpackChunkdiscord_app.webpackExports ? webpackChunkdiscord_app.push([
   [Symbol("Discord Re-envisioned")], {}, (exp:any) => {
     webpackChunkdiscord_app.pop()
@@ -19,19 +17,20 @@ function find(filter:Function):Array<any> {
   return modules
 }
 
+function byPropsAll(...props: string[]) {
+  const norm:Array<any> = find((m: { [x: string]: any }) => props.every((prop) => typeof m[prop] !== "undefined"))
+  const def = find((m: { default: { [x: string]: any } }) => props.every((prop) => typeof m.default?.[prop] !== "undefined")).map(m => m.default)
+  return [...norm, ...def]
+}
+function byDisplayName(displayName: string) {
+  const norm:Array<any> = find((m: { default: { displayName: any } }) => m.default?.displayName === displayName)
+  const type:Array<any> = find((m: { default: { type: { displayName: any } } }) => m.default?.type?.displayName === displayName)
+  const rend:Array<any> = find((m: { default: { type: { render: { displayName: any } } } }) => m.default?.type?.render?.displayName === displayName)
+  return [...norm, ...type, ...rend]
+}
+
 export default function getModule(filter:Function|string|number|Array<string>, first = true):any|Array<any>|null {
   let modules = []
-  function byPropsAll(...props: string[]) {
-    const norm:Array<any> = find((m: { [x: string]: any }) => props.every((prop) => typeof m[prop] !== "undefined"))
-    const def = find((m: { default: { [x: string]: any } }) => props.every((prop) => typeof m.default?.[prop] !== "undefined")).map(m => m.default)
-    return [...norm, ...def]
-  }
-  function byDisplayName(displayName: string) {
-    const norm:Array<any> = find((m: { default: { displayName: any } }) => m.default?.displayName === displayName)
-    const type:Array<any> = find((m: { default: { type: { displayName: any } } }) => m.default?.type?.displayName === displayName)
-    const rend:Array<any> = find((m: { default: { type: { render: { displayName: any } } } }) => m.default?.type?.render?.displayName === displayName)
-    return [...norm, ...type, ...rend]
-  }
   if (Array.isArray(filter)) modules = byPropsAll(...filter)
   else if (typeof filter === "string") modules = byDisplayName(filter)
   else if (typeof filter === "number") modules = [webpackExports.c[filter]]
@@ -74,7 +73,7 @@ Object.defineProperty(webpackChunkdiscord_app, "push", {
 export function asyncGetModule(filter:Function):Promise<any> {
   return new Promise((resolve, reject) => {
     if (typeof filter !== "function") return reject(`Filter has to be a function, cannot be '${typeof filter}'`)
-    const cached = DrApi.getModule(filter)
+    const cached = getModule(filter)
     if (cached) return resolve(cached)
   
     function listener(m:any) {

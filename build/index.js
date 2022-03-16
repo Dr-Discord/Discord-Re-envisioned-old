@@ -147,19 +147,19 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         }
         return modules;
       }
+      function byPropsAll(...props) {
+        const norm = find((m) => props.every((prop) => typeof m[prop] !== "undefined"));
+        const def = find((m) => props.every((prop) => typeof m.default?.[prop] !== "undefined")).map((m) => m.default);
+        return [...norm, ...def];
+      }
+      function byDisplayName(displayName) {
+        const norm = find((m) => m.default?.displayName === displayName);
+        const type = find((m) => m.default?.type?.displayName === displayName);
+        const rend = find((m) => m.default?.type?.render?.displayName === displayName);
+        return [...norm, ...type, ...rend];
+      }
       function getModule(filter, first = true) {
         let modules = [];
-        function byPropsAll(...props) {
-          const norm = find((m) => props.every((prop) => typeof m[prop] !== "undefined"));
-          const def = find((m) => props.every((prop) => typeof m.default?.[prop] !== "undefined")).map((m) => m.default);
-          return [...norm, ...def];
-        }
-        function byDisplayName(displayName) {
-          const norm = find((m) => m.default?.displayName === displayName);
-          const type = find((m) => m.default?.type?.displayName === displayName);
-          const rend = find((m) => m.default?.type?.render?.displayName === displayName);
-          return [...norm, ...type, ...rend];
-        }
         if (Array.isArray(filter))
           modules = byPropsAll(...filter);
         else if (typeof filter === "string")
@@ -206,7 +206,7 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         return new Promise((resolve, reject) => {
           if (typeof filter !== "function")
             return reject(`Filter has to be a function, cannot be '${typeof filter}'`);
-          const cached = DrApi.getModule(filter);
+          const cached = getModule(filter);
           if (cached)
             return resolve(cached);
           function listener(m) {
@@ -689,13 +689,41 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
   var require_dashboard = __commonJS({
     "tsBuild/dashboard.js"(exports) {
       "use strict";
+      var __createBinding = exports && exports.__createBinding || (Object.create ? function(o, m, k, k2) {
+        if (k2 === void 0)
+          k2 = k;
+        Object.defineProperty(o, k2, { enumerable: true, get: function() {
+          return m[k];
+        } });
+      } : function(o, m, k, k2) {
+        if (k2 === void 0)
+          k2 = k;
+        o[k2] = m[k];
+      });
+      var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? function(o, v) {
+        Object.defineProperty(o, "default", { enumerable: true, value: v });
+      } : function(o, v) {
+        o["default"] = v;
+      });
+      var __importStar = exports && exports.__importStar || function(mod) {
+        if (mod && mod.__esModule)
+          return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k in mod)
+            if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k))
+              __createBinding(result, mod, k);
+        }
+        __setModuleDefault(result, mod);
+        return result;
+      };
       var __importDefault = exports && exports.__importDefault || function(mod) {
         return mod && mod.__esModule ? mod : { "default": mod };
       };
       Object.defineProperty(exports, "__esModule", { value: true });
       var react_1 = require_react();
       var util_1 = require_util();
-      var getModule_1 = __importDefault(require_getModule());
+      var getModule_1 = __importStar(require_getModule());
       var patcher_1 = __importDefault(require_patcher());
       var i18n_1 = __importDefault(require_i18n());
       var storage_1 = require_storage();
@@ -797,11 +825,15 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
           return;
         children.unshift(react_1.React.createElement(DrDashboardButton, { key: "drdashLinkButton" }, children));
       });
-      var Views = (0, getModule_1.default)("FluxContainer(ViewsWithMainInterface)").default?.prototype?.render?.call({ memoizedGetStateFromStores: () => ({}) })?.type;
-      patcher_1.default.after("DrInternal-RouterRoutes-Patch", Views?.prototype, "render", (_, res) => {
-        const routes = res.props.children[0].props.children[1];
-        routes[routes.length - 1].props.path.push("/dr_dashboard");
-      });
+      {
+        (async () => {
+          const Views = await (0, getModule_1.asyncGetModule)((e) => e.default?.displayName === "ViewsWithMainInterface");
+          patcher_1.default.after("DrInternal-RouterRoutes-Patch", Views.default?.prototype, "render", (_, res) => {
+            const routes = res.props.children[0].props.children[1];
+            routes[routes.length - 1].props.path.push("/dr_dashboard");
+          });
+        })();
+      }
       var Gear = (0, getModule_1.default)("Gear").default;
       var OpenExternal = (0, getModule_1.default)("OpenExternal").default;
       var editorThemes = [
@@ -819,14 +851,6 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         "github",
         "gob",
         "gruvbox",
-        "idle_fingers",
-        "iplastic",
-        "katzenmilch",
-        "kr_theme",
-        "kuroir",
-        "merbivore",
-        "merbivore_soft",
-        "mono_industrial",
         "monokai",
         "nord_dark",
         "one_dark",
@@ -837,10 +861,6 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
         "terminal",
         "textmate",
         "tomorrow",
-        "tomorrow_night",
-        "tomorrow_night_blue",
-        "tomorrow_night_bright",
-        "tomorrow_night_eighties",
         "twilight",
         "vibrant_ink",
         "xcode"
