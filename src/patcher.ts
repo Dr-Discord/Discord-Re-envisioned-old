@@ -3,6 +3,12 @@ const Quick_Symbol = Symbol("DrApi.patch.quick")
 const Internal_Symbol = Symbol("DrInternal")
 const ALLpatches:any = {}
 
+function isClass(func:any):boolean {
+  if(!(func && func.constructor === Function) || func.prototype === undefined) return false
+  if(Function.prototype === Object.getPrototypeOf(func)) return Object.getOwnPropertyNames(func.prototype).length > 1
+  return true
+}
+
 function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:string, callback:Function, opts:patcherOpts) {
   let { method = "after", id, once = false, index = 0 } = opts
   let originalFunction = moduleToPatch[functionToPatch]
@@ -30,11 +36,24 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
     if (!ALLpatches[patchName].length) delete ALLpatches[patchName]
   }
   if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
-    moduleToPatch[functionToPatch] = function() {
+    if (isClass(originalFunction)) moduleToPatch[functionToPatch] = class extends originalFunction {
+      constructor() {
+        if (false) super()
+        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]()
+        let insteadFunction:any = () => new originalFunction(arguments)
+        let that = Object.assign({}, insteadFunction)
+        for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, that) ?? insteadFunction
+        let res = Reflect.apply(insteadFunction, that, arguments) 
+        for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, that)
+        if (once) unpatch()
+        return res
+      }
+    }
+    else moduleToPatch[functionToPatch] = function() {
       for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]()
       let insteadFunction = originalFunction
       for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, this) ?? insteadFunction
-      let res = insteadFunction.apply(this, [...arguments])
+      let res = Reflect.apply(insteadFunction, this, arguments)
       for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, this)
       if (once) unpatch()
       return res
@@ -47,11 +66,15 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
         for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1].unpatch()
         for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) patches.instead[patch - 1].unpatch()
         for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1].unpatch()
-        moduleToPatch[functionToPatch] = originalFunction
       }
     }
-    Object.assign(moduleToPatch[functionToPatch], originalFunction, {
-      toString: () => originalFunction.toString()
+
+    Object.assign(moduleToPatch[functionToPatch], originalFunction)
+    Object.defineProperty(moduleToPatch[functionToPatch], "toString", {
+      value: () => originalFunction.toString(),
+      writable: false,
+      enumerable: false,
+      configurable: true
     })
   }
   if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))

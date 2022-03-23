@@ -62,6 +62,19 @@ export function showConfirmationModal (title:string|react.ReactElement, content:
     >{content}</ConfirmationModal>
   ))
 }
+export function alert(title:string|react.ReactElement, content:string|react.ReactElement|Array<string|react.ReactElement>):void {
+  const { openModal } = getModule(["openModal", "openModalLazy"])
+  const Alert = getModule("Alert").default
+  const Markdown = getModule((m: { default: { displayName: string; rules: any } }) => m.default?.displayName === "Markdown" && m.default.rules).default
+
+  if (!Array.isArray(content)) content = [content]
+  content = content.map((c:any) => typeof(c) === "string" ? <Markdown>{c}</Markdown> : c)
+  
+  openModal((props:any) => (
+    <Alert {...props} title={title} body={...(content as any)} />
+  ))
+}
+
 export function prompt(title:string, defaultValue:string):Promise<string|null> {
   const TextInput = getModule("TextInput").default
   const ConfirmationModal = getModule("ConfirmModal").default
@@ -167,4 +180,23 @@ export function openSetting(this:any) {
       </ModalRoot>
     })
   }
+}
+
+export function anonymous(callback:Function, ...args:any[]) { return callback(...args) }
+
+export function copyText(text:string) {
+  const copyModule = getModule(["copy", "SUPPORTS_COPY"])
+  if (!copyModule.SUPPORTS_COPY) {
+    // deprecated dom method
+    const el = Object.assign(document.createElement("textarea"), {
+      value: text,
+      readonly: true,
+      style: { position: "absolute", left: "-9999px" }
+    })
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand("copy")
+    document.body.removeChild(el)
+  }
+  else copyModule.copy(text)
 }

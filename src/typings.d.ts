@@ -29,6 +29,7 @@ interface addonApi {
   disable: (name:string) => void
   enable: (name:string) => void
   toggle: (name:string) => void
+  install: (url:string) => void
 }
 
 interface DrApi {
@@ -56,6 +57,7 @@ interface DrApi {
   Themes:addonApi
   showConfirmationModal: (title:string|React.ReactElement, content:string|React.ReactElement|Array<string|React.ReactElement>, opts:showConfirmationModalProps) => void
   prompt: (title:string, defaultValue:string) => Promise<string|null>
+  alert: (title:string|react.ReactElement, content:string|react.ReactElement|Array<string|react.ReactElement>) => void
   toast: (text:string, opts:toastOpts) => Node
   storage: {
     get: (plugin:string, key:string) => any

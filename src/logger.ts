@@ -18,12 +18,18 @@ function ifDark(yes:any, no:any, force?:boolean):any {
 
 export const cache:any = {}
 
+function getColor(prop:string):string {
+  if (prop === "error") return "#ed4245"
+  if (prop === "warn") return "#faa81a"
+  return "#F52590"
+}
+
 export default new Proxy(cache, {
   get: (_:any, prop:string) => {
     const log = (...input:any[]) => {
       let firstArgIsString = typeof input[0] === "string"
       let lastArgs = firstArgIsString ? [`\n${input[0]}`, ...input.slice(1)] : ["\n", ...input]
-      getOriginal(prop)(`%cDR%c${i18n.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: #F52590; border-radius: 4px`, `background: #F52590; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...lastArgs)
+      getOriginal(prop)(`%cDR%c${i18n.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor(prop)}; border-radius: 4px`, `background: ${getColor(prop)}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...lastArgs)
     }
     cache[prop] = log
     return log

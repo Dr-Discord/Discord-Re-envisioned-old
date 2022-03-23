@@ -1,5 +1,5 @@
 import { React } from "./react"
-import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal, openSetting as initOpenSettings } from "./util"
+import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal, openSetting as initOpenSettings, anonymous } from "./util"
 import getModule, { asyncGetModule } from "./getModule"
 import patcher from "./patcher"
 import i18n from "./i18n"
@@ -77,37 +77,40 @@ const DrIcon = React.memo(() => (
 ))
 
 let selectedChild:any = () => {}
+let DrDashboardButton:any
 
-const { LinkButton } = getModule(["LinkButton"])
-interface DrDashboardButton {
-  children: Array<React.ReactNode>
-}
-const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
-  const [isSelected, setSelected] = React.useState(false)
-  let _selectedChild = children.find((e:any) => e?.props?.selected)
-  if (_selectedChild) selectedChild = _selectedChild
-
-  dispatch = function(val:boolean) {
-    if (!val) {
-      const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`)
-      if (!domNode) return setSelected(val)
-      if (!selectedChild.props) selectedChild.props = {}
-      selectedChild.props.selected = getOwnerInstance(domNode)._reactInternals.return.key === selectedChild.key      
-    }
-    setSelected(val)
+anonymous(async () => {
+  const { LinkButton } = await asyncGetModule((e: { LinkButton:any }) => e.LinkButton)
+  interface DrDashboardButton {
+    children: Array<React.ReactNode>
   }
-
-  return (
-    <LinkButton 
-      text={i18n.name}
-      icon={() =>  <DrIcon />}
-      route="/dr_dashboard"
-      selected={isSelected}
-      onFocus={() => {
-        if (selectedChild) selectedChild.props.selected = false
-      }}
-    />
-  )
+  DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
+    const [isSelected, setSelected] = React.useState(false)
+    let _selectedChild = children.find((e:any) => e?.props?.selected)
+    if (_selectedChild) selectedChild = _selectedChild
+  
+    dispatch = function(val:boolean) {
+      if (!val) {
+        const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`)
+        if (!domNode) return setSelected(val)
+        if (!selectedChild.props) selectedChild.props = {}
+        selectedChild.props.selected = getOwnerInstance(domNode)._reactInternals.return.key === selectedChild.key      
+      }
+      setSelected(val)
+    }
+  
+    return (
+      <LinkButton 
+        text={i18n.name}
+        icon={() =>  <DrIcon />}
+        route="/dr_dashboard"
+        selected={isSelected}
+        onFocus={() => {
+          if (selectedChild) selectedChild.props.selected = false
+        }}
+      />
+    )
+  })
 })
 
 const SwitchOrig = getModule("SwitchItem").default
@@ -137,19 +140,17 @@ patcher.after("DrInternal-RouterRoutes-Patch", getModule("ConnectedPrivateChanne
   const children = res.props.children.props.children
   dispatch(/^\/dr_dashboard/.test(location.pathname))
   if (children.find((e:any) => e && e.key === "drdashLinkButton")) return
+  if (!DrDashboardButton) return
   children.unshift(<DrDashboardButton key="drdashLinkButton">{children}</DrDashboardButton>)
 })
 
-
-{
-  (async () => {
-    const Views = await asyncGetModule((e: { default: { displayName: string } }) => e.default?.displayName === "ViewsWithMainInterface")
-    patcher.after("DrInternal-RouterRoutes-Patch", Views.default?.prototype, "render", (_:unknown, res:any) => {
-      const routes = res.props.children[0].props.children[1]
-      routes[routes.length - 1].props.path.push("/dr_dashboard")
+anonymous(async () => {
+  const Views = await asyncGetModule((e: { default: { displayName: string } }) => e.default?.displayName === "ViewsWithMainInterface")
+  patcher.after("DrInternal-RouterRoutes-Patch", Views.default?.prototype, "render", (_:unknown, res:any) => {
+    const routes = res.props.children[0].props.children[1]
+    routes[routes.length - 1].props.path.push("/dr_dashboard")
   })
-  })()
-}
+})
 
 const Gear = getModule("Gear").default
 const OpenExternal = getModule("OpenExternal").default

@@ -29,7 +29,7 @@ function byDisplayName(displayName: string) {
   return [...norm, ...type, ...rend]
 }
 
-export default function getModule(filter:Function|string|number|Array<string>, first = true):any|Array<any>|null {
+export function getModule(filter:Function|string|number|Array<string>, first = true):any|Array<any>|null {
   let modules = []
   if (Array.isArray(filter)) modules = byPropsAll(...filter)
   else if (typeof filter === "string") modules = byDisplayName(filter)
@@ -38,7 +38,7 @@ export default function getModule(filter:Function|string|number|Array<string>, f
   if (first) return modules[0]
   return modules
 }
-
+export default getModule
 // Off of Zlibs/BDs async find 
 // Idk how it really works
 const listeners = new Set<Function>()
@@ -72,7 +72,7 @@ Object.defineProperty(webpackChunkdiscord_app, "push", {
 })
 export function asyncGetModule(filter:Function):Promise<any> {
   return new Promise((resolve, reject) => {
-    if (typeof filter !== "function") return reject(`Filter has to be a function, cannot be '${typeof filter}'`)
+    if (typeof filter !== "function") return reject(`Filter has to be a function, cannot be type '${typeof filter}'`)
     const cached = getModule(filter)
     if (cached) return resolve(cached)
   

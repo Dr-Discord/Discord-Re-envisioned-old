@@ -10,15 +10,16 @@ if (location.pathname.startsWith("/dr_dashboard")) {
 
 if (Boolean(window.DrApi)) throw new Error("Discord Re-envisioned is already loaded.")
 
-import { React, ReactDOM } from "./react"
+import React, { ReactDOM } from "./react"
 import patcher from "./patcher"
-import { default as getModule, asyncGetModule } from "./getModule"
+import getModule, { asyncGetModule } from "./getModule"
 import { pluginStyling } from "./styling"
 import createToast from "./toast"
-import { showConfirmationModal, getOwnerInstance, waitUntil, getReactInstance, findInReactTree, findInTree, prompt, openSetting } from "./util"
+import { showConfirmationModal, getOwnerInstance, waitUntil, getReactInstance, findInReactTree, findInTree, prompt, alert } from "./util"
 import { internal, plugins } from "./storage"
 import "./dashboard"
 import i18n from "./i18n"
+import { initCard } from "./addonManager"
 
 document.body.appendChild(Object.assign(document.createElement("script"), {
   src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
@@ -32,7 +33,8 @@ window.__DR__BACKEND__ = {
   app: window?.__DR__ELECTRON__BACKEND__?.app ?? false,
   transparent: window?.__DR__ELECTRON__BACKEND__?.transparent ?? false,
   toggleTransparency: window?.__DR__ELECTRON__BACKEND__?.toggleTransparency ?? (function() { throw new Error("tried using toggleTransparency on WEB!") }),
-  isPopped: false
+  isPopped: false,
+  logger
 }
 const badges:{ [x:string]: [string, string] } = {
   "515780151791976453": [i18n.badges.developer, "#F52590"],
@@ -77,7 +79,8 @@ async function Start() {
       isEnabled: function(name) { return Plugins.isEnabled(name) },
       disable: function(name) { return Plugins.disable(name) },
       enable: function(name) { return Plugins.enable(name) },
-      toggle: function(name) { return Plugins.toggle(name) }
+      toggle: function(name) { return Plugins.toggle(name) },
+      install: function(url) { return Plugins.install(url) }
     },
     Themes: {
       get: function(name) { return themes.get(name) },
@@ -85,10 +88,12 @@ async function Start() {
       isEnabled: function(name) { return themes.isEnabled(name) },
       disable: function(name) { return themes.disable(name) },
       enable: function(name) { return themes.enable(name) },
-      toggle: function(name) { return themes.toggle(name) }
+      toggle: function(name) { return themes.toggle(name) },
+      install: function(url) { return themes.install(url) }
     },
     showConfirmationModal: function(title, content, opts = {}) { return showConfirmationModal(title, content, opts) },
     prompt: async function(title, defaultValue) { return await prompt(title, defaultValue) },
+    alert: function(title, content) { return alert(title, content) },
     toast: function(text, opts = {}) { return createToast(text, opts) },
     React,
     ReactDOM,
@@ -125,6 +130,10 @@ async function Start() {
     if (!content) return
     res.props.children.push(makeBadge(content[0], content[1], Number(badgeModule.BadgeSizes[props.size].replace("SIZE_", ""))))
   })
-
+  const Card = initCard()
+  patcher.instead("DrInternal-Addoncards-Patch", getModule(["defaultRules", "astParserFor"]).defaultRules.link, "react", (props:Array<any>, orig:Function) => {    
+    if (!props[0].target.startsWith("dr://")) return 
+    return () => <Card href={props[0].target} />
+  })
   logger.log("Loaded!")
 }
