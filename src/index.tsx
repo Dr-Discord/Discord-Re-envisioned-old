@@ -1,8 +1,17 @@
+/**
+ * @file index.tsx
+ * @author doggybootsy
+ * @desc main entry point.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 import logger from "./logger"
 
 logger.log("Loading...")
 
 if (location.pathname.startsWith("/dr_dashboard")) {
+  logger.error("404, oh no redirecting")
   const node = document.querySelector("[href=\"//discord.com/login\"]")
   if (node) node.click()
   throw new Error("Preventing further execution")

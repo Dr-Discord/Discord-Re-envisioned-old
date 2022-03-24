@@ -2,7 +2,6 @@ interface patcherOpts {
   method?:"before"|"after"|"instead"
   id?:string|symbol
   index?:number
-  once?:boolean
 }
 interface showConfirmationModalOpts {
   onConfirm?:()=>void

@@ -1,3 +1,11 @@
+/**
+ * @file util.tsx
+ * @author doggybootsy
+ * @desc Make life easier.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 import { React } from "./react"
 import getModule from "./getModule"
 import react from "react"
@@ -71,7 +79,7 @@ export function alert(title:string|react.ReactElement, content:string|react.Reac
   content = content.map((c:any) => typeof(c) === "string" ? <Markdown>{c}</Markdown> : c)
   
   openModal((props:any) => (
-    <Alert {...props} title={title} body={...(content as any)} />
+    <Alert {...props} title={title} body={...(content as Array<string|react.ReactElement>)} />
   ))
 }
 
@@ -87,24 +95,26 @@ export function prompt(title:string, defaultValue:string):Promise<string|null> {
   return new Promise((resolve) => {
     openModal((props:any) => {
       if (props.transitionState === 3) resolve(null)
-      return React.createElement(ConfirmationModal, Object.assign({
-        header: title,
-        confirmButtonColor: Button.ButtonColors.BRAND,
-        confirmText: Messages.OKAY,
-        cancelText: Messages.CANCEL,
-        onConfirm: () => resolve(toReturn),
-        onCancel: () => resolve(null),
-        children: React.createElement(React.memo(() => {
+      return <ConfirmationModal
+        header={title}
+        confirmButtonColor={Button.ButtonColors.BRAND}
+        confirmText={Messages.OKAY}
+        cancelText={Messages.CANCEL}
+        onConfirm={() => resolve(toReturn)}
+        onCancel={() => resolve(null)}
+        {...props}
+      >
+        {React.createElement(() => {
           const [value, setValue] = React.useState(defaultValue)
-          return React.createElement(TextInput, {
-            value: value,
-            onChange: (value:string) => {
+          return <TextInput 
+            value={value}
+            onChange={(value:string) => {
               setValue(value)
               toReturn = value
-            }
-          })
-        }))
-      }, props))
+            }}
+          />
+        })}
+      </ConfirmationModal>
     })
   })
 }

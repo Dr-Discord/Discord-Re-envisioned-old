@@ -1,3 +1,13 @@
+/**
+ * @file getModule.ts
+ * @author doggybootsy
+ * @desc Easy way to get modules from the webpack bundle.
+ * @license MIT
+ * @version 1.0.0
+ */
+
+import patcher from "./patcher"
+
 const webpackExports = !webpackChunkdiscord_app.webpackExports ? webpackChunkdiscord_app.push([
   [Symbol("Discord Re-envisioned")], {}, (exp:any) => {
     webpackChunkdiscord_app.pop()
@@ -46,16 +56,9 @@ const listeners = new Set<Function>()
 let __ORIGINAL_PUSH__:Function = webpackChunkdiscord_app.push
 function handlePush(chunk:any) {
   const [, modules] = chunk
-  for (const id in modules) {
-    const originalModule = modules[id]
-    modules[id] = (module:any, exports:any, require:any) => {
-      Reflect.apply(originalModule, null, [module, exports, require]);
-      for (const ite of [...listeners]) ite(exports)
-    }
-    Object.assign(modules[id], originalModule, {
-      toString: () => originalModule.toString()
-    })
-  }
+  for (const id in modules) patcher.after("DrInternal-handlePush-Patch", modules, id, ([, exports]:any) => {
+    for (const ite of [...listeners]) ite(exports)
+  })
   return __ORIGINAL_PUSH__.apply(window.webpackChunkdiscord_app, [chunk])
 }
 Object.defineProperty(webpackChunkdiscord_app, "push", {

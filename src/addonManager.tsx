@@ -1,3 +1,11 @@
+/**
+ * @file addonManager.tsx
+ * @author doggybootsy
+ * @desc The addon manager for the addon system.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 import { React } from "./react"
 import getModule from "./getModule"
 import { alert, copyText } from "./util"
@@ -38,7 +46,7 @@ export const initCard = () => {
             onClick={() => {
               setCopied(true)
               copyText(href)
-              setTimeout(() => setCopied(false), 1000)
+              setTimeout(() => setCopied(false), 2000)
             }}
           >
             <svg className="copyLinkIcon-aa2cFn" aria-hidden="false" width="24" height="24" viewBox="0 0 24 24">
@@ -47,7 +55,6 @@ export const initCard = () => {
                 <rect width="24" height="24"></rect>
               </g>
             </svg>
-            {isCopied ? "Link Copied!" : "Copy Link"}
           </div>
         </Text>
         <div className={content}>

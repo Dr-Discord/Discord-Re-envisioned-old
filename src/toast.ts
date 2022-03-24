@@ -1,4 +1,14 @@
+/**
+ * @file toast.ts
+ * @author doggybootsy
+ * @desc A simple toast system.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 import { internalStyling } from "./styling"
+import domNodes from "./domNodes"
+
 internalStyling.inject("toasts", `.dr-toast { display: inline-flex; box-sizing: border-box; border-radius: 3px; color: var(--text-normal); font-size: 16px; background-color: var(--background-floating); vertical-align: bottom; box-shadow: var(--elevation-low); margin: 0 10px 0 auto; flex-grow: 1; opacity: 1; transition: opacity 0.3s ease-in-out; width: fit-content }
 .dr-toast:is(.adding, .removing) { opacity: 0 }
 .dr-toast:not(:last-child) {  margin-bottom: 5px }
@@ -20,9 +30,7 @@ insure()
 let toastWrapper:any = null
 function insure() {
   if (!!toastWrapper) return
-  const toastContainer = document.createElement("div")
-  toastContainer.className = "dr-toast-container"
-  document.body.appendChild(toastContainer)
+  const toastContainer = domNodes.getToastContainer()
   toastWrapper = document.createElement("div")
   toastWrapper.className = "dr-toast-wrapper"
   toastWrapper.style.marginBottom = "5px"

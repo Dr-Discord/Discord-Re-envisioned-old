@@ -74,6 +74,89 @@
     }
   });
 
+  // tsBuild/storage.js
+  var require_storage = __commonJS({
+    "tsBuild/storage.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      exports.internal = exports.plugins = exports.localStorage = void 0;
+      exports.localStorage = (() => {
+        if (window.localStorage)
+          return window.localStorage;
+        const frame = document.createElement("frame");
+        frame.src = "about:blank";
+        document.body.appendChild(frame);
+        let localStorage = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage");
+        frame.remove();
+        Object.defineProperty(window, "localStorage", localStorage);
+        return window.localStorage;
+      })();
+      exports.localStorage.setItem("dr-storage", (() => {
+        let res = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
+        for (const dataType of ["themeData", "pluginData", "internalData"])
+          res[dataType] = res[dataType] ?? {};
+        return JSON.stringify(res);
+      })());
+      exports.plugins = {
+        get: (plugin, key) => JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}").pluginData?.[plugin]?.[key],
+        set: (plugin, key, value) => {
+          const storage = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
+          if (!storage.pluginData[plugin])
+            storage.pluginData[plugin] = {};
+          storage.pluginData[plugin][key] = value;
+          exports.localStorage.setItem("dr-storage", JSON.stringify(storage));
+        }
+      };
+      exports.internal = {
+        get: (key) => JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}").internalData?.[key],
+        set: (key, value) => {
+          const storage = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
+          storage.internalData[key] = value;
+          exports.localStorage.setItem("dr-storage", JSON.stringify(storage));
+        }
+      };
+    }
+  });
+
+  // tsBuild/domNodes.js
+  var require_domNodes = __commonJS({
+    "tsBuild/domNodes.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var storage_1 = require_storage();
+      function getIframe() {
+        if (this.iframe)
+          return this.iframe;
+        const node = document.createElement("iframe");
+        node.id = "dr-iframe";
+        document.body.appendChild(node);
+        return this.iframe = node;
+      }
+      function getToastContainer() {
+        if (this.toast)
+          return this.toast;
+        const node = document.createElement("div");
+        node.id = "dr-toast-container";
+        document.body.appendChild(node);
+        return this.toast = node;
+      }
+      function getCCss() {
+        if (this.CCss)
+          return this.CCss;
+        const node = document.createElement("style");
+        node.id = "dr-customcss";
+        node.innerHTML = storage_1.internal.get("customCSS") ?? "";
+        document.body.appendChild(node);
+        return this.CCss = node;
+      }
+      exports.default = {
+        getIframe,
+        getToastContainer,
+        getCCss
+      };
+    }
+  });
+
   // tsBuild/logger.js
   var require_logger = __commonJS({
     "tsBuild/logger.js"(exports) {
@@ -84,8 +167,16 @@
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.cache = void 0;
       var i18n_1 = __importDefault(require_i18n());
+      var domNodes_1 = __importDefault(require_domNodes());
+      var _console = (() => {
+        const frame = domNodes_1.default.getIframe();
+        const c = Object.getOwnPropertyDescriptor(frame.contentWindow, "console");
+        if (!c)
+          return console;
+        return c.value;
+      })();
       function getOriginal(type) {
-        const original = console[type];
+        const original = _console[type];
         if (original?.__sentry_original__)
           return original.__sentry_original__;
         if (original?.__REACT_DEVTOOLS_ORIGINAL_METHOD__)
@@ -105,24 +196,151 @@
       }
       exports.cache = {};
       function getColor(prop) {
-        if (prop === "error")
-          return "#ed4245";
-        if (prop === "warn")
-          return "#faa81a";
-        return "#F52590";
-      }
-      exports.default = new Proxy(exports.cache, {
-        get: (_, prop) => {
-          const log = (...input) => {
-            let firstArgIsString = typeof input[0] === "string";
-            let lastArgs = firstArgIsString ? [`
-${input[0]}`, ...input.slice(1)] : ["\n", ...input];
-            getOriginal(prop)(`%cDR%c${i18n_1.default.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor(prop)}; border-radius: 4px`, `background: ${getColor(prop)}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...lastArgs);
-          };
-          exports.cache[prop] = log;
-          return log;
+        switch (prop) {
+          case "error":
+            return "#ed4245";
+          case "warn":
+            return "#faa81a";
+          default:
+            return "#F52590";
         }
-      });
+      }
+      function evIn(input) {
+        return typeof input[0] === "string" ? [`
+${input[0]}`, ...input.slice(1)] : ["\n", ...input];
+      }
+      exports.default = {
+        error: (...input) => getOriginal("error")(`%cDR%c${i18n_1.default.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor("error")}; border-radius: 4px`, `background: ${getColor("error")}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...evIn(input)),
+        warn: (...input) => getOriginal("warn")(`%cDR%c${i18n_1.default.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor("warn")}; border-radius: 4px`, `background: ${getColor("warn")}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...evIn(input)),
+        log: (...input) => getOriginal("log")(`%cDR%c${i18n_1.default.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor("log")}; border-radius: 4px`, `background: ${getColor("log")}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...evIn(input))
+      };
+    }
+  });
+
+  // tsBuild/patcher.js
+  var require_patcher = __commonJS({
+    "tsBuild/patcher.js"(exports) {
+      "use strict";
+      Object.defineProperty(exports, "__esModule", { value: true });
+      var Patch_Symbol = Symbol("DrApi.patch");
+      var Quick_Symbol = Symbol("DrApi.patch.quick");
+      var Internal_Symbol = Symbol("DrInternal");
+      var ALLpatches = {};
+      function isClass(func) {
+        if (!(func && func.constructor === Function) || func.prototype === void 0)
+          return false;
+        if (Function.prototype === Object.getPrototypeOf(func))
+          return Object.getOwnPropertyNames(func.prototype).length > 1;
+        return true;
+      }
+      function patch(patchName, moduleToPatch, functionToPatch, callback, opts) {
+        let { method = "after", id, index = 0 } = opts;
+        let originalFunction = moduleToPatch[functionToPatch];
+        if (!originalFunction) {
+          moduleToPatch[functionToPatch] = () => {
+          };
+          originalFunction = moduleToPatch[functionToPatch];
+        }
+        method = method.toLowerCase();
+        if (!(method === "before" || method === "after" || method === "instead"))
+          throw new Error(`'${method}' is a invalid patch type`);
+        let patches = moduleToPatch?.[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] };
+        let CallbackSymbol = Symbol();
+        let patchInfo = { unpatch, patchName: id ?? patchName, moduleToPatch, functionToPatch, callback, method, Symbol: CallbackSymbol };
+        patches[method].splice(index, 0, Object.assign(callback, { unpatch, Symbol: CallbackSymbol }));
+        let DidUnpatch = false;
+        function unpatch() {
+          if (DidUnpatch)
+            return;
+          DidUnpatch = true;
+          let found = patches[method].find((p) => p.Symbol === patchInfo.Symbol);
+          let index2 = patches[method].indexOf(found);
+          patches[method].splice(index2, 1);
+          found = ALLpatches[patchName].find((p) => p.Symbol === patchInfo.Symbol);
+          index2 = ALLpatches[patchName].indexOf(found);
+          ALLpatches[patchName].splice(index2, 1);
+          if (!ALLpatches[patchName].length)
+            delete ALLpatches[patchName];
+        }
+        if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
+          if (isClass(originalFunction))
+            moduleToPatch[functionToPatch] = class extends originalFunction {
+              constructor() {
+                if (false)
+                  super();
+                const that = moduleToPatch[functionToPatch];
+                for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
+                  patches.before[patch2 - 1]([...arguments], that);
+                let insteadFunction = () => new originalFunction(arguments);
+                for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
+                  insteadFunction = patches.instead[patch2 - 1]([...arguments], insteadFunction, that) ?? insteadFunction;
+                let res = Reflect.apply(insteadFunction, that, arguments);
+                for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
+                  patches.after[patch2 - 1]([...arguments], res, that);
+                return res;
+              }
+            };
+          else
+            moduleToPatch[functionToPatch] = function() {
+              for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
+                patches.before[patch2 - 1]();
+              let insteadFunction = originalFunction;
+              for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
+                insteadFunction = patches.instead[patch2 - 1]([...arguments], insteadFunction, this) ?? insteadFunction;
+              let res = Reflect.apply(insteadFunction, this, arguments);
+              for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
+                patches.after[patch2 - 1]([...arguments], res, this);
+              return res;
+            };
+          moduleToPatch[functionToPatch][Patch_Symbol] = {
+            original: originalFunction,
+            module: moduleToPatch,
+            function: functionToPatch,
+            patches,
+            unpatchAll: () => {
+              for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
+                patches.before[patch2 - 1].unpatch();
+              for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
+                patches.instead[patch2 - 1].unpatch();
+              for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
+                patches.after[patch2 - 1].unpatch();
+            }
+          };
+          Object.assign(moduleToPatch[functionToPatch], originalFunction);
+          Object.defineProperty(moduleToPatch[functionToPatch], "toString", {
+            value: () => originalFunction.toString(),
+            writable: false,
+            enumerable: false,
+            configurable: true
+          });
+        }
+        if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))
+          if (patchName === "DrInternal-handlePush-Patch")
+            return unpatch;
+          else if (!ALLpatches[Internal_Symbol])
+            ALLpatches[Internal_Symbol] = [patchInfo];
+          else
+            ALLpatches[Internal_Symbol].push(patchInfo);
+        else if (!ALLpatches[patchName])
+          ALLpatches[patchName] = [patchInfo];
+        else
+          ALLpatches[patchName].push(patchInfo);
+        return unpatch;
+      }
+      exports.default = {
+        patch,
+        quick: (moduleToPatch, functionToPatch, callback, opts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
+        before: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "before" })),
+        instead: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "instead" })),
+        after: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "after" })),
+        unpatchAll: (id) => {
+          if (!ALLpatches[id])
+            return;
+          for (const patch2 of ALLpatches[id])
+            patch2.unpatch();
+        },
+        patches: ALLpatches
+      };
     }
   });
 
@@ -130,8 +348,12 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
   var require_getModule = __commonJS({
     "tsBuild/getModule.js"(exports) {
       "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.asyncGetModule = exports.getModule = void 0;
+      var patcher_1 = __importDefault(require_patcher());
       var webpackExports = !webpackChunkdiscord_app.webpackExports ? webpackChunkdiscord_app.push([
         [Symbol("Discord Re-envisioned")],
         {},
@@ -185,17 +407,11 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
       var __ORIGINAL_PUSH__ = webpackChunkdiscord_app.push;
       function handlePush(chunk) {
         const [, modules] = chunk;
-        for (const id in modules) {
-          const originalModule = modules[id];
-          modules[id] = (module2, exports2, require2) => {
-            Reflect.apply(originalModule, null, [module2, exports2, require2]);
+        for (const id in modules)
+          patcher_1.default.after("DrInternal-handlePush-Patch", modules, id, ([, exports2]) => {
             for (const ite of [...listeners])
               ite(exports2);
-          };
-          Object.assign(modules[id], originalModule, {
-            toString: () => originalModule.toString()
           });
-        }
         return __ORIGINAL_PUSH__.apply(window.webpackChunkdiscord_app, [chunk]);
       }
       Object.defineProperty(webpackChunkdiscord_app, "push", {
@@ -248,197 +464,23 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
     }
   });
 
-  // tsBuild/patcher.js
-  var require_patcher = __commonJS({
-    "tsBuild/patcher.js"(exports) {
-      "use strict";
-      Object.defineProperty(exports, "__esModule", { value: true });
-      var Patch_Symbol = Symbol("DrApi.patch");
-      var Quick_Symbol = Symbol("DrApi.patch.quick");
-      var Internal_Symbol = Symbol("DrInternal");
-      var ALLpatches = {};
-      function isClass(func) {
-        if (!(func && func.constructor === Function) || func.prototype === void 0)
-          return false;
-        if (Function.prototype === Object.getPrototypeOf(func))
-          return Object.getOwnPropertyNames(func.prototype).length > 1;
-        return true;
-      }
-      function patch(patchName, moduleToPatch, functionToPatch, callback, opts) {
-        let { method = "after", id, once = false, index = 0 } = opts;
-        let originalFunction = moduleToPatch[functionToPatch];
-        if (!originalFunction) {
-          moduleToPatch[functionToPatch] = () => {
-          };
-          originalFunction = moduleToPatch[functionToPatch];
-        }
-        method = method.toLowerCase();
-        if (!(method === "before" || method === "after" || method === "instead"))
-          throw new Error(`'${method}' is a invalid patch type`);
-        let patches = moduleToPatch?.[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] };
-        let CallbackSymbol = Symbol();
-        let patchInfo = { unpatch, patchName: id ?? patchName, moduleToPatch, functionToPatch, callback, method, Symbol: CallbackSymbol };
-        patches[method].splice(index, 0, Object.assign(callback, { unpatch, Symbol: CallbackSymbol }));
-        let DidUnpatch = false;
-        function unpatch() {
-          if (DidUnpatch)
-            return;
-          DidUnpatch = true;
-          let found = patches[method].find((p) => p.Symbol === patchInfo.Symbol);
-          let index2 = patches[method].indexOf(found);
-          patches[method].splice(index2, 1);
-          found = ALLpatches[patchName].find((p) => p.Symbol === patchInfo.Symbol);
-          index2 = ALLpatches[patchName].indexOf(found);
-          ALLpatches[patchName].splice(index2, 1);
-          if (!ALLpatches[patchName].length)
-            delete ALLpatches[patchName];
-        }
-        if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
-          if (isClass(originalFunction))
-            moduleToPatch[functionToPatch] = class extends originalFunction {
-              constructor() {
-                if (false)
-                  super();
-                for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
-                  patches.before[patch2 - 1]();
-                let insteadFunction = () => new originalFunction(arguments);
-                let that = Object.assign({}, insteadFunction);
-                for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
-                  insteadFunction = patches.instead[patch2 - 1]([...arguments], insteadFunction, that) ?? insteadFunction;
-                let res = Reflect.apply(insteadFunction, that, arguments);
-                for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
-                  patches.after[patch2 - 1]([...arguments], res, that);
-                if (once)
-                  unpatch();
-                return res;
-              }
-            };
-          else
-            moduleToPatch[functionToPatch] = function() {
-              for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
-                patches.before[patch2 - 1]();
-              let insteadFunction = originalFunction;
-              for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
-                insteadFunction = patches.instead[patch2 - 1]([...arguments], insteadFunction, this) ?? insteadFunction;
-              let res = Reflect.apply(insteadFunction, this, arguments);
-              for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
-                patches.after[patch2 - 1]([...arguments], res, this);
-              if (once)
-                unpatch();
-              return res;
-            };
-          moduleToPatch[functionToPatch][Patch_Symbol] = {
-            original: originalFunction,
-            module: moduleToPatch,
-            function: functionToPatch,
-            patches,
-            unpatchAll: () => {
-              for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
-                patches.before[patch2 - 1].unpatch();
-              for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
-                patches.instead[patch2 - 1].unpatch();
-              for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
-                patches.after[patch2 - 1].unpatch();
-            }
-          };
-          Object.assign(moduleToPatch[functionToPatch], originalFunction);
-          Object.defineProperty(moduleToPatch[functionToPatch], "toString", {
-            value: () => originalFunction.toString(),
-            writable: false,
-            enumerable: false,
-            configurable: true
-          });
-        }
-        if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))
-          if (!ALLpatches[Internal_Symbol])
-            ALLpatches[Internal_Symbol] = [patchInfo];
-          else
-            ALLpatches[Internal_Symbol].push(patchInfo);
-        else if (!ALLpatches[patchName])
-          ALLpatches[patchName] = [patchInfo];
-        else
-          ALLpatches[patchName].push(patchInfo);
-        return unpatch;
-      }
-      exports.default = {
-        patch,
-        quick: (moduleToPatch, functionToPatch, callback, opts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
-        before: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "before" })),
-        instead: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "instead" })),
-        after: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "after" })),
-        unpatchAll: (id) => {
-          if (!ALLpatches[id])
-            return;
-          for (const patch2 of ALLpatches[id])
-            patch2.unpatch();
-          return;
-        },
-        patches: ALLpatches
-      };
-    }
-  });
-
-  // tsBuild/storage.js
-  var require_storage = __commonJS({
-    "tsBuild/storage.js"(exports) {
-      "use strict";
-      Object.defineProperty(exports, "__esModule", { value: true });
-      exports.internal = exports.plugins = exports.localStorage = void 0;
-      exports.localStorage = (() => {
-        if (window.localStorage)
-          return window.localStorage;
-        const frame = document.createElement("frame");
-        frame.src = "about:blank";
-        document.body.appendChild(frame);
-        let localStorage = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage");
-        frame.remove();
-        Object.defineProperty(window, "localStorage", localStorage);
-        return window.localStorage;
-      })();
-      exports.localStorage.setItem("dr-storage", (() => {
-        let res = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
-        for (const dataType of ["themeData", "pluginData", "internalData"])
-          res[dataType] = res[dataType] ?? {};
-        return JSON.stringify(res);
-      })());
-      exports.plugins = {
-        get: (plugin, key) => JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}").pluginData?.[plugin]?.[key],
-        set: (plugin, key, value) => {
-          const storage = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
-          if (!storage.pluginData[plugin])
-            storage.pluginData[plugin] = {};
-          storage.pluginData[plugin][key] = value;
-          exports.localStorage.setItem("dr-storage", JSON.stringify(storage));
-        }
-      };
-      exports.internal = {
-        get: (key) => JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}").internalData?.[key],
-        set: (key, value) => {
-          const storage = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
-          storage.internalData[key] = value;
-          exports.localStorage.setItem("dr-storage", JSON.stringify(storage));
-        }
-      };
-    }
-  });
-
   // tsBuild/styling.js
   var require_styling = __commonJS({
     "tsBuild/styling.js"(exports) {
       "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.customcss = exports.internalStyling = exports.themeStyling = exports.pluginStyling = void 0;
-      var storage_1 = require_storage();
+      var domNodes_1 = __importDefault(require_domNodes());
       var DrHead = document.createElement("dr-styles");
       document.head.appendChild(DrHead);
       var Dr_ele = {
         internal: document.createElement("dr-internal"),
         plugin: document.createElement("dr-plugin"),
         theme: document.createElement("dr-theme"),
-        customcss: Object.assign(document.createElement("style"), {
-          innerHTML: storage_1.internal.get("customCSS") ?? "",
-          id: "dr-customcss"
-        })
+        customcss: domNodes_1.default.getCCss()
       };
       for (const key of Object.keys(Dr_ele))
         DrHead.appendChild(Dr_ele[key]);
@@ -490,8 +532,12 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
   var require_toast = __commonJS({
     "tsBuild/toast.js"(exports) {
       "use strict";
+      var __importDefault = exports && exports.__importDefault || function(mod) {
+        return mod && mod.__esModule ? mod : { "default": mod };
+      };
       Object.defineProperty(exports, "__esModule", { value: true });
       var styling_1 = require_styling();
+      var domNodes_1 = __importDefault(require_domNodes());
       styling_1.internalStyling.inject("toasts", `.dr-toast { display: inline-flex; box-sizing: border-box; border-radius: 3px; color: var(--text-normal); font-size: 16px; background-color: var(--background-floating); vertical-align: bottom; box-shadow: var(--elevation-low); margin: 0 10px 0 auto; flex-grow: 1; opacity: 1; transition: opacity 0.3s ease-in-out; width: fit-content }
 .dr-toast:is(.adding, .removing) { opacity: 0 }
 .dr-toast:not(:last-child) {  margin-bottom: 5px }
@@ -512,9 +558,7 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
       function insure() {
         if (!!toastWrapper)
           return;
-        const toastContainer = document.createElement("div");
-        toastContainer.className = "dr-toast-container";
-        document.body.appendChild(toastContainer);
+        const toastContainer = domNodes_1.default.getToastContainer();
         toastWrapper = document.createElement("div");
         toastWrapper.className = "dr-toast-wrapper";
         toastWrapper.style.marginBottom = "5px";
@@ -647,24 +691,13 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
           openModal((props) => {
             if (props.transitionState === 3)
               resolve(null);
-            return react_1.React.createElement(ConfirmationModal, Object.assign({
-              header: title,
-              confirmButtonColor: Button.ButtonColors.BRAND,
-              confirmText: Messages.OKAY,
-              cancelText: Messages.CANCEL,
-              onConfirm: () => resolve(toReturn),
-              onCancel: () => resolve(null),
-              children: react_1.React.createElement(react_1.React.memo(() => {
-                const [value, setValue] = react_1.React.useState(defaultValue);
-                return react_1.React.createElement(TextInput, {
-                  value,
-                  onChange: (value2) => {
-                    setValue(value2);
-                    toReturn = value2;
-                  }
-                });
-              }))
-            }, props));
+            return react_1.React.createElement(ConfirmationModal, { header: title, confirmButtonColor: Button.ButtonColors.BRAND, confirmText: Messages.OKAY, cancelText: Messages.CANCEL, onConfirm: () => resolve(toReturn), onCancel: () => resolve(null), ...props }, react_1.React.createElement(() => {
+              const [value, setValue] = react_1.React.useState(defaultValue);
+              return react_1.React.createElement(TextInput, { value, onChange: (value2) => {
+                setValue(value2);
+                toReturn = value2;
+              } });
+            }));
           });
         });
       }
@@ -1046,8 +1079,8 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
           } }, react_1.React.createElement(InfoFilled, { className: infoIcon })), react_1.React.createElement("div", { className: `copyLink-1bBHaR${isCopied ? " copied-2eS1g4" : ""}`, role: "button", tabIndex: 0, onClick: () => {
             setCopied(true);
             (0, util_1.copyText)(href);
-            setTimeout(() => setCopied(false), 1e3);
-          } }, react_1.React.createElement("svg", { className: "copyLinkIcon-aa2cFn", "aria-hidden": "false", width: "24", height: "24", viewBox: "0 0 24 24" }, react_1.React.createElement("g", { fill: "none", "fill-rule": "evenodd" }, react_1.React.createElement("path", { fill: "currentColor", d: "M10.59 13.41c.41.39.41 1.03 0 1.42-.39.39-1.03.39-1.42 0a5.003 5.003 0 0 1 0-7.07l3.54-3.54a5.003 5.003 0 0 1 7.07 0 5.003 5.003 0 0 1 0 7.07l-1.49 1.49c.01-.82-.12-1.64-.4-2.42l.47-.48a2.982 2.982 0 0 0 0-4.24 2.982 2.982 0 0 0-4.24 0l-3.53 3.53a2.982 2.982 0 0 0 0 4.24zm2.82-4.24c.39-.39 1.03-.39 1.42 0a5.003 5.003 0 0 1 0 7.07l-3.54 3.54a5.003 5.003 0 0 1-7.07 0 5.003 5.003 0 0 1 0-7.07l1.49-1.49c-.01.82.12 1.64.4 2.43l-.47.47a2.982 2.982 0 0 0 0 4.24 2.982 2.982 0 0 0 4.24 0l3.53-3.53a2.982 2.982 0 0 0 0-4.24.973.973 0 0 1 0-1.42z" }), react_1.React.createElement("rect", { width: "24", height: "24" }))), isCopied ? "Link Copied!" : "Copy Link")), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: buildInfo }, react_1.React.createElement(Text, { size: Text.Sizes.SIZE_14, className: subHead }, spl[1]), react_1.React.createElement(Text, { size: Text.Sizes.SIZE_16, className: buildDetails }, "demo plugin for drdiscord random test ing lol")), react_1.React.createElement(Button, { size: Button.Sizes.MEDIUM, color: Button.Colors.GREEN }, "Install")));
+            setTimeout(() => setCopied(false), 2e3);
+          } }, react_1.React.createElement("svg", { className: "copyLinkIcon-aa2cFn", "aria-hidden": "false", width: "24", height: "24", viewBox: "0 0 24 24" }, react_1.React.createElement("g", { fill: "none", "fill-rule": "evenodd" }, react_1.React.createElement("path", { fill: "currentColor", d: "M10.59 13.41c.41.39.41 1.03 0 1.42-.39.39-1.03.39-1.42 0a5.003 5.003 0 0 1 0-7.07l3.54-3.54a5.003 5.003 0 0 1 7.07 0 5.003 5.003 0 0 1 0 7.07l-1.49 1.49c.01-.82-.12-1.64-.4-2.42l.47-.48a2.982 2.982 0 0 0 0-4.24 2.982 2.982 0 0 0-4.24 0l-3.53 3.53a2.982 2.982 0 0 0 0 4.24zm2.82-4.24c.39-.39 1.03-.39 1.42 0a5.003 5.003 0 0 1 0 7.07l-3.54 3.54a5.003 5.003 0 0 1-7.07 0 5.003 5.003 0 0 1 0-7.07l1.49-1.49c-.01.82.12 1.64.4 2.43l-.47.47a2.982 2.982 0 0 0 0 4.24 2.982 2.982 0 0 0 4.24 0l3.53-3.53a2.982 2.982 0 0 0 0-4.24.973.973 0 0 1 0-1.42z" }), react_1.React.createElement("rect", { width: "24", height: "24" }))))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: buildInfo }, react_1.React.createElement(Text, { size: Text.Sizes.SIZE_14, className: subHead }, spl[1]), react_1.React.createElement(Text, { size: Text.Sizes.SIZE_16, className: buildDetails }, "demo plugin for drdiscord random test ing lol")), react_1.React.createElement(Button, { size: Button.Sizes.MEDIUM, color: Button.Colors.GREEN }, "Install")));
         });
       };
       exports.initCard = initCard;
@@ -1093,6 +1126,7 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
       var logger_1 = __importDefault(require_logger());
       logger_1.default.log("Loading...");
       if (location.pathname.startsWith("/dr_dashboard")) {
+        logger_1.default.error("404, oh no redirecting");
         const node = document.querySelector('[href="//discord.com/login"]');
         if (node)
           node.click();
@@ -1278,3 +1312,94 @@ ${input[0]}`, ...input.slice(1)] : ["\n", ...input];
   });
   require_tsBuild();
 })();
+/**
+ * @file addonManager.tsx
+ * @author doggybootsy
+ * @desc The addon manager for the addon system.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file dashboard.tsx
+ * @author doggybootsy
+ * @desc Were the main dashboard is located.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file domNodes.ts
+ * @author doggybootsy
+ * @desc Simple way to share the nodes between the different parts of the code.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file getModule.ts
+ * @author doggybootsy
+ * @desc Easy way to get modules from the webpack bundle.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file i18n.ts
+ * @author doggybootsy
+ * @desc i18n.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file index.tsx
+ * @author doggybootsy
+ * @desc main entry point.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file logger.ts
+ * @author doggybootsy
+ * @desc Stylish console logging.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file patcher.ts
+ * @author doggybootsy
+ * @desc Monkey patcher.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file react.ts
+ * @author doggybootsy
+ * @desc Holds React, ReactDOM and, ReactSpring.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file storage.ts
+ * @author doggybootsy
+ * @desc Internal and plugin storage.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file styling.ts
+ * @author doggybootsy
+ * @desc Internal, theme, plugin, and custom CSS injection.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file toast.ts
+ * @author doggybootsy
+ * @desc A simple toast system.
+ * @license MIT
+ * @version 1.0.0
+ */
+/**
+ * @file util.tsx
+ * @author doggybootsy
+ * @desc Make life easier.
+ * @license MIT
+ * @version 1.0.0
+ */

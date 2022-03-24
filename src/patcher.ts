@@ -1,3 +1,11 @@
+/**
+ * @file patcher.ts
+ * @author doggybootsy
+ * @desc Monkey patcher.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 const Patch_Symbol = Symbol("DrApi.patch")
 const Quick_Symbol = Symbol("DrApi.patch.quick")
 const Internal_Symbol = Symbol("DrInternal")
@@ -10,7 +18,7 @@ function isClass(func:any):boolean {
 }
 
 function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:string, callback:Function, opts:patcherOpts) {
-  let { method = "after", id, once = false, index = 0 } = opts
+  let { method = "after", id, index = 0 } = opts
   let originalFunction = moduleToPatch[functionToPatch]
   if (!originalFunction) {
     moduleToPatch[functionToPatch] = () => {}
@@ -39,13 +47,12 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
     if (isClass(originalFunction)) moduleToPatch[functionToPatch] = class extends originalFunction {
       constructor() {
         if (false) super()
-        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]()
+        const that = moduleToPatch[functionToPatch]
+        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]([...arguments], that)
         let insteadFunction:any = () => new originalFunction(arguments)
-        let that = Object.assign({}, insteadFunction)
         for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, that) ?? insteadFunction
         let res = Reflect.apply(insteadFunction, that, arguments) 
         for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, that)
-        if (once) unpatch()
         return res
       }
     }
@@ -55,7 +62,6 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
       for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, this) ?? insteadFunction
       let res = Reflect.apply(insteadFunction, this, arguments)
       for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, this)
-      if (once) unpatch()
       return res
     }
     moduleToPatch[functionToPatch][Patch_Symbol] = {
@@ -77,9 +83,12 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
       configurable: true
     })
   }
+  // Check if internal if internal its not a 'handlePush' patch if it is skip adding it to the ALLpatches
   if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))
-    if (!ALLpatches[Internal_Symbol]) ALLpatches[Internal_Symbol] = [patchInfo]
-    else ALLpatches[Internal_Symbol].push(patchInfo)
+    if (patchName === "DrInternal-handlePush-Patch") return unpatch
+    else
+      if (!ALLpatches[Internal_Symbol]) ALLpatches[Internal_Symbol] = [patchInfo]
+      else ALLpatches[Internal_Symbol].push(patchInfo)
   else
     if (!ALLpatches[patchName]) ALLpatches[patchName] = [patchInfo]
     else ALLpatches[patchName].push(patchInfo)
@@ -95,7 +104,6 @@ export default {
   unpatchAll: (id:string|symbol) => {
     if (!ALLpatches[id]) return
     for (const patch of ALLpatches[id]) patch.unpatch()
-    return
   },
   patches: ALLpatches
 }

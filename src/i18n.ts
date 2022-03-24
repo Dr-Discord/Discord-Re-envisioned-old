@@ -1,3 +1,11 @@
+/**
+ * @file i18n.ts
+ * @author doggybootsy
+ * @desc i18n.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 export const languages:any = {
   global: {
     name: "Discord Re-envisioned",

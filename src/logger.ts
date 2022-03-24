@@ -1,8 +1,23 @@
+/**
+ * @file logger.ts
+ * @author doggybootsy
+ * @desc Stylish console logging.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 import i18n from "./i18n"
+import domNodes from "./domNodes"
+
+const _console:Console = (() => {
+  const frame:any = domNodes.getIframe()
+  const c = Object.getOwnPropertyDescriptor(frame.contentWindow, "console")
+  if (!c) return console
+  return c.value
+})()
 
 function getOriginal(type:string):Function {
-  // @ts-expect-error
-  const original = console[type]
+  const original = (_console as any)[type]
   if (original?.__sentry_original__) return original.__sentry_original__
   if (original?.__REACT_DEVTOOLS_ORIGINAL_METHOD__) return original.__REACT_DEVTOOLS_ORIGINAL_METHOD__
   return original
@@ -19,19 +34,19 @@ function ifDark(yes:any, no:any, force?:boolean):any {
 export const cache:any = {}
 
 function getColor(prop:string):string {
-  if (prop === "error") return "#ed4245"
-  if (prop === "warn") return "#faa81a"
-  return "#F52590"
+  switch (prop) {
+    case "error": return "#ed4245"
+    case "warn": return "#faa81a"
+    default: return "#F52590"
+  }
 }
 
-export default new Proxy(cache, {
-  get: (_:any, prop:string) => {
-    const log = (...input:any[]) => {
-      let firstArgIsString = typeof input[0] === "string"
-      let lastArgs = firstArgIsString ? [`\n${input[0]}`, ...input.slice(1)] : ["\n", ...input]
-      getOriginal(prop)(`%cDR%c${i18n.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor(prop)}; border-radius: 4px`, `background: ${getColor(prop)}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...lastArgs)
-    }
-    cache[prop] = log
-    return log
-  }
-})
+function evIn(input:Array<any>):Array<any> {
+  return typeof input[0] === "string" ? [`\n${input[0]}`, ...input.slice(1)] : ["\n", ...input]
+}
+
+export default {
+  error: (...input:any[]) => getOriginal("error")(`%cDR%c${i18n.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor("error")}; border-radius: 4px`, `background: ${getColor("error")}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...evIn(input)),
+  warn: (...input:any[]) => getOriginal("warn")(`%cDR%c${i18n.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor("warn")}; border-radius: 4px`, `background: ${getColor("warn")}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...evIn(input)),
+  log: (...input:any[]) => getOriginal("log")(`%cDR%c${i18n.name}`, `background-image:url(data:image/svg+xml;base64,${getIcon(ifDark("#202124", "#fff"))}); color: transparent; background-size: 24px; background-repeat: no-repeat; padding: 5px; background-color: ${getColor("log")}; border-radius: 4px`, `background: ${getColor("log")}; margin-left: 5px; margin-bottom: 9px; padding: 2px; border-radius: 4px; color: ${ifDark("#202124", "#fff")}`, ...evIn(input))
+}

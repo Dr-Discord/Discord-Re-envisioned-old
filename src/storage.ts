@@ -1,3 +1,11 @@
+/**
+ * @file storage.ts
+ * @author doggybootsy
+ * @desc Internal and plugin storage.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 interface localStorage {
   getItem: (key:string) => string|null
   setItem: (key:string, value:string) => void

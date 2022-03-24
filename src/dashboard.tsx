@@ -1,3 +1,11 @@
+/**
+ * @file dashboard.tsx
+ * @author doggybootsy
+ * @desc Were the main dashboard is located.
+ * @license MIT
+ * @version 1.0.0
+ */
+
 import { React } from "./react"
 import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal, openSetting as initOpenSettings, anonymous } from "./util"
 import getModule, { asyncGetModule } from "./getModule"
