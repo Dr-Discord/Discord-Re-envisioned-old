@@ -20,6 +20,10 @@ interface toastOpts {
 
 type React = typeof import("react")
 type ReactDOM = typeof import("react-dom")
+// Simple way for both 'string' and 'React.ReactElement' be one type
+type ReactString = string|React.ReactElement
+// Same as above but support 'ReactString' and 'Array<ReactString>'
+type ReactStringArray = ReactString|Array<ReactString>
 
 interface addonApi {
   get: (name:string) => any
@@ -54,9 +58,9 @@ interface DrApi {
   }
   Plugins:addonApi
   Themes:addonApi
-  showConfirmationModal: (title:string|React.ReactElement, content:string|React.ReactElement|Array<string|React.ReactElement>, opts:showConfirmationModalProps) => void
+  showConfirmationModal: (title:ReactString, content:ReactStringArray, opts:showConfirmationModalProps) => void
   prompt: (title:string, defaultValue:string) => Promise<string|null>
-  alert: (title:string|react.ReactElement, content:string|react.ReactElement|Array<string|react.ReactElement>) => void
+  alert: (title:ReactString, content:ReactStringArray) => void
   toast: (text:string, opts:toastOpts) => Node
   storage: {
     get: (plugin:string, key:string) => any

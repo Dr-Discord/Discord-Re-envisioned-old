@@ -1,11 +1,3 @@
-/**
- * @file getModule.ts
- * @author doggybootsy
- * @desc Easy way to get modules from the webpack bundle.
- * @license MIT
- * @version 1.0.0
- */
-
 import patcher from "./patcher"
 
 const webpackExports = !webpackChunkdiscord_app.webpackExports ? webpackChunkdiscord_app.push([

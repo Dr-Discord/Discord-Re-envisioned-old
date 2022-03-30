@@ -1,12 +1,4 @@
-/**
- * @file styling.ts
- * @author doggybootsy
- * @desc Internal, theme, plugin, and custom CSS injection.
- * @license MIT
- * @version 1.0.0
- */
-
-import domNodes from "./domNodes"
+import { internal } from "./storage"
 
 const DrHead = document.createElement("dr-styles")
 document.head.appendChild(DrHead)
@@ -16,7 +8,10 @@ const Dr_ele:eles = {
   internal: document.createElement("dr-internal"),
   plugin: document.createElement("dr-plugin"),
   theme: document.createElement("dr-theme"),
-  customcss: domNodes.getCCss()
+  customcss: Object.assign(document.createElement("style"), {
+    id: "dr-customcss",
+    innerHTML: internal.get("customCSS") ?? ""
+  })
 }
 for (const key of Object.keys(Dr_ele)) DrHead.appendChild(Dr_ele[key])
 

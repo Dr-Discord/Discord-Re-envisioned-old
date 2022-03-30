@@ -1,11 +1,3 @@
-/**
- * @file i18n.ts
- * @author doggybootsy
- * @desc i18n.
- * @license MIT
- * @version 1.0.0
- */
-
 export const languages:any = {
   global: {
     name: "Discord Re-envisioned",
@@ -15,6 +7,10 @@ export const languages:any = {
     devMode: {
       title: "Toggle Developer Mode",
       note: "Warning you can get banned from Discord if you do this (not a 100% chance)!"
+    },
+    showTime: {
+      title: "Show Time In Logs",
+      note: "Shows the time when a log was made in console."
     },
     toggleTransparency: {
       title: "Toggle Transparency",

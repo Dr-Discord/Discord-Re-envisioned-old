@@ -1,11 +1,3 @@
-/**
- * @file util.tsx
- * @author doggybootsy
- * @desc Make life easier.
- * @license MIT
- * @version 1.0.0
- */
-
 import { React } from "./react"
 import getModule from "./getModule"
 import react from "react"
@@ -40,8 +32,13 @@ interface showConfirmationModalProps {
   key?:string|undefined
 }
 
-export function showConfirmationModal (title:string|react.ReactElement, content:string|react.ReactElement|Array<string|react.ReactElement>, opts:showConfirmationModalProps) {
+function updateContent(content:ReactStringArray):Array<react.ReactElement> {
   const Markdown = getModule((m: { default: { displayName: string; rules: any } }) => m.default?.displayName === "Markdown" && m.default.rules).default
+
+  if (!Array.isArray(content)) content = [content]
+  return content = content.map((c:any) => typeof(c) === "string" ? <Markdown>{c}</Markdown> : c)
+}
+export function showConfirmationModal (title:ReactString, content:ReactStringArray, opts:showConfirmationModalProps) {
   const ConfirmationModal = getModule("ConfirmModal").default
   const Button = getModule(["ButtonColors"])
   const { openModal } = getModule(["openModal", "openModalLazy"])
@@ -55,8 +52,7 @@ export function showConfirmationModal (title:string|react.ReactElement, content:
     cancelText = Messages.CANCEL, 
     danger = false
   } = opts
-  if (!Array.isArray(content)) content = [content]
-  content = content.map((c:any) => typeof(c) === "string" ? <Markdown>{c}</Markdown> : c)
+  content = updateContent(content)
   openModal((props:any) => (
     <ConfirmationModal
       {...props}
@@ -70,16 +66,13 @@ export function showConfirmationModal (title:string|react.ReactElement, content:
     >{content}</ConfirmationModal>
   ))
 }
-export function alert(title:string|react.ReactElement, content:string|react.ReactElement|Array<string|react.ReactElement>):void {
+export function alert(title:ReactString, content:ReactStringArray):void {
   const { openModal } = getModule(["openModal", "openModalLazy"])
   const Alert = getModule("Alert").default
-  const Markdown = getModule((m: { default: { displayName: string; rules: any } }) => m.default?.displayName === "Markdown" && m.default.rules).default
-
-  if (!Array.isArray(content)) content = [content]
-  content = content.map((c:any) => typeof(c) === "string" ? <Markdown>{c}</Markdown> : c)
+  content = updateContent(content)
   
   openModal((props:any) => (
-    <Alert {...props} title={title} body={...(content as Array<string|react.ReactElement>)} />
+    <Alert {...props} title={title} body={...(content as Array<ReactString>)} />
   ))
 }
 
@@ -196,7 +189,7 @@ export function anonymous(callback:Function, ...args:any[]) { return callback(..
 
 export function copyText(text:string) {
   const copyModule = getModule(["copy", "SUPPORTS_COPY"])
-  if (!copyModule.SUPPORTS_COPY) {
+  if (!copyModule.SUPPORTS_COPY) navigator.clipboard.writeText(text).catch(() => {
     // deprecated dom method
     const el = Object.assign(document.createElement("textarea"), {
       value: text,
@@ -207,6 +200,6 @@ export function copyText(text:string) {
     el.select()
     document.execCommand("copy")
     document.body.removeChild(el)
-  }
+  })
   else copyModule.copy(text)
 }

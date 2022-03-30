@@ -1,7 +1,6 @@
 const { join } = require("path")
 const electron = require("electron")
-const Module = require("module")
-const { existsSync, readFileSync, writeFileSync } = require("fs")
+const { existsSync, writeFileSync } = require("fs")
 
 electron.app.commandLine.appendSwitch("no-force-async-hooks-checks")
 
@@ -67,7 +66,6 @@ electron.app.once("ready", () => {
   } catch (error) {}
 })
 
-Object.assign(BrowserWindow, electron.BrowserWindow)
 const Electron = new Proxy(electron, { get: (target, prop) => prop === "BrowserWindow" ? BrowserWindow : target[prop] })
 
 const electronPath = require.resolve("electron")
@@ -81,9 +79,8 @@ electron.app.name = pkg.name
 
 // Load other discord mods | 'app-old' and if the 'module.exports' is a function it runs it and with the arg to load discord
 const appOld = join(process.resourcesPath, "app-old")
-const req = (path) => Module._load(path, null, true)
 if (existsSync(appOld)) {
   const res = req(appOld)
-  if (typeof res === "function") res(() => req(join(basePath, pkg.main)))
+  if (typeof res === "function") res(() => require(join(basePath, pkg.main)))
 }
-else req(join(basePath, pkg.main))
+else require(join(basePath, pkg.main))

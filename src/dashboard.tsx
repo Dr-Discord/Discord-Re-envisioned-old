@@ -1,13 +1,5 @@
-/**
- * @file dashboard.tsx
- * @author doggybootsy
- * @desc Were the main dashboard is located.
- * @license MIT
- * @version 1.0.0
- */
-
 import { React } from "./react"
-import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal, openSetting as initOpenSettings, anonymous } from "./util"
+import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal, openSetting as initOpenSettings, anonymous, alert } from "./util"
 import getModule, { asyncGetModule } from "./getModule"
 import patcher from "./patcher"
 import i18n from "./i18n"
@@ -31,45 +23,7 @@ internalStyling.inject("settings", `.dr-editor-header { background-color: var(--
 .dr-editor-header-button:active { color: var(--interactive-active) }
 .dr-editor-header-button > * { width: 22px; height: 22px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) }
 .dr-editor-header + .ace_editor { border-radius: 0 0 6px 6px }
-.dr-select { height: 330px }
-.dr-addon-card {
-  background: var(--background-tertiary);
-  border-radius: 8px;
-  color: var(--text-normal)
-}
-.dr-addon-card-header {
-  background: var(--background-secondary-alt);
-  padding: 10px;
-  border-radius: 8px 8px 0 0;
-}
-.dr-addon-card-body {
-  padding: 10px 10px 2px;
-  height: calc(100% - 107px);
-}
-.dr-addon-card-footer {
-  background: var(--background-secondary-alt);
-  padding: 6px;
-  border-radius: 0 0 8px 8px;
-  height: 32px;
-}
-.dr-addon-card-button {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  cursor: pointer;
-  background: var(--background-primary);
-}
-.dr-addon-card-button > svg {
-  height: 24px;
-  width: 24px;
-  padding: 4px;
-}
-.dr-addon-card-button.dr-addon-card-uninstall {
-  background: #F04747;
-}
-.dr-addon-card-footer .container-2nx-BQ {
-  transform: translateY(4px)
-}`)
+.dr-select { height: 330px }`)
 
 const DrIcon = React.memo(() => (
   <svg
@@ -207,44 +161,11 @@ const SelectTheme = React.memo((props:any) => {
     value={theme}
   />
 })
-const Markdown = getModule((m: { default: { displayName: string; rules: any } }) => m.default?.displayName === "Markdown" && m.default.rules).default
-const Switch = getModule("Switch").default
-const Flex = getModule("Flex").default
-const Trash = getModule("Trash").default
 const Addoncard = React.memo(({  }:any) => {
   const [isEnabled, setEnabled] = React.useState(false)
   return (
     <div className="dr-addon-card">
-      <div className="dr-addon-card-header">
-        <Flex className={Flex.Direction.HORIZONTAL}>
-          <Flex.Child grow={0}>Name</Flex.Child>
-          <Flex.Child grow={0}>Version</Flex.Child>
-        </Flex>
-        <div>Author</div>
-      </div>
-      <div className="dr-addon-card-body"><Markdown>content</Markdown></div>
-      <Flex className="dr-addon-card-footer">
-        <Flex.Child className={Flex.Direction.HORIZONTAL}>
-          <Flex.Child grow={0}>
-            <div className="dr-addon-card-button dr-addon-card-uninstall">
-              <Trash />
-            </div>
-          </Flex.Child>
-          <Flex.Child grow={0}>
-            <div className="dr-addon-card-button">
-              <Gear />
-            </div>
-          </Flex.Child>
-        </Flex.Child>
-        <Flex.Child>
-          <Switch
-            checked={isEnabled}
-            onChange={(val:boolean) => {
-              setEnabled(val)
-            }}
-          />
-        </Flex.Child>
-      </Flex>
+      
     </div>
   )
 })
@@ -261,6 +182,12 @@ const pages:any = {
           internal.set("devMode", val)
           window.__DR__BACKEND__.devMode = val
         }}
+      />
+      <SwitchItem
+        value={internal.get("showTime") ?? false}
+        title={i18n.showTime.title}
+        note={i18n.showTime.note}
+        onChange={(val:boolean) => internal.set("showTime", val)}
       />
       {window.__DR__BACKEND__.app ? <SwitchItem
         value={window.__DR__BACKEND__.transparent}
@@ -290,7 +217,9 @@ const pages:any = {
     return <>
       <div className="dr-editor-header">
         {makeButton(<OpenExternal />, i18n.customCSS.popout, console.log)}
-        {makeButton(<Gear />, i18n.customCSS.settings, () => openSetting(i18n.customCSS.settings, "Apply and customize settings to your css", "hasnt been added yet"))}
+        {makeButton(<Gear />, i18n.customCSS.settings, () => alert(i18n.customCSS.settings, [
+          "Apply and customize settings to your css", "hasnt been added yet"
+        ]))}
         {makeButton(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
   <path fill="currentcolor" d="M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" />
   <path fill="currentcolor" d="M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z" />
@@ -343,13 +272,15 @@ const DashPage = React.memo(() => {
   )
 })
 
-waitUntil(() => document.querySelector(`.${container}`)).then((domNode:Element) => {
+anonymous(async () => {
+  const domNode:Element = await waitUntil(() => document.querySelector(`.${container}`))
   const Router = getOwnerInstance(domNode)
   const Route = getModule("RouteWithImpression").default
-  patcher.after("DrInternal-RouterRoutes-Patch", Router?.props?.children, "type", (_:unknown, res:any) => {
-    const { children } = findInReactTree(res, (m:any) => Array.isArray(m.children) && m.children.length > 5)
-    
-    children.push(
+  
+  patcher.after("DrInternal-RouterRoutes-Patch", Router?.props?.children[0], "type", (_:unknown, res:any) => {
+    const ret = findInReactTree(res, (m:any) => m && Array.isArray(m.children) && m.children.length > 5)
+    if (!ret?.children) return
+    ret.children.push(
       <Route
         path="/dr_dashboard"
         impressionName="dr_dashboard"
@@ -360,7 +291,7 @@ waitUntil(() => document.querySelector(`.${container}`)).then((domNode:Element) 
   })
   Router.forceUpdate()
   const { app } = getModule(["app"])
-  waitUntil(() => document.querySelector(`.${app}`)).then((domNode:Element) => {
-    findInTree(getOwnerInstance(domNode)?._reactInternals, (n:any) => n?.historyUnlisten, { walkable: [ "child", "stateNode" ] }).forceUpdate()
-  })
+  const _domNode:Element = await waitUntil(() => document.querySelector(`.${app}`))
+  findInTree(getOwnerInstance(_domNode)?._reactInternals, (n:any) => n?.historyUnlisten, { walkable: [ "child", "stateNode" ] }).forceUpdate()
+  Router.forceUpdate()
 })

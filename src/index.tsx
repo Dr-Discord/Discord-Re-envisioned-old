@@ -1,11 +1,3 @@
-/**
- * @file index.tsx
- * @author doggybootsy
- * @desc main entry point.
- * @license MIT
- * @version 1.0.0
- */
-
 import logger from "./logger"
 
 logger.log("Loading...")

@@ -1,11 +1,3 @@
-/**
- * @file storage.ts
- * @author doggybootsy
- * @desc Internal and plugin storage.
- * @license MIT
- * @version 1.0.0
- */
-
 interface localStorage {
   getItem: (key:string) => string|null
   setItem: (key:string, value:string) => void
@@ -15,11 +7,14 @@ interface localStorage {
 // Get the localStorage object
 export const localStorage:localStorage = (() => {
   if (window.localStorage) return window.localStorage
-  const frame = document.createElement("frame")
-  frame.src = "about:blank"
-  document.body.appendChild(frame)
+  let frame:any = document.getElementById("dr-frame")
+  if (!frame) {
+    frame = document.createElement("frame")
+    frame.src = "about:blank"
+    frame.id = "dr-frame"
+    document.body.appendChild(frame)
+  }
   let localStorage:any = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage")
-  frame.remove()
   Object.defineProperty(window, "localStorage", localStorage)
   return window.localStorage
 })()

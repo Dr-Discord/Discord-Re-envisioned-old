@@ -1,11 +1,3 @@
-/**
- * @file patcher.ts
- * @author doggybootsy
- * @desc Monkey patcher.
- * @license MIT
- * @version 1.0.0
- */
-
 const Patch_Symbol = Symbol("DrApi.patch")
 const Quick_Symbol = Symbol("DrApi.patch.quick")
 const Internal_Symbol = Symbol("DrInternal")
@@ -15,6 +7,21 @@ function isClass(func:any):boolean {
   if(!(func && func.constructor === Function) || func.prototype === undefined) return false
   if(Function.prototype === Object.getPrototypeOf(func)) return Object.getOwnPropertyNames(func.prototype).length > 1
   return true
+}
+// symple way to change the toString to the original
+function setToString(obj:any, old:any) {
+  Object.defineProperty(obj, "toString", {
+    value: () => old.toString(),
+    writable: true,
+    enumerable: false,
+    configurable: true
+  })
+  Object.defineProperty(obj.toString, "toString", {
+    value: () => old.toString.toString(),
+    writable: true,
+    enumerable: false,
+    configurable: true
+  })
 }
 
 function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:string, callback:Function, opts:patcherOpts) {
@@ -76,12 +83,7 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
     }
 
     Object.assign(moduleToPatch[functionToPatch], originalFunction)
-    Object.defineProperty(moduleToPatch[functionToPatch], "toString", {
-      value: () => originalFunction.toString(),
-      writable: false,
-      enumerable: false,
-      configurable: true
-    })
+    setToString(moduleToPatch[functionToPatch], originalFunction)
   }
   // Check if internal if internal its not a 'handlePush' patch if it is skip adding it to the ALLpatches
   if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))

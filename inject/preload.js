@@ -1,5 +1,6 @@
 const { ipcRenderer, contextBridge } = require("electron")
 const preload = ipcRenderer.sendSync("DR_DISCORD_PRELOAD")
+
 if (!preload) throw new Error("no preload found")
 require(preload)
 
