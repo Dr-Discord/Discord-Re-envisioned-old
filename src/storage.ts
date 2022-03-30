@@ -7,13 +7,7 @@ interface localStorage {
 // Get the localStorage object
 export const localStorage:localStorage = (() => {
   if (window.localStorage) return window.localStorage
-  let frame:any = document.getElementById("dr-frame")
-  if (!frame) {
-    frame = document.createElement("frame")
-    frame.src = "about:blank"
-    frame.id = "dr-frame"
-    document.body.appendChild(frame)
-  }
+  const frame:any = document.getElementById("dr-frame")
   let localStorage:any = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage")
   Object.defineProperty(window, "localStorage", localStorage)
   return window.localStorage

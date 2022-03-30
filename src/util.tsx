@@ -10,6 +10,12 @@ export async function waitUntil(condition:Function):Promise<any> {
   return item
 }
 
+export function addToWindow(key:any, value:any) {
+  // Bd adds 'window[0]' to the window object so i add to both window and window[0]
+  if (window[0]) window[0][key] = value
+  window[key] = value
+}
+
 export function getReactInstance(element:Element) {
   if (!element) return
   if (element.__reactInternalInstance$) return element.__reactInternalInstance$
@@ -189,6 +195,7 @@ export function anonymous(callback:Function, ...args:any[]) { return callback(..
 
 export function copyText(text:string) {
   const copyModule = getModule(["copy", "SUPPORTS_COPY"])
+  // If we cant copy try 2 ways
   if (!copyModule.SUPPORTS_COPY) navigator.clipboard.writeText(text).catch(() => {
     // deprecated dom method
     const el = Object.assign(document.createElement("textarea"), {

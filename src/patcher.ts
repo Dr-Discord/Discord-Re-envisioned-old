@@ -51,18 +51,7 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
     if (!ALLpatches[patchName].length) delete ALLpatches[patchName]
   }
   if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
-    if (isClass(originalFunction)) moduleToPatch[functionToPatch] = class extends originalFunction {
-      constructor() {
-        if (false) super()
-        const that = moduleToPatch[functionToPatch]
-        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]([...arguments], that)
-        let insteadFunction:any = () => new originalFunction(arguments)
-        for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, that) ?? insteadFunction
-        let res = Reflect.apply(insteadFunction, that, arguments) 
-        for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, that)
-        return res
-      }
-    }
+    if (isClass(originalFunction)) throw new Error(`'${functionToPatch}' is a class, you can't patch a class (extend the class for now)`)
     else moduleToPatch[functionToPatch] = function() {
       for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]()
       let insteadFunction = originalFunction

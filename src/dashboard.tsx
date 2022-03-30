@@ -183,12 +183,6 @@ const pages:any = {
           window.__DR__BACKEND__.devMode = val
         }}
       />
-      <SwitchItem
-        value={internal.get("showTime") ?? false}
-        title={i18n.showTime.title}
-        note={i18n.showTime.note}
-        onChange={(val:boolean) => internal.set("showTime", val)}
-      />
       {window.__DR__BACKEND__.app ? <SwitchItem
         value={window.__DR__BACKEND__.transparent}
         title={i18n.toggleTransparency.title}

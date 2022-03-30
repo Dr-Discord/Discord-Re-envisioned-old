@@ -1,26 +1,42 @@
+// Frame for plugins to run in and to get original stuff
+const frame:any = document.createElement("frame")
+frame.src = "about:blank"
+frame.id = "dr-frame"
+document.body.appendChild(frame)
+Object.defineProperty(frame, "contentWindow", { value: window[0] ? window[0] : window })
+// If we are already injected throw a error
+if (Boolean(window.DrApi)) throw new Error("Discord Re-envisioned is already loaded.")
+
 import logger from "./logger"
-
-logger.log("Loading...")
-
+// If the location leads the dashboard we redirect
 if (location.pathname.startsWith("/dr_dashboard")) {
   logger.error("404, oh no redirecting")
   const node = document.querySelector("[href=\"//discord.com/login\"]")
   if (node) node.click()
   throw new Error("Preventing further execution")
 }
-
-if (Boolean(window.DrApi)) throw new Error("Discord Re-envisioned is already loaded.")
-
 import React, { ReactDOM } from "./react"
 import patcher from "./patcher"
 import getModule, { asyncGetModule } from "./getModule"
 import { pluginStyling } from "./styling"
 import createToast from "./toast"
-import { showConfirmationModal, getOwnerInstance, waitUntil, getReactInstance, findInReactTree, findInTree, prompt, alert } from "./util"
+import { 
+  showConfirmationModal, 
+  getOwnerInstance, 
+  waitUntil, 
+  getReactInstance, 
+  findInReactTree, 
+  findInTree, 
+  prompt,
+  alert,
+  addToWindow
+} from "./util"
 import { internal, plugins } from "./storage"
 import "./dashboard"
 import i18n from "./i18n"
 import { initCard } from "./addonManager"
+
+logger.log("Loading...")
 
 document.body.appendChild(Object.assign(document.createElement("script"), {
   src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
@@ -29,14 +45,14 @@ document.body.appendChild(Object.assign(document.createElement("script"), {
 
 Start()
 
-window.__DR__BACKEND__ = {
+addToWindow("__DR__BACKEND__", {
   devMode: internal.get("devMode") ?? false,
   app: window?.__DR__ELECTRON__BACKEND__?.app ?? false,
   transparent: window?.__DR__ELECTRON__BACKEND__?.transparent ?? false,
   toggleTransparency: window?.__DR__ELECTRON__BACKEND__?.toggleTransparency ?? (function() { throw new Error("tried using toggleTransparency on WEB!") }),
   isPopped: false,
   logger
-}
+})
 const badges:{ [x:string]: [string, string] } = {
   "515780151791976453": [i18n.badges.developer, "#F52590"],
   "359174224809689089": [i18n.badges.developer, "#F52590"],
@@ -55,7 +71,7 @@ async function Start() {
   await waitUntil(() => document.querySelector(".container-YkUktl"))
   const Plugins:any = {}
   const themes:any = {}
-  window.DrApi = {
+  addToWindow("DrApi", {
     getModule, 
     asyncGetModule,
     findInReactTree, 
@@ -106,7 +122,7 @@ async function Start() {
       owner: function(element) { return getOwnerInstance(element) },
       react: function(element) { return getReactInstance(element) }
     }
-  }
+  } as DrApi)
 
   const Tooltip = getModule("Tooltip").default
   const Clickable = getModule("Clickable").default

@@ -8,10 +8,6 @@ export const languages:any = {
       title: "Toggle Developer Mode",
       note: "Warning you can get banned from Discord if you do this (not a 100% chance)!"
     },
-    showTime: {
-      title: "Show Time In Logs",
-      note: "Shows the time when a log was made in console."
-    },
     toggleTransparency: {
       title: "Toggle Transparency",
       note: "Warning this will braek window snapping!"
