@@ -80,7 +80,7 @@ electron.app.name = pkg.name
 // Load other discord mods | 'app-old' and if the 'module.exports' is a function it runs it and with the arg to load discord
 const appOld = join(process.resourcesPath, "app-old")
 if (existsSync(appOld)) {
-  const res = req(appOld)
+  const res = require(appOld)
   if (typeof res === "function") res(() => require(join(basePath, pkg.main)))
 }
 else require(join(basePath, pkg.main))
