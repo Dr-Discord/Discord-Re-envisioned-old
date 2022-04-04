@@ -31,8 +31,7 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
     moduleToPatch[functionToPatch] = () => {}
     originalFunction = moduleToPatch[functionToPatch]
   }
-  // @ts-expect-error
-  method = method.toLowerCase()
+  method = (method.toLowerCase() as "before"|"after"|"instead")
   if (!(method === "before" || method === "after" || method === "instead")) throw new Error(`'${method}' is a invalid patch type`)
   let patches = moduleToPatch?.[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] }
   let CallbackSymbol = Symbol()

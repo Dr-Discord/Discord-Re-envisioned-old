@@ -15,8 +15,6 @@ const Editor = React.memo(({ props = {}, editor = () => {} }:any) => {
   return <div ref={ref} {...props} />
 })
 
-const openSetting = initOpenSettings()
-
 internalStyling.inject("settings", `.dr-editor-header { background-color: var(--background-secondary); display: flex; flex-direction: row; padding: 2px 4px; border-radius: 6px 6px 0 0 }
 .dr-editor-header-button { color: red; margin-right: 5px; width: 26px; height: 26px; color: var(--interactive-normal); position: relative }
 .dr-editor-header-button:hover { color: var(--interactive-hover) }

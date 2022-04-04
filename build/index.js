@@ -611,7 +611,7 @@
         const ConfirmationModal = (0, getModule_1.default)("ConfirmModal").default;
         const Button = (0, getModule_1.default)(["ButtonColors"]);
         const { openModal } = (0, getModule_1.default)(["openModal", "openModalLazy"]);
-        const Messages = (0, getModule_1.default)(["Messages"], false)[1].Messages;
+        const { Messages } = (0, getModule_1.default)(["Messages"], false)[1];
         const emptyFunction = () => {
         };
         const { onConfirm = emptyFunction, onCancel = emptyFunction, confirmText = Messages.OKAY, cancelText = Messages.CANCEL, danger = false } = opts;
@@ -619,11 +619,11 @@
         openModal((props) => react_1.React.createElement(ConfirmationModal, { ...props, header: title, content, onConfirm, onCancel, confirmText, cancelText, confirmButtonColor: danger ? Button.ButtonColors.RED : Button.ButtonColors.BRAND }, content));
       }
       exports.showConfirmationModal = showConfirmationModal;
-      function alert(title, content) {
+      function alert(title, content, options = {}) {
         const { openModal } = (0, getModule_1.default)(["openModal", "openModalLazy"]);
         const Alert = (0, getModule_1.default)("Alert").default;
         content = updateContent(content);
-        openModal((props) => react_1.React.createElement(Alert, { ...props, title, body: content }));
+        openModal((props) => react_1.React.createElement(Alert, { ...props, title, body: content, onConfirm: options.onConfirm, confirmText: options.confirmText, minorText: options.smallText, onConfirmSecondary: options.smallTextClose }));
       }
       exports.alert = alert;
       function prompt(title, defaultValue) {
@@ -785,7 +785,6 @@
         react_1.React.useEffect(() => editor(ace.edit(ref.current)));
         return react_1.React.createElement("div", { ref, ...props });
       });
-      var openSetting = (0, util_1.openSetting)();
       styling_1.internalStyling.inject("settings", `.dr-editor-header { background-color: var(--background-secondary); display: flex; flex-direction: row; padding: 2px 4px; border-radius: 6px 6px 0 0 }
 .dr-editor-header-button { color: red; margin-right: 5px; width: 26px; height: 26px; color: var(--interactive-normal); position: relative }
 .dr-editor-header-button:hover { color: var(--interactive-hover) }
@@ -1173,8 +1172,8 @@
           prompt: async function(title, defaultValue) {
             return await (0, util_1.prompt)(title, defaultValue);
           },
-          alert: function(title, content) {
-            return (0, util_1.alert)(title, content);
+          alert: function(title, content, options) {
+            return (0, util_1.alert)(title, content, options);
           },
           toast: function(text, opts = {}) {
             return (0, toast_1.default)(text, opts);

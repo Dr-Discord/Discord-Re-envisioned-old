@@ -15,7 +15,5 @@
     "outDir": "tsBuild",
     "jsx": "react"
   },
-  "include": [
-    "src/*"
-  ],
+  "include": [ "src/*" ]
 }

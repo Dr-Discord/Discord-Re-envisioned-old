@@ -110,7 +110,7 @@ async function Start() {
     },
     showConfirmationModal: function(title, content, opts = {}) { return showConfirmationModal(title, content, opts) },
     prompt: async function(title, defaultValue) { return await prompt(title, defaultValue) },
-    alert: function(title, content) { return alert(title, content) },
+    alert: function(title, content, options) { return alert(title, content, options) },
     toast: function(text, opts = {}) { return createToast(text, opts) },
     React,
     ReactDOM,

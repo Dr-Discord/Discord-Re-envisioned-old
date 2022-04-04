@@ -11,6 +11,14 @@ interface showConfirmationModalOpts {
   danger?:boolean
   key?:string|undefined
 }
+interface alertOpts {
+  confirmText?: String
+  smallText?: String,
+  smallTextClose?: Function
+  onConfirm?: Function
+  cancelText?: String
+  onCancel?: Function
+}
 interface toastOpts {
   type?:"success"|"error"|"info"|"warning"
   duration?: number
@@ -60,7 +68,7 @@ interface DrApi {
   Themes:addonApi
   showConfirmationModal: (title:ReactString, content:ReactStringArray, opts:showConfirmationModalProps) => void
   prompt: (title:string, defaultValue:string) => Promise<string|null>
-  alert: (title:ReactString, content:ReactStringArray) => void
+  alert: (title:ReactString, content:ReactStringArray, options:alertOpts) => void
   toast: (text:string, opts:toastOpts) => Node
   storage: {
     get: (plugin:string, key:string) => any

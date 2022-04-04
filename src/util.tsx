@@ -48,7 +48,7 @@ export function showConfirmationModal (title:ReactString, content:ReactStringArr
   const ConfirmationModal = getModule("ConfirmModal").default
   const Button = getModule(["ButtonColors"])
   const { openModal } = getModule(["openModal", "openModalLazy"])
-  const Messages = getModule(["Messages"], false)[1].Messages
+  const { Messages } = getModule(["Messages"], false)[1]
   
   const emptyFunction = () => {}
   const { 
@@ -72,13 +72,22 @@ export function showConfirmationModal (title:ReactString, content:ReactStringArr
     >{content}</ConfirmationModal>
   ))
 }
-export function alert(title:ReactString, content:ReactStringArray):void {
+
+export function alert(title:ReactString, content:ReactStringArray, options:alertOpts = {}):void {
   const { openModal } = getModule(["openModal", "openModalLazy"])
   const Alert = getModule("Alert").default
   content = updateContent(content)
   
   openModal((props:any) => (
-    <Alert {...props} title={title} body={...(content as Array<ReactString>)} />
+    <Alert 
+      {...props} 
+      title={title} 
+      body={...(content as Array<ReactString>)} 
+      onConfirm={options.onConfirm}
+      confirmText={options.confirmText}
+      minorText={options.smallText}
+      onConfirmSecondary={options.smallTextClose}
+    />
   ))
 }
 
