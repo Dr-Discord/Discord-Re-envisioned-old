@@ -30,8 +30,6 @@ type React = typeof import("react")
 type ReactDOM = typeof import("react-dom")
 // Simple way for both 'string' and 'React.ReactElement' be one type
 type ReactString = string|React.ReactElement
-// Same as above but support 'ReactString' and 'Array<ReactString>'
-type ReactStringArray = ReactString|Array<ReactString>
 
 interface addonApi {
   get: (name:string) => any
@@ -66,9 +64,9 @@ interface DrApi {
   }
   Plugins:addonApi
   Themes:addonApi
-  showConfirmationModal: (title:ReactString, content:ReactStringArray, opts:showConfirmationModalProps) => void
+  showConfirmationModal: (title:ReactString, content:ReactString|Array<ReactString>, opts:showConfirmationModalProps) => void
   prompt: (title:string, defaultValue:string) => Promise<string|null>
-  alert: (title:ReactString, content:ReactStringArray, options:alertOpts) => void
+  alert: (title:ReactString, content:ReactString|Array<ReactString>, options:alertOpts) => void
   toast: (text:string, opts:toastOpts) => Node
   storage: {
     get: (plugin:string, key:string) => any
@@ -94,6 +92,7 @@ interface webpackChunkdiscord_app {
 }
 
 interface Window {
+  0: Window
   DrApi:DrApi
   webpackChunkdiscord_app:webpackChunkdiscord_app
   localStorage?:localStorage|null
@@ -113,4 +112,14 @@ interface Element {
   _reactInternals?:any
   click:()=>void
   nonce?:string
+}
+
+interface tooltipProps {
+  "aria-label":string
+  onBlur:()=>void
+  onClick:()=>void
+  onContextMenu:()=>void
+  onFocus:()=>void
+  onMouseEnter:()=>void
+  onMouseLeave:()=>void
 }

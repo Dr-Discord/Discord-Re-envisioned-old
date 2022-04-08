@@ -16,30 +16,52 @@ export const initCard = () => {
     buildInfo,
     buildDetails,
     subHead,
+    copyLink,
+    copied,
+    copyLinkIcon
   } = getModule(["titleRegion"])
   const InfoFilled = getModule("InfoFilled").default
+  const Tooltip = getModule("Tooltip").default
+  const Download = getModule("Download").default
+  const Clickable = getModule("Clickable").default
+  const HelpCircle = getModule("HelpCircle").default
+  const Link = getModule("Link").default
+  let to:number|undefined
+  
   return React.memo(({ href }:any) => {
+    const [copiedText, setCopiedText] = React.useState(false)
     const spl = href.replace("dr://", "").split("/")
+    
     return (
       <div className={wrapper}>
         <Text size={Text.Sizes.SIZE_12} className={titleRegion}>
           <strong className={title}>{spl[0]}</strong>
           <a 
             className={infoLink} 
-            onClick={(e) => {
-              alert("title", "content")
-            }}
-          ><InfoFilled className={infoIcon} /></a>
+            onClick={() => alert("Title", "Body")}
+          ><HelpCircle className={infoIcon} /></a>
+          <Clickable className={[copyLink, copiedText ? copied : ""].join(" ")} onClick={() => {
+            if (to) clearTimeout(to)
+            copyText(href)
+            setCopiedText(true)
+            setTimeout(setCopiedText.bind(this, false), 2000)
+          }}>
+            <Link className={copyLinkIcon} />
+            {copiedText ? "Link Copied!" : "Copy Link"}
+          </Clickable>
+          <Clickable className={copyLink}>
+            <Tooltip text="Install">
+              {(props:tooltipProps) => (
+                <Download {...props} className={copyLinkIcon} />
+              )}
+            </Tooltip>
+          </Clickable>
         </Text>
         <div className={content}>
           <div className={buildInfo}>
-            <Text size={Text.Sizes.SIZE_14} className={subHead}>demoPlugin</Text>
-            <Text size={Text.Sizes.SIZE_16} className={buildDetails}>demo plugin for drdiscord random test ing lol</Text>
+            <div className={buildDetails}>Title</div>
+            <Text className={subHead}>Info</Text>
           </div>
-          <Button 
-            size={Button.Sizes.MEDIUM}
-            color={Button.Colors.GREEN}
-          >Install</Button>
         </div>
       </div>
     )

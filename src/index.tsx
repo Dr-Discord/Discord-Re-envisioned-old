@@ -1,16 +1,15 @@
+// If we are already injected throw a error
+if (Boolean(window.DrApi)) throw new Error("Discord Re-envisioned is already loaded.")
 // Frame for plugins to run in and to get original stuff
 const frame:any = document.createElement("frame")
 frame.src = "about:blank"
 frame.id = "dr-frame"
 document.body.appendChild(frame)
-Object.defineProperty(frame, "contentWindow", { value: window[0] ? window[0] : window })
-// If we are already injected throw a error
-if (Boolean(window.DrApi)) throw new Error("Discord Re-envisioned is already loaded.")
 
 import logger from "./logger"
 // If the location leads the dashboard we redirect
 if (location.pathname.startsWith("/dr_dashboard")) {
-  logger.error("404, oh no redirecting")
+  logger.error("Redirecting to dashboard")
   const node = document.querySelector("[href=\"//discord.com/login\"]")
   if (node) node.click()
   throw new Error("Preventing further execution")
@@ -28,8 +27,7 @@ import {
   findInReactTree, 
   findInTree, 
   prompt,
-  alert,
-  addToWindow
+  alert
 } from "./util"
 import { internal, plugins } from "./storage"
 import "./dashboard"
@@ -45,20 +43,32 @@ document.body.appendChild(Object.assign(document.createElement("script"), {
 
 Start()
 
-addToWindow("__DR__BACKEND__", {
+window.__DR__BACKEND__ = {
   devMode: internal.get("devMode") ?? false,
   app: window?.__DR__ELECTRON__BACKEND__?.app ?? false,
   transparent: window?.__DR__ELECTRON__BACKEND__?.transparent ?? false,
   toggleTransparency: window?.__DR__ELECTRON__BACKEND__?.toggleTransparency ?? (function() { throw new Error("tried using toggleTransparency on WEB!") }),
   isPopped: false,
   logger
-})
+}
+
 const badges:{ [x:string]: [string, string] } = {
   "515780151791976453": [i18n.badges.developer, "#F52590"],
   "359174224809689089": [i18n.badges.developer, "#F52590"],
   "775199408638656553": [i18n.badges.tester, "#FFF"]
 }
 if (window.__DR__BACKEND__.app) window.DiscordNative.window.setDevtoolsCallbacks(null, null)
+
+function normalFunctionToNative(fun:Function) {
+  const newFunction = Object.assign(function(this:unknown) { return Reflect.apply(fun, this, arguments) }, fun)
+  Object.defineProperty(newFunction, "toString", {
+    value: () => `function ${fun.name ? fun.name : ""}() { [native code] }`,
+    writable: true,
+    enumerable: false,
+    configurable: true
+  })
+  return newFunction
+}
 
 async function Start() {
   try {
@@ -71,58 +81,58 @@ async function Start() {
   await waitUntil(() => document.querySelector(".container-YkUktl"))
   const Plugins:any = {}
   const themes:any = {}
-  addToWindow("DrApi", {
-    getModule, 
-    asyncGetModule,
-    findInReactTree, 
-    findInTree,
+  window.DrApi = {
+    getModule: normalFunctionToNative(getModule), 
+    asyncGetModule: normalFunctionToNative(asyncGetModule), 
+    findInReactTree: normalFunctionToNative(findInReactTree), 
+    findInTree: normalFunctionToNative(findInTree), 
     patcher: {
-      before: function(id:string|symbol, module:any, functionToPatch:string, callback:Function, opts = {}) { return patcher.before(id, module, functionToPatch, callback, Object.assign({}, opts)) },
-      instead: function(id:string|symbol, module:any, functionToPatch:string, callback:Function, opts = {}) { return patcher.instead(id, module, functionToPatch, callback, Object.assign({}, opts)) },
-      after: function(id:string|symbol, module:any, functionToPatch:string, callback:Function, opts = {}) { return patcher.after(id, module, functionToPatch, callback, Object.assign({}, opts)) },
-      patch: function(id:string|symbol, module:any, functionToPatch:string, callback:Function, opts = {}) { return patcher.patch(id, module, functionToPatch, callback, Object.assign({}, opts)) },
-      quick: function(module:any, functionToPatch:string, callback:Function, opts = {}) { return patcher.quick(module, functionToPatch, callback, opts) },
-      unpatchAll: function(id:string|symbol) { return patcher.unpatchAll(id) },
+      before: normalFunctionToNative(patcher.before),
+      instead: normalFunctionToNative(patcher.instead),
+      after: normalFunctionToNative(patcher.after),
+      patch: normalFunctionToNative(patcher.patch),
+      quick: normalFunctionToNative(patcher.quick),
+      unpatchAll: normalFunctionToNative(patcher.unpatchAll),
       patches: patcher.patches
     },
     styling: {
-      inject: function(id, css) { return pluginStyling.inject(id, css) },
-      update: function(id, css) { return pluginStyling.update(id, css) },
-      uninject: function(id) { return pluginStyling.uninject(id) }
+      inject: normalFunctionToNative(pluginStyling.inject),
+      update: normalFunctionToNative(pluginStyling.update),
+      uninject: normalFunctionToNative(pluginStyling.uninject)
     },
     Plugins: {
-      get: function(name) { return Plugins.get(name) },
-      getAll: () => Plugins.getAll(),
-      isEnabled: function(name) { return Plugins.isEnabled(name) },
-      disable: function(name) { return Plugins.disable(name) },
-      enable: function(name) { return Plugins.enable(name) },
-      toggle: function(name) { return Plugins.toggle(name) },
-      install: function(url) { return Plugins.install(url) }
+      get: normalFunctionToNative(Plugins.get),
+      getAll: normalFunctionToNative(Plugins.getAll),
+      isEnabled: normalFunctionToNative(Plugins.isEnabled),
+      disable: normalFunctionToNative(Plugins.disable),
+      enable: normalFunctionToNative(Plugins.enable),
+      toggle: normalFunctionToNative(Plugins.toggle),
+      install: normalFunctionToNative(Plugins.install)
     },
     Themes: {
-      get: function(name) { return themes.get(name) },
-      getAll: () => themes.getAll(),
-      isEnabled: function(name) { return themes.isEnabled(name) },
-      disable: function(name) { return themes.disable(name) },
-      enable: function(name) { return themes.enable(name) },
-      toggle: function(name) { return themes.toggle(name) },
-      install: function(url) { return themes.install(url) }
+      get: normalFunctionToNative(themes.get),
+      getAll: normalFunctionToNative(themes.getAll),
+      isEnabled: normalFunctionToNative(themes.isEnabled),
+      disable: normalFunctionToNative(themes.disable),
+      enable: normalFunctionToNative(themes.enable),
+      toggle: normalFunctionToNative(themes.toggle),
+      install: normalFunctionToNative(themes.install)
     },
-    showConfirmationModal: function(title, content, opts = {}) { return showConfirmationModal(title, content, opts) },
-    prompt: async function(title, defaultValue) { return await prompt(title, defaultValue) },
-    alert: function(title, content, options) { return alert(title, content, options) },
-    toast: function(text, opts = {}) { return createToast(text, opts) },
+    showConfirmationModal: normalFunctionToNative(showConfirmationModal),
+    prompt: normalFunctionToNative(prompt),
+    alert: normalFunctionToNative(alert),
+    toast: normalFunctionToNative(function(text:string, opts = {}) { return createToast(text, opts) }),
     React,
     ReactDOM,
     storage: {
-      get: function(plugin:string, key:string) { return plugins.get(plugin, key) },
-      set: function(plugin:string, key:string, data:any) { return plugins.set(plugin, key, data) }
+      get: normalFunctionToNative(plugins.get),
+      set: normalFunctionToNative(plugins.set)
     },
     getInstance: {
-      owner: function(element) { return getOwnerInstance(element) },
-      react: function(element) { return getReactInstance(element) }
+      owner: normalFunctionToNative(getOwnerInstance),
+      react: normalFunctionToNative(getReactInstance)
     }
-  } as DrApi)
+  }
 
   const Tooltip = getModule("Tooltip").default
   const Clickable = getModule("Clickable").default
@@ -149,8 +159,8 @@ async function Start() {
   })
   const Card = initCard()
   patcher.instead("DrInternal-Addoncards-Patch", getModule(["defaultRules", "astParserFor"]).defaultRules.link, "react", (props:Array<any>, orig:Function) => {    
-    if (!props[0].target.startsWith("dr://")) return 
-    return () => <Card href={props[0].target} />
+    if (/dr:\/\/(plugin|theme)\/([A-z]|[0-9])+(\/|)/.test(props[0].target)) return () => <Card href={props[0].target} />
+    return
   })
   logger.log("Loaded!")
 }

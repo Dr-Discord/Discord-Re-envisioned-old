@@ -10,12 +10,6 @@ export async function waitUntil(condition:Function):Promise<any> {
   return item
 }
 
-export function addToWindow(key:any, value:any) {
-  // Bd adds 'window[0]' to the window object so i add to both window and window[0]
-  if (window[0]) window[0][key] = value
-  window[key] = value
-}
-
 export function getReactInstance(element:Element) {
   if (!element) return
   if (element.__reactInternalInstance$) return element.__reactInternalInstance$
@@ -38,13 +32,13 @@ interface showConfirmationModalProps {
   key?:string|undefined
 }
 
-function updateContent(content:ReactStringArray):Array<react.ReactElement> {
+function updateContent(content:ReactString|Array<ReactString>):Array<react.ReactElement> {
   const Markdown = getModule((m: { default: { displayName: string; rules: any } }) => m.default?.displayName === "Markdown" && m.default.rules).default
 
   if (!Array.isArray(content)) content = [content]
   return content = content.map((c:any) => typeof(c) === "string" ? <Markdown>{c}</Markdown> : c)
 }
-export function showConfirmationModal (title:ReactString, content:ReactStringArray, opts:showConfirmationModalProps) {
+export function showConfirmationModal (title:ReactString, content:ReactString|Array<ReactString>, opts:showConfirmationModalProps) {
   const ConfirmationModal = getModule("ConfirmModal").default
   const Button = getModule(["ButtonColors"])
   const { openModal } = getModule(["openModal", "openModalLazy"])
@@ -73,7 +67,7 @@ export function showConfirmationModal (title:ReactString, content:ReactStringArr
   ))
 }
 
-export function alert(title:ReactString, content:ReactStringArray, options:alertOpts = {}):void {
+export function alert(title:ReactString, content:ReactString|Array<ReactString>, options:alertOpts = {}):void {
   const { openModal } = getModule(["openModal", "openModalLazy"])
   const Alert = getModule("Alert").default
   content = updateContent(content)

@@ -26,11 +26,9 @@ function setToString(obj:any, old:any) {
 
 function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:string, callback:Function, opts:patcherOpts) {
   let { method = "after", id, index = 0 } = opts
+  if (!moduleToPatch) throw new Error("moduleToPatch is required/is undefined")
+  if (!moduleToPatch[functionToPatch]) moduleToPatch[functionToPatch] = () => {}
   let originalFunction = moduleToPatch[functionToPatch]
-  if (!originalFunction) {
-    moduleToPatch[functionToPatch] = () => {}
-    originalFunction = moduleToPatch[functionToPatch]
-  }
   method = (method.toLowerCase() as "before"|"after"|"instead")
   if (!(method === "before" || method === "after" || method === "instead")) throw new Error(`'${method}' is a invalid patch type`)
   let patches = moduleToPatch?.[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] }
@@ -51,31 +49,37 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
   }
   if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
     if (isClass(originalFunction)) throw new Error(`'${functionToPatch}' is a class, you can't patch a class (extend the class for now)`)
-    else moduleToPatch[functionToPatch] = function() {
-      for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]()
-      let insteadFunction = originalFunction
-      for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, this) ?? insteadFunction
-      let res = Reflect.apply(insteadFunction, this, arguments)
-      for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, this)
-      return res
-    }
-    moduleToPatch[functionToPatch][Patch_Symbol] = {
-      original: originalFunction,
-      module: moduleToPatch,
-      function: functionToPatch,
-      patches, unpatchAll: () => {
-        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1].unpatch()
-        for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) patches.instead[patch - 1].unpatch()
-        for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1].unpatch()
-      }
-    }
 
-    Object.assign(moduleToPatch[functionToPatch], originalFunction)
+    Object.defineProperty(moduleToPatch, functionToPatch, {
+      writable: true,
+      configurable: true,
+      value: function() {
+        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]()
+        let insteadFunction = originalFunction
+        for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, this) ?? insteadFunction
+        let res = Reflect.apply(insteadFunction, this, arguments)
+        for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, this)
+        return res
+      }
+    })
+
+    Object.assign(moduleToPatch[functionToPatch], originalFunction, {
+      [Patch_Symbol]: {
+        original: originalFunction,
+        module: moduleToPatch,
+        function: functionToPatch,
+        patches, unpatchAll: () => {
+          for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1].unpatch()
+          for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) patches.instead[patch - 1].unpatch()
+          for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1].unpatch()
+        }
+      }
+    })
     setToString(moduleToPatch[functionToPatch], originalFunction)
   }
-  // Check if internal if internal its not a 'handlePush' patch if it is skip adding it to the ALLpatches
+  
   if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))
-    if (patchName === "DrInternal-handlePush-Patch") return unpatch
+    if (patchName === "DrInternal-dontShow-Patch") return unpatch
     else
       if (!ALLpatches[Internal_Symbol]) ALLpatches[Internal_Symbol] = [patchInfo]
       else ALLpatches[Internal_Symbol].push(patchInfo)

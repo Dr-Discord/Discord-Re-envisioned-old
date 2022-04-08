@@ -45,26 +45,13 @@ export default getModule
 // Idk how it really works
 const listeners = new Set<Function>()
 
-let __ORIGINAL_PUSH__:Function = webpackChunkdiscord_app.push
-function handlePush(chunk:any) {
+patcher.instead("DrInternal-webpack-Patch", webpackChunkdiscord_app, "push", ([chunk]:Array<Array<any>>, orig:Function) => {
   const [, modules] = chunk
-  for (const id in modules) patcher.after("DrInternal-handlePush-Patch", modules, id, ([, exports]:any) => {
+  for (const id in modules) patcher.after("DrInternal-dontShow-Patch", modules, id, ([, exports]:any) => {
     for (const ite of [...listeners]) ite(exports)
   })
-  return __ORIGINAL_PUSH__.apply(window.webpackChunkdiscord_app, [chunk])
-}
-Object.defineProperty(webpackChunkdiscord_app, "push", {
-  configurable: true,
-  get: () => handlePush,
-  set: (newPush) => {
-    __ORIGINAL_PUSH__ = newPush
-    Object.defineProperty(webpackChunkdiscord_app, "push", {
-      value: handlePush,
-      configurable: true,
-      writable: true
-    })
-  }
 })
+
 export function asyncGetModule(filter:Function):Promise<any> {
   return new Promise((resolve, reject) => {
     if (typeof filter !== "function") return reject(`Filter has to be a function, cannot be type '${typeof filter}'`)

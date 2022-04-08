@@ -5,7 +5,7 @@ import patcher from "./patcher"
 import i18n from "./i18n"
 import { internal } from "./storage"
 import { ReactNode } from "react"
-import { customcss, internalStyling } from "./styling"
+import { updateCustomCSS, internalStyling } from "./styling"
 
 let dispatch = (val:boolean) => {}
 
@@ -37,10 +37,9 @@ const DrIcon = React.memo(() => (
 ))
 
 let selectedChild:any = () => {}
-let DrDashboardButton:any
+let DrDashboardButton:any = React.memo(() => <>Module Not Loaded!</>)
 
-anonymous(async () => {
-  const { LinkButton } = await asyncGetModule((e: { LinkButton:any }) => e.LinkButton)
+asyncGetModule((e: { LinkButton:any }) => e.LinkButton).then(({ LinkButton }) => {
   interface DrDashboardButton {
     children: Array<React.ReactNode>
   }
@@ -73,7 +72,6 @@ anonymous(async () => {
   })
 })
 
-const SwitchOrig = getModule("SwitchItem").default
 interface SwitchItemProps {
   value:boolean
   onChange?:Function
@@ -82,30 +80,33 @@ interface SwitchItemProps {
   disabled?:boolean
   initialChange?:boolean
 }
-const SwitchItem = React.memo((props:SwitchItemProps) => {
-  const { value, onChange = () => {}, title, note, disabled = false, initialChange = true } = props
-  const [checked, setChecked] = React.useState(value)
-  return <SwitchOrig
-    value={checked}
-    onChange={() => {
-      if (initialChange) setChecked(!checked)
-      onChange(!checked, setChecked)
-    }}
-    note={note}
-    disabled={disabled}
-  >{title}</SwitchOrig>
+let SwitchItem:any = React.memo(() => <>Module Not Loaded!</>)
+asyncGetModule((e: { default: { displayName: string }}) => e.default?.displayName === "SwitchItem").then(SwitchOrig => {
+  SwitchItem = React.memo((props:SwitchItemProps) => {
+    const { value, onChange = () => {}, title, note, disabled = false, initialChange = true } = props
+    const [checked, setChecked] = React.useState(value)
+    return <SwitchOrig
+      value={checked}
+      onChange={() => {
+        if (initialChange) setChecked(!checked)
+        onChange(!checked, setChecked)
+      }}
+      note={note}
+      disabled={disabled}
+    >{title}</SwitchOrig>
+  })
+})
+asyncGetModule((e: { default: { displayName: string }}) => e.default?.displayName === "ConnectedPrivateChannelsList").then(ConnectedPrivateChannelsList => {
+  patcher.after("DrInternal-RouterRoutes-Patch", ConnectedPrivateChannelsList, "default", (_:unknown, res:any, that:unknown) => {
+    const children = res.props.children.props.children
+    dispatch(/^\/dr_dashboard/.test(location.pathname))
+    if (children.find((e:any) => e && e.key === "drdashLinkButton")) return
+    if (!DrDashboardButton) return
+    children.unshift(<DrDashboardButton key="drdashLinkButton">{children}</DrDashboardButton>)
+  })
 })
 
-patcher.after("DrInternal-RouterRoutes-Patch", getModule("ConnectedPrivateChannelsList"), "default", (_:unknown, res:any, that:unknown) => {
-  const children = res.props.children.props.children
-  dispatch(/^\/dr_dashboard/.test(location.pathname))
-  if (children.find((e:any) => e && e.key === "drdashLinkButton")) return
-  if (!DrDashboardButton) return
-  children.unshift(<DrDashboardButton key="drdashLinkButton">{children}</DrDashboardButton>)
-})
-
-anonymous(async () => {
-  const Views = await asyncGetModule((e: { default: { displayName: string } }) => e.default?.displayName === "ViewsWithMainInterface")
+asyncGetModule((e: { default: { displayName: string } }) => e.default?.displayName === "ViewsWithMainInterface").then(Views => {
   patcher.after("DrInternal-RouterRoutes-Patch", Views.default?.prototype, "render", (_:unknown, res:any) => {
     const routes = res.props.children[0].props.children[1]
     routes[routes.length - 1].props.path.push("/dr_dashboard")
@@ -230,7 +231,7 @@ const pages:any = {
         editor.setValue(internal.get("customCSS") ?? "")
         editor.on("change", () => {
           const value = editor.getValue()
-          customcss(value)
+          updateCustomCSS(value)
           internal.set("customCSS", value)
         })
       }}/>
