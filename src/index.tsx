@@ -10,7 +10,7 @@ import logger from "./logger"
 // If the location leads the dashboard we redirect
 if (location.pathname.startsWith("/dr_dashboard")) {
   logger.error("Redirecting to dashboard")
-  const node = document.querySelector("[href=\"//discord.com/login\"]")
+  const node = Array.from(document.getElementsByTagName("a")).find(e => /https:\/\/(canary|ptb|)(\.|)discord.com\/login/.test(e.href))
   if (node) node.click()
   throw new Error("Preventing further execution")
 }

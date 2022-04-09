@@ -26,10 +26,9 @@ class BrowserWindow extends electron.BrowserWindow {
     opts.webPreferences.preload = join(__dirname, "preload.js")
 
     electron.ipcMain.on("DR_DISCORD_PRELOAD", (event) => event.returnValue = oldPreload)
-
+    
     const win = new electron.BrowserWindow(opts)
     win.webContents.on("did-finish-load", () => { win.webContents.executeJavaScript("window.__DR__ELECTRON__BACKEND__.init((c) => window.eval(c))") })
-    
     return win 
   }
 }

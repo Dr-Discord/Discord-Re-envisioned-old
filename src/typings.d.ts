@@ -26,6 +26,9 @@ interface toastOpts {
   closeButton?: boolean
 }
 
+type setImmediate = (callback:()=>void)=>number
+const setImmediate:setImmediate
+
 type React = typeof import("react")
 type ReactDOM = typeof import("react-dom")
 // Simple way for both 'string' and 'React.ReactElement' be one type
@@ -85,7 +88,7 @@ interface localStorage {
   [x:string]: string|Function
 }
 interface webpackChunkdiscord_app {
-  [x:string]:number|Function
+  [x:string]:any
   push: (chunk:Array<any>) => void
   webpackExports?:any
   pop: () => Array<any>
@@ -100,6 +103,7 @@ interface Window {
     [x:string]:any
   }
   [x:string]:any
+  setImmediate:setImmediate
 }
 
 declare const DrApi:DrApi

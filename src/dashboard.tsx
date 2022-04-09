@@ -85,7 +85,7 @@ asyncGetModule((e: { default: { displayName: string }}) => e.default?.displayNam
   SwitchItem = React.memo((props:SwitchItemProps) => {
     const { value, onChange = () => {}, title, note, disabled = false, initialChange = true } = props
     const [checked, setChecked] = React.useState(value)
-    return <SwitchOrig
+    return <SwitchOrig.default
       value={checked}
       onChange={() => {
         if (initialChange) setChecked(!checked)
@@ -93,7 +93,7 @@ asyncGetModule((e: { default: { displayName: string }}) => e.default?.displayNam
       }}
       note={note}
       disabled={disabled}
-    >{title}</SwitchOrig>
+    >{title}</SwitchOrig.default>
   })
 })
 asyncGetModule((e: { default: { displayName: string }}) => e.default?.displayName === "ConnectedPrivateChannelsList").then(ConnectedPrivateChannelsList => {

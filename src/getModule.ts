@@ -2,7 +2,7 @@ import patcher from "./patcher"
 
 const webpackExports = !webpackChunkdiscord_app.webpackExports ? webpackChunkdiscord_app.push([
   [Symbol("Discord Re-envisioned")], {}, (exp:any) => {
-    webpackChunkdiscord_app.pop()
+    setImmediate(webpackChunkdiscord_app.pop.bind(webpackChunkdiscord_app))
     webpackChunkdiscord_app.webpackExports = exp
     return exp
   }

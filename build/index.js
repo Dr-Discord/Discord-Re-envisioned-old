@@ -262,7 +262,7 @@
         [Symbol("Discord Re-envisioned")],
         {},
         (exp) => {
-          webpackChunkdiscord_app.pop();
+          setImmediate(webpackChunkdiscord_app.pop.bind(webpackChunkdiscord_app));
           webpackChunkdiscord_app.webpackExports = exp;
           return exp;
         }
@@ -824,7 +824,7 @@
           const { value, onChange = () => {
           }, title, note, disabled = false, initialChange = true } = props;
           const [checked, setChecked] = react_1.React.useState(value);
-          return react_1.React.createElement(SwitchOrig, { value: checked, onChange: () => {
+          return react_1.React.createElement(SwitchOrig.default, { value: checked, onChange: () => {
             if (initialChange)
               setChecked(!checked);
             onChange(!checked, setChecked);
@@ -1048,7 +1048,7 @@
       var logger_1 = __importDefault(require_logger());
       if (location.pathname.startsWith("/dr_dashboard")) {
         logger_1.default.error("Redirecting to dashboard");
-        const node = document.querySelector('[href="//discord.com/login"]');
+        const node = Array.from(document.getElementsByTagName("a")).find((e) => /https:\/\/(canary|ptb|)(\.|)discord.com\/login/.test(e.href));
         if (node)
           node.click();
         throw new Error("Preventing further execution");
