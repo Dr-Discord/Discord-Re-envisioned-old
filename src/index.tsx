@@ -43,7 +43,7 @@ document.body.appendChild(Object.assign(document.createElement("script"), {
 
 Start()
 
-window.__DR__BACKEND__ = {
+window.__DR_BACKEND__ = {
   devMode: internal.get("devMode") ?? false,
   app: window?.__DR_ELECTRON_BACKEND__?.app ?? false,
   transparent: window?.__DR_ELECTRON_BACKEND__?.transparent ?? false,
@@ -57,7 +57,7 @@ const badges:{ [x:string]: [string, string] } = {
   "359174224809689089": [i18n.badges.developer, "#F52590"],
   "775199408638656553": [i18n.badges.tester, "#FFF"]
 }
-if (window.__DR__BACKEND__.app) window.DiscordNative.window.setDevtoolsCallbacks(null, null)
+if (window.__DR_BACKEND__.app) window.DiscordNative.window.setDevtoolsCallbacks(null, null)
 
 function normalFunctionToNative(fun:Function) {
   const newFunction = Object.assign(function(this:unknown) { return Reflect.apply(fun, this, arguments) }, fun)
@@ -73,10 +73,10 @@ function normalFunctionToNative(fun:Function) {
 async function Start() {
   try {
     Object.defineProperty(getModule(["isDeveloper"]), "isDeveloper", { 
-      get: () => window.__DR__BACKEND__.devMode, 
-      set: (val:boolean) => window.__DR__BACKEND__.devMode = val 
+      get: () => window.__DR_BACKEND__.devMode, 
+      set: (val:boolean) => window.__DR_BACKEND__.devMode = val 
     })
-  } catch (error) { window.__DR__BACKEND__.isDeveloperErrored = true }
+  } catch (error) { window.__DR_BACKEND__.isDeveloperErrored = true }
   // Idk good time to load
   await waitUntil(() => document.querySelector(".container-YkUktl"))
   const Plugins:any = {}

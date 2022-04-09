@@ -156,10 +156,9 @@ export function findInReactTree(tree:any, searchFilter:Function):any {
 }
 
 export function restart(full:boolean) {
-  if (window.__DR__BACKEND__.app && full) return window.__DR__BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART")
+  if (window.__DR_BACKEND__.app && full) return window.__DR_BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART")
   return location.reload()
 }
-
 
 export function openSetting(this:any) {
   const { openModal } = getModule(["openModal", "openModalLazy"])

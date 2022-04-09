@@ -176,18 +176,18 @@ const pages:any = {
         value={internal.get("devMode") ?? false}
         title={i18n.devMode.title}
         note={i18n.devMode.note}
-        disabled={window.__DR__BACKEND__.isDeveloperErrored}
+        disabled={window.__DR_BACKEND__.isDeveloperErrored}
         onChange={(val:boolean) => {
           internal.set("devMode", val)
-          window.__DR__BACKEND__.devMode = val
+          window.__DR_BACKEND__.devMode = val
         }}
       />
-      {window.__DR__BACKEND__.app ? <SwitchItem
-        value={window.__DR__BACKEND__.transparent}
+      {window.__DR_BACKEND__.app ? <SwitchItem
+        value={window.__DR_BACKEND__.transparent}
         title={i18n.toggleTransparency.title}
         note={i18n.toggleTransparency.note}
         onChange={(val:boolean) => {
-          window.__DR__BACKEND__.toggleTransparency()
+          window.__DR_BACKEND__.toggleTransparency()
         }}
       /> : false}
     </>
@@ -258,7 +258,7 @@ const DashPage = React.memo(() => {
           type={TabBar.Types.TOP_PILL}
           onItemSelect={(e:string) => setPage(e)}
           selectedItem={page}
-        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key} disabled={key === "customcss" && (!window.ace || window.__DR__BACKEND__.isPopped)}>{val}</TabBar.Item>)}</TabBar>
+        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key} disabled={key === "customcss" && (!window.ace || window.__DR_BACKEND__.isPopped)}>{val}</TabBar.Item>)}</TabBar>
       </Header>
       <div className={content}><div className={auto} style={{ padding: "16px 12px" }}><Page /></div></div>
     </div>

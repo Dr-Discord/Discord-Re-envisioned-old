@@ -684,8 +684,8 @@
       }
       exports.findInReactTree = findInReactTree;
       function restart(full) {
-        if (window.__DR__BACKEND__.app && full)
-          return window.__DR__BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART");
+        if (window.__DR_BACKEND__.app && full)
+          return window.__DR_BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART");
         return location.reload();
       }
       exports.restart = restart;
@@ -894,11 +894,11 @@
       });
       var pages = {
         general: react_1.React.memo(() => {
-          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement(SwitchItem, { value: storage_1.internal.get("devMode") ?? false, title: i18n_1.default.devMode.title, note: i18n_1.default.devMode.note, disabled: window.__DR__BACKEND__.isDeveloperErrored, onChange: (val) => {
+          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement(SwitchItem, { value: storage_1.internal.get("devMode") ?? false, title: i18n_1.default.devMode.title, note: i18n_1.default.devMode.note, disabled: window.__DR_BACKEND__.isDeveloperErrored, onChange: (val) => {
             storage_1.internal.set("devMode", val);
-            window.__DR__BACKEND__.devMode = val;
-          } }), window.__DR__BACKEND__.app ? react_1.React.createElement(SwitchItem, { value: window.__DR__BACKEND__.transparent, title: i18n_1.default.toggleTransparency.title, note: i18n_1.default.toggleTransparency.note, onChange: (val) => {
-            window.__DR__BACKEND__.toggleTransparency();
+            window.__DR_BACKEND__.devMode = val;
+          } }), window.__DR_BACKEND__.app ? react_1.React.createElement(SwitchItem, { value: window.__DR_BACKEND__.transparent, title: i18n_1.default.toggleTransparency.title, note: i18n_1.default.toggleTransparency.note, onChange: (val) => {
+            window.__DR_BACKEND__.toggleTransparency();
           } }) : false);
         }),
         plugins: react_1.React.memo(() => {
@@ -943,7 +943,7 @@
       var DashPage = react_1.React.memo(() => {
         const [page, setPage] = react_1.React.useState("general");
         const Page = pages[page] ?? react_1.React.memo(() => react_1.React.createElement(react_1.React.Fragment, null, "ERROR | This page may not be added"));
-        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, null) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => setPage(e), selectedItem: page }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key, disabled: key === "customcss" && (!window.ace || window.__DR__BACKEND__.isPopped) }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
+        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, null) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => setPage(e), selectedItem: page }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key, disabled: key === "customcss" && (!window.ace || window.__DR_BACKEND__.isPopped) }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
       });
       (0, util_1.anonymous)(async () => {
         const domNode = await (0, util_1.waitUntil)(() => document.querySelector(`.${container}`));
@@ -1069,7 +1069,7 @@
         nonce: document.querySelector("[nonce]")?.nonce
       }));
       Start();
-      window.__DR__BACKEND__ = {
+      window.__DR_BACKEND__ = {
         devMode: storage_1.internal.get("devMode") ?? false,
         app: window?.__DR_ELECTRON_BACKEND__?.app ?? false,
         transparent: window?.__DR_ELECTRON_BACKEND__?.transparent ?? false,
@@ -1084,7 +1084,7 @@
         "359174224809689089": [i18n_1.default.badges.developer, "#F52590"],
         "775199408638656553": [i18n_1.default.badges.tester, "#FFF"]
       };
-      if (window.__DR__BACKEND__.app)
+      if (window.__DR_BACKEND__.app)
         window.DiscordNative.window.setDevtoolsCallbacks(null, null);
       function normalFunctionToNative(fun) {
         const newFunction = Object.assign(function() {
@@ -1101,11 +1101,11 @@
       async function Start() {
         try {
           Object.defineProperty((0, getModule_1.default)(["isDeveloper"]), "isDeveloper", {
-            get: () => window.__DR__BACKEND__.devMode,
-            set: (val) => window.__DR__BACKEND__.devMode = val
+            get: () => window.__DR_BACKEND__.devMode,
+            set: (val) => window.__DR_BACKEND__.devMode = val
           });
         } catch (error) {
-          window.__DR__BACKEND__.isDeveloperErrored = true;
+          window.__DR_BACKEND__.isDeveloperErrored = true;
         }
         await (0, util_1.waitUntil)(() => document.querySelector(".container-YkUktl"));
         const Plugins = {};

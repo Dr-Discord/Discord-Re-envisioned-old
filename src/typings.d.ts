@@ -99,7 +99,7 @@ interface Window {
   DrApi:DrApi
   webpackChunkdiscord_app:webpackChunkdiscord_app
   localStorage?:localStorage|null
-  __DR__BACKEND__: {
+  __DR_BACKEND__: {
     [x:string]:any
   }
   [x:string]:any
