@@ -72,11 +72,18 @@ electron.app.setAppPath(basePath)
 electron.app.name = pkg.name
 
 const electronPath = require.resolve("electron")
-delete require.cache[electronPath].exports
-require.cache[electronPath].exports = {
-  ...electron,
-  BrowserWindow
+const cached = require.cache[electronPath]
+const propertyNames = Object.getOwnPropertyNames(cached.exports)
+delete cached.exports
+
+const newElectron = {}
+for (const propertyName of propertyNames) {
+  Object.defineProperty(newElectron, propertyName, {
+    ...Object.getOwnPropertyDescriptor(electron, propertyName),
+    get: () => propertyName === "BrowserWindow" ? BrowserWindow : electron[propertyName]
+  })
 }
+cached.exports = newElectron
 
 // Load other discord mods | 'app-old' and if the 'module.exports' is a function it runs it and with the arg to load discord
 const appOld = join(process.resourcesPath, "app-old")
