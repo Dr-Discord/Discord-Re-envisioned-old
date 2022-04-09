@@ -1071,9 +1071,9 @@
       Start();
       window.__DR__BACKEND__ = {
         devMode: storage_1.internal.get("devMode") ?? false,
-        app: window?.__DR__ELECTRON__BACKEND__?.app ?? false,
-        transparent: window?.__DR__ELECTRON__BACKEND__?.transparent ?? false,
-        toggleTransparency: window?.__DR__ELECTRON__BACKEND__?.toggleTransparency ?? function() {
+        app: window?.__DR_ELECTRON_BACKEND__?.app ?? false,
+        transparent: window?.__DR_ELECTRON_BACKEND__?.transparent ?? false,
+        toggleTransparency: window?.__DR_ELECTRON_BACKEND__?.toggleTransparency ?? function() {
           throw new Error("tried using toggleTransparency on WEB!");
         },
         isPopped: false,

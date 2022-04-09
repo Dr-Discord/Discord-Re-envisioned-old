@@ -23,14 +23,13 @@ class BrowserWindow extends electron.BrowserWindow {
       opts.backgroundColor = "#00000000"
     }
     const oldPreload = opts.webPreferences.preload
-
     opts.webPreferences.preload = join(__dirname, "preload.js")
+
+    super(opts)
 
     electron.ipcMain.on("DR_DISCORD_PRELOAD", (event) => event.returnValue = oldPreload)
     
-    const win = new electron.BrowserWindow(opts)
-    win.webContents.on("did-finish-load", () => { win.webContents.executeJavaScript("window.__DR__ELECTRON__BACKEND__.init((c) => window.eval(c))") })
-    return win 
+    this.webContents.on("did-finish-load", () => { this.webContents.executeJavaScript("window.__DR_ELECTRON_BACKEND__.init((c) => window.eval(c))") })
   }
 }
 
