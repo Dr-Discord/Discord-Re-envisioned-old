@@ -17,6 +17,7 @@ electron.ipcMain.on("DR_TRANSPARENT", (event) => event.returnValue = transparent
 class BrowserWindow extends electron.BrowserWindow {
   constructor(opts) {
     if (opts.title != "Discord") return super(opts)
+    
     if (typeof transparent === "boolean" && transparent === true) {
       opts.transparent = true
       opts.backgroundColor = "#00000000"
@@ -65,16 +66,17 @@ electron.app.once("ready", () => {
   } catch (error) {}
 })
 
-const Electron = new Proxy(electron, { get: (target, prop) => prop === "BrowserWindow" ? BrowserWindow : target[prop] })
-
-const electronPath = require.resolve("electron")
-delete require.cache[electronPath].exports
-require.cache[electronPath].exports = Electron
-
 const basePath = join(process.resourcesPath, "app.asar")
 const pkg = require(join(basePath, "package.json"))
 electron.app.setAppPath(basePath)
 electron.app.name = pkg.name
+
+const electronPath = require.resolve("electron")
+delete require.cache[electronPath].exports
+require.cache[electronPath].exports = {
+  ...electron,
+  BrowserWindow
+}
 
 // Load other discord mods | 'app-old' and if the 'module.exports' is a function it runs it and with the arg to load discord
 const appOld = join(process.resourcesPath, "app-old")
