@@ -37,39 +37,37 @@ const DrIcon = React.memo(() => (
 ))
 
 let selectedChild:any = () => {}
-let DrDashboardButton:any = React.memo(() => <>Module Not Loaded!</>)
 
-asyncGetModule((e: { LinkButton:any }) => e.LinkButton).then(({ LinkButton }) => {
-  interface DrDashboardButton {
-    children: Array<React.ReactNode>
-  }
-  DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
-    const [isSelected, setSelected] = React.useState(false)
-    let _selectedChild = children.find((e:any) => e?.props?.selected)
-    if (_selectedChild) selectedChild = _selectedChild
-  
-    dispatch = function(val:boolean) {
-      if (!val) {
-        const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`)
-        if (!domNode) return setSelected(val)
-        if (!selectedChild.props) selectedChild.props = {}
-        selectedChild.props.selected = getOwnerInstance(domNode)._reactInternals.return.key === selectedChild.key      
-      }
-      setSelected(val)
+interface DrDashboardButton {
+  children: Array<React.ReactNode>
+}
+const { LinkButton } = getModule(["LinkButton"])
+const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
+  const [isSelected, setSelected] = React.useState(false)
+  let _selectedChild = children.find((e:any) => e?.props?.selected)
+  if (_selectedChild) selectedChild = _selectedChild
+
+  dispatch = function(val:boolean) {
+    if (!val) {
+      const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`)
+      if (!domNode) return setSelected(val)
+      if (!selectedChild.props) selectedChild.props = {}
+      selectedChild.props.selected = getOwnerInstance(domNode)._reactInternals.return.key === selectedChild.key      
     }
-  
-    return (
-      <LinkButton 
-        text={i18n.name}
-        icon={() =>  <DrIcon />}
-        route="/dr_dashboard"
-        selected={isSelected}
-        onFocus={() => {
-          if (selectedChild) selectedChild.props.selected = false
-        }}
-      />
-    )
-  })
+    setSelected(val)
+  }
+
+  return (
+    <LinkButton 
+      text={i18n.name}
+      icon={() =>  <DrIcon />}
+      route="/dr_dashboard"
+      selected={isSelected}
+      onFocus={() => {
+        if (selectedChild) selectedChild.props.selected = false
+      }}
+    />
+  )
 })
 
 interface SwitchItemProps {
@@ -80,21 +78,20 @@ interface SwitchItemProps {
   disabled?:boolean
   initialChange?:boolean
 }
-let SwitchItem:any = React.memo(() => <>Module Not Loaded!</>)
-asyncGetModule((e: { default: { displayName: string }}) => e.default?.displayName === "SwitchItem").then(SwitchOrig => {
-  SwitchItem = React.memo((props:SwitchItemProps) => {
-    const { value, onChange = () => {}, title, note, disabled = false, initialChange = true } = props
-    const [checked, setChecked] = React.useState(value)
-    return <SwitchOrig.default
-      value={checked}
-      onChange={() => {
-        if (initialChange) setChecked(!checked)
-        onChange(!checked, setChecked)
-      }}
-      note={note}
-      disabled={disabled}
-    >{title}</SwitchOrig.default>
-  })
+
+const SwitchOrig = getModule("SwitchItem")
+const SwitchItem = React.memo((props:SwitchItemProps) => {
+  const { value, onChange = () => {}, title, note, disabled = false, initialChange = true } = props
+  const [checked, setChecked] = React.useState(value)
+  return <SwitchOrig.default
+    value={checked}
+    onChange={() => {
+      if (initialChange) setChecked(!checked)
+      onChange(!checked, setChecked)
+    }}
+    note={note}
+    disabled={disabled}
+  >{title}</SwitchOrig.default>
 })
 asyncGetModule((e: { default: { displayName: string }}) => e.default?.displayName === "ConnectedPrivateChannelsList").then(ConnectedPrivateChannelsList => {
   patcher.after("DrInternal-RouterRoutes-Patch", ConnectedPrivateChannelsList, "default", (_:unknown, res:any, that:unknown) => {

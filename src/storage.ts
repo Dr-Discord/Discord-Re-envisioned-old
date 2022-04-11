@@ -9,8 +9,7 @@ export const localStorage:localStorage = (() => {
   if (window.localStorage) return window.localStorage
   const frame:any = document.getElementById("dr-frame")
   let localStorage:any = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage")
-  Object.defineProperty(window, "localStorage", localStorage)
-  return window.localStorage
+  return Reflect.apply(localStorage.get, window, [])
 })()
 // Set base data
 localStorage.setItem("dr-storage", (() => {

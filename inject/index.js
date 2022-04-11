@@ -18,7 +18,7 @@ class BrowserWindow extends electron.BrowserWindow {
   constructor(opts) {
     if (opts.title != "Discord") return super(opts)
     
-    if (typeof transparent === "boolean" && transparent === true) {
+    if (transparent) {
       opts.transparent = true
       opts.backgroundColor = "#00000000"
     }
@@ -26,10 +26,10 @@ class BrowserWindow extends electron.BrowserWindow {
     opts.webPreferences.preload = join(__dirname, "preload.js")
 
     super(opts)
-
     electron.ipcMain.on("DR_DISCORD_PRELOAD", (event) => event.returnValue = oldPreload)
-    
-    this.webContents.on("did-finish-load", () => { this.webContents.executeJavaScript("window.__DR_ELECTRON_BACKEND__.init((c) => window.eval(c))") })
+    this.webContents.on("did-finish-load", () => {
+      this.webContents.executeJavaScript("window.__DR_ELECTRON_BACKEND__.init((c) => window.eval(c))")
+    })
   }
 }
 
@@ -53,7 +53,7 @@ electron.app.once("ready", () => {
   electron.session.defaultSession.webRequest.onHeadersReceived(function({ responseHeaders }, callback) {
     delete responseHeaders["content-security-policy-report-only"]
     delete responseHeaders["content-security-policy"]
-    
+    console.log(arguments[0]);
     callback({ 
       cancel: false, 
       responseHeaders
