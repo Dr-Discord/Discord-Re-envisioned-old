@@ -16,7 +16,7 @@ const Editor = React.memo(({ props = {}, editor = () => {} }:any) => {
 })
 
 internalStyling.inject("settings", `.dr-editor-header { background-color: var(--background-secondary); display: flex; flex-direction: row; padding: 2px 4px; border-radius: 6px 6px 0 0 }
-.dr-editor-header-button { color: red; margin-right: 5px; width: 26px; height: 26px; color: var(--interactive-normal); position: relative }
+.dr-editor-header-button { margin-right: 5px; width: 26px; height: 26px; color: var(--interactive-normal); position: relative }
 .dr-editor-header-button:hover { color: var(--interactive-hover) }
 .dr-editor-header-button:active { color: var(--interactive-active) }
 .dr-editor-header-button > * { width: 22px; height: 22px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) }
@@ -64,7 +64,7 @@ const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
       route="/dr_dashboard"
       selected={isSelected}
       onFocus={() => {
-        if (selectedChild) selectedChild.props.selected = false
+        if (selectedChild?.props) selectedChild.props.selected = false
       }}
     />
   )
@@ -198,7 +198,7 @@ const pages:any = {
     const [theme, setTheme] = React.useState(internal.get("editorTheme") ?? "monokai")
     let _theme = theme
     function makeButton(reactElement:ReactNode, tooltip:string, onClick:Function) {
-      return <Tooltip text={tooltip}>{(props:any) => <div {...props} onClick={(e:any) => {
+      return <Tooltip text={tooltip}>{(props:tooltipProps) => <div {...props} onClick={(e:any) => {
         onClick(e)
         props.onClick(e)
       }} className="dr-editor-header-button">{reactElement}</div>}</Tooltip>
@@ -206,9 +206,11 @@ const pages:any = {
 
     return <>
       <div className="dr-editor-header">
-        {makeButton(<OpenExternal />, i18n.customCSS.popout, console.log)}
+        {makeButton(<OpenExternal />, i18n.customCSS.popout, () => alert(i18n.customCSS.settings, [
+          "Popout the css editor to use it anywhere", "Not added yet"
+        ]))}
         {makeButton(<Gear />, i18n.customCSS.settings, () => alert(i18n.customCSS.settings, [
-          "Apply and customize settings to your css", "hasnt been added yet"
+          "Apply and customize settings to your css", "Not added yet"
         ]))}
         {makeButton(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
   <path fill="currentcolor" d="M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" />
@@ -279,7 +281,7 @@ anonymous(async () => {
       />
     )
   })
-  Router.forceUpdate()
+
   const { app } = getModule(["app"])
   const _domNode:Element = await waitUntil(() => document.querySelector(`.${app}`))
   findInTree(getOwnerInstance(_domNode)?._reactInternals, (n:any) => n?.historyUnlisten, { walkable: [ "child", "stateNode" ] }).forceUpdate()

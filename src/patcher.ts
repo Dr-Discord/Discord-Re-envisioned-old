@@ -1,37 +1,27 @@
 const Patch_Symbol = Symbol("DrApi.patch")
 const Quick_Symbol = Symbol("DrApi.patch.quick")
 const Internal_Symbol = Symbol("DrInternal")
+
+Symbol.drPatcher = { patch: Patch_Symbol, quick: Quick_Symbol }
+
 const ALLpatches:any = {}
 
-function isClass(func:any):boolean {
-  if(!(func && func.constructor === Function) || func.prototype === undefined) return false
-  if(Function.prototype === Object.getPrototypeOf(func)) return Object.getOwnPropertyNames(func.prototype).length > 1
-  return true
-}
-// symple way to change the toString to the original
-function setToString(obj:any, old:any) {
-  Object.defineProperty(obj, "toString", {
-    value: () => old.toString(),
-    writable: true,
-    enumerable: false,
-    configurable: true
-  })
-  Object.defineProperty(obj.toString, "toString", {
-    value: () => old.toString.toString(),
-    writable: true,
-    enumerable: false,
-    configurable: true
-  })
-}
+type PatcherOf = typeof patcher
+type PatcherKeys = keyof PatcherOf
 
-function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:string, callback:Function, opts:patcherOpts) {
+function patch(this:PatcherOf, patchName:string|symbol, moduleToPatch:any, functionToPatch:string, callback:Function, opts:patcherOpts) {
   let { method = "after", id, index = 0 } = opts
+
   if (!moduleToPatch) throw new Error("moduleToPatch is required/is undefined")
+
   if (!moduleToPatch[functionToPatch]) moduleToPatch[functionToPatch] = () => {}
   let originalFunction = moduleToPatch[functionToPatch]
+  
   method = (method.toLowerCase() as "before"|"after"|"instead")
   if (!(method === "before" || method === "after" || method === "instead")) throw new Error(`'${method}' is a invalid patch type`)
-  let patches = moduleToPatch?.[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] }
+
+  let patches = moduleToPatch[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] }
+
   let CallbackSymbol = Symbol()
   let patchInfo = { unpatch, patchName: id ?? patchName, moduleToPatch, functionToPatch, callback, method, Symbol: CallbackSymbol }
   patches[method].splice(index, 0, Object.assign(callback, { unpatch, Symbol: CallbackSymbol }))
@@ -47,18 +37,17 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
     ALLpatches[patchName].splice(index, 1)
     if (!ALLpatches[patchName].length) delete ALLpatches[patchName]
   }
-  if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
-    if (isClass(originalFunction)) throw new Error(`'${functionToPatch}' is a class, you can't patch a class (extend the class for now)`)
-
+  
+  if (!moduleToPatch[functionToPatch].hasOwnProperty(Patch_Symbol)) {
     Object.defineProperty(moduleToPatch, functionToPatch, {
       writable: true,
       configurable: true,
       value: function() {
-        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1]()
+        for (let patch = Object.keys(patches.before).length; patch > 0; patch--) patches.before[patch - 1](arguments, this)
         let insteadFunction = originalFunction
-        for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1]([...arguments], insteadFunction, this) ?? insteadFunction
+        for (let patch = Object.keys(patches.instead).length; patch > 0; patch--) insteadFunction = patches.instead[patch - 1](arguments, insteadFunction, this) ?? insteadFunction
         let res = Reflect.apply(insteadFunction, this, arguments)
-        for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1]([...arguments], res, this)
+        for (let patch = Object.keys(patches.after).length; patch > 0; patch--) patches.after[patch - 1](arguments, res, this)
         return res
       }
     })
@@ -75,7 +64,19 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
         }
       }
     })
-    setToString(moduleToPatch[functionToPatch], originalFunction)
+
+    Object.defineProperty(moduleToPatch[functionToPatch], "toString", {
+      value: () => originalFunction.toString(),
+      writable: true,
+      enumerable: false,
+      configurable: true
+    })
+    Object.defineProperty(moduleToPatch[functionToPatch].toString, "toString", {
+      value: () => originalFunction.toString.toString(),
+      writable: true,
+      enumerable: false,
+      configurable: true
+    })
   }
   
   if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))
@@ -89,15 +90,22 @@ function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:strin
   return unpatch
 }
 
-export default {
+const patcher:any = {
   patch,
-  quick: (moduleToPatch:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
-  before: (id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "before" })),
-  instead: (id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "instead" })),
-  after: (id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "after" })),
-  unpatchAll: (id:string|symbol) => {
+  before: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "before" })) },
+  instead: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "instead" })) },
+  after: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "after" })) },
+  unpatchAll: function(this:PatcherOf, id:string|symbol) {
     if (!ALLpatches[id]) return
     for (const patch of ALLpatches[id]) patch.unpatch()
   },
+}
+
+export default {
+  ...patcher,
+  quick: (moduleToPatch:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
+  create: (id:string|symbol) => Object.fromEntries(Object.keys(patcher).map((key:PatcherKeys) => [
+    key, patcher[key].bind(null, id)
+  ])),
   patches: ALLpatches
 }

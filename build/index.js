@@ -83,14 +83,14 @@
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.console = void 0;
       var i18n_1 = __importDefault(require_i18n());
-      var _console = (() => {
+      var consoleFromFrame = (() => {
         const frame = document.getElementById("dr-frame");
         const c = Object.getOwnPropertyDescriptor(frame.contentWindow, "console");
         if (!c?.value)
           return window.console;
         return c.value;
       })();
-      exports.console = _console;
+      exports.console = consoleFromFrame;
       function getIcon(color) {
         return btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path d="M11.1903 7.802C11.1903 8.426 11.1003 9.092 10.9203 9.8C10.7403 10.496 10.4883 11.192 10.1643 11.888C9.84032 12.572 9.43832 13.232 8.95832 13.868C8.49032 14.492 7.95632 15.044 7.35632 15.524C6.75632 15.992 6.09632 16.37 5.37632 16.658C4.66832 16.946 3.91232 17.09 3.10832 17.09C2.94032 17.09 2.77232 17.078 2.60432 17.054C2.43632 17.042 2.26832 17.024 2.10032 17C2.42432 15.344 2.74232 13.73 3.05432 12.158C3.17432 11.498 3.30032 10.814 3.43232 10.106C3.56432 9.386 3.69032 8.678 3.81032 7.982C3.93032 7.286 4.04432 6.62 4.15232 5.984C4.27232 5.348 4.36832 4.772 4.44032 4.256C4.95632 4.16 5.47832 4.07 6.00632 3.986C6.53432 3.902 7.07432 3.86 7.62632 3.86C8.27432 3.86 8.82032 3.962 9.26432 4.166C9.72032 4.37 10.0863 4.652 10.3623 5.012C10.6503 5.372 10.8603 5.792 10.9923 6.272C11.1243 6.752 11.1903 7.262 11.1903 7.802ZM6.94232 6.398C6.81032 7.106 6.67232 7.784 6.52832 8.432C6.38432 9.08 6.24032 9.734 6.09632 10.394C5.95232 11.054 5.80832 11.744 5.66432 12.464C5.52032 13.184 5.38232 13.97 5.25032 14.822C5.53832 14.63 5.81432 14.372 6.07832 14.048C6.35432 13.712 6.61232 13.328 6.85232 12.896C7.09232 12.464 7.30832 12.008 7.50032 11.528C7.70432 11.048 7.87832 10.58 8.02232 10.124C8.16632 9.668 8.27432 9.242 8.34632 8.846C8.43032 8.45 8.47232 8.108 8.47232 7.82C8.47232 7.376 8.34632 7.028 8.09432 6.776C7.85432 6.524 7.47032 6.398 6.94232 6.398ZM10.0456 17.018C10.3696 15.422 10.6816 13.862 10.9816 12.338C11.0896 11.69 11.2096 11.018 11.3416 10.322C11.4736 9.614 11.5936 8.918 11.7016 8.234C11.8216 7.538 11.9296 6.872 12.0256 6.236C12.1336 5.588 12.2176 5 12.2776 4.472C12.9616 4.256 13.6996 4.1 14.4916 4.004C15.2836 3.896 16.0696 3.842 16.8496 3.842C17.3176 3.842 17.7016 3.896 18.0016 4.004C18.3136 4.112 18.5536 4.268 18.7216 4.472C18.9016 4.664 19.0276 4.892 19.0996 5.156C19.1716 5.42 19.2076 5.714 19.2076 6.038C19.2076 6.518 19.1236 6.992 18.9556 7.46C18.7876 7.916 18.5596 8.354 18.2716 8.774C17.9956 9.182 17.6716 9.56 17.2996 9.908C16.9396 10.244 16.5496 10.52 16.1296 10.736C16.3456 11.216 16.5736 11.744 16.8136 12.32C17.0656 12.884 17.2996 13.424 17.5156 13.94C17.7556 14.54 18.0016 15.14 18.2536 15.74L15.4636 16.712C15.2236 15.944 15.0076 15.224 14.8156 14.552C14.7316 14.276 14.6476 13.994 14.5636 13.706C14.4796 13.406 14.4016 13.124 14.3296 12.86C14.2576 12.596 14.1976 12.362 14.1496 12.158C14.1016 11.942 14.0716 11.768 14.0596 11.636L13.8256 11.708C13.7536 12.092 13.6636 12.542 13.5556 13.058C13.4596 13.574 13.3696 14.072 13.2856 14.552C13.1776 15.116 13.0696 15.686 12.9616 16.262L10.0456 17.018ZM14.2756 9.206C14.5036 9.182 14.7796 9.086 15.1036 8.918C15.4396 8.75 15.7576 8.552 16.0576 8.324C16.3576 8.084 16.6156 7.838 16.8316 7.586C17.0476 7.334 17.1556 7.112 17.1556 6.92C17.1556 6.788 17.1136 6.686 17.0296 6.614C16.9456 6.53 16.8256 6.47 16.6696 6.434C16.5256 6.386 16.3636 6.356 16.1836 6.344C16.0036 6.332 15.8176 6.326 15.6256 6.326C15.4936 6.326 15.3556 6.332 15.2116 6.344C15.0796 6.344 14.9596 6.344 14.8516 6.344L14.2756 9.206Z" fill="${color}"></path></svg>`);
       }
@@ -115,10 +115,10 @@
         ].filter((e) => e);
       }
       exports.default = {
-        error: _console.error.bind(exports, ...generateStr("error")),
-        warn: _console.warn.bind(exports, ...generateStr("warn")),
-        log: _console.log.bind(exports, ...generateStr("log")),
-        console: _console
+        error: consoleFromFrame.error.bind(exports, ...generateStr("error")),
+        warn: consoleFromFrame.warn.bind(exports, ...generateStr("warn")),
+        log: consoleFromFrame.log.bind(exports, ...generateStr("log")),
+        console: consoleFromFrame
       };
     }
   });
@@ -131,28 +131,8 @@
       var Patch_Symbol = Symbol("DrApi.patch");
       var Quick_Symbol = Symbol("DrApi.patch.quick");
       var Internal_Symbol = Symbol("DrInternal");
+      Symbol.drPatcher = { patch: Patch_Symbol, quick: Quick_Symbol };
       var ALLpatches = {};
-      function isClass(func) {
-        if (!(func && func.constructor === Function) || func.prototype === void 0)
-          return false;
-        if (Function.prototype === Object.getPrototypeOf(func))
-          return Object.getOwnPropertyNames(func.prototype).length > 1;
-        return true;
-      }
-      function setToString(obj, old) {
-        Object.defineProperty(obj, "toString", {
-          value: () => old.toString(),
-          writable: true,
-          enumerable: false,
-          configurable: true
-        });
-        Object.defineProperty(obj.toString, "toString", {
-          value: () => old.toString.toString(),
-          writable: true,
-          enumerable: false,
-          configurable: true
-        });
-      }
       function patch(patchName, moduleToPatch, functionToPatch, callback, opts) {
         let { method = "after", id, index = 0 } = opts;
         if (!moduleToPatch)
@@ -164,7 +144,7 @@
         method = method.toLowerCase();
         if (!(method === "before" || method === "after" || method === "instead"))
           throw new Error(`'${method}' is a invalid patch type`);
-        let patches = moduleToPatch?.[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] };
+        let patches = moduleToPatch[functionToPatch]?.[Patch_Symbol]?.patches ?? { before: [], after: [], instead: [] };
         let CallbackSymbol = Symbol();
         let patchInfo = { unpatch, patchName: id ?? patchName, moduleToPatch, functionToPatch, callback, method, Symbol: CallbackSymbol };
         patches[method].splice(index, 0, Object.assign(callback, { unpatch, Symbol: CallbackSymbol }));
@@ -182,21 +162,19 @@
           if (!ALLpatches[patchName].length)
             delete ALLpatches[patchName];
         }
-        if (!moduleToPatch[functionToPatch][Patch_Symbol]) {
-          if (isClass(originalFunction))
-            throw new Error(`'${functionToPatch}' is a class, you can't patch a class (extend the class for now)`);
+        if (!moduleToPatch[functionToPatch].hasOwnProperty(Patch_Symbol)) {
           Object.defineProperty(moduleToPatch, functionToPatch, {
             writable: true,
             configurable: true,
             value: function() {
               for (let patch2 = Object.keys(patches.before).length; patch2 > 0; patch2--)
-                patches.before[patch2 - 1]();
+                patches.before[patch2 - 1](arguments, this);
               let insteadFunction = originalFunction;
               for (let patch2 = Object.keys(patches.instead).length; patch2 > 0; patch2--)
-                insteadFunction = patches.instead[patch2 - 1]([...arguments], insteadFunction, this) ?? insteadFunction;
+                insteadFunction = patches.instead[patch2 - 1](arguments, insteadFunction, this) ?? insteadFunction;
               let res = Reflect.apply(insteadFunction, this, arguments);
               for (let patch2 = Object.keys(patches.after).length; patch2 > 0; patch2--)
-                patches.after[patch2 - 1]([...arguments], res, this);
+                patches.after[patch2 - 1](arguments, res, this);
               return res;
             }
           });
@@ -216,7 +194,18 @@
               }
             }
           });
-          setToString(moduleToPatch[functionToPatch], originalFunction);
+          Object.defineProperty(moduleToPatch[functionToPatch], "toString", {
+            value: () => originalFunction.toString(),
+            writable: true,
+            enumerable: false,
+            configurable: true
+          });
+          Object.defineProperty(moduleToPatch[functionToPatch].toString, "toString", {
+            value: () => originalFunction.toString.toString(),
+            writable: true,
+            enumerable: false,
+            configurable: true
+          });
         }
         if (typeof patchName === "string" && /DrInternal-([A-z]+)-Patch/.test(patchName))
           if (patchName === "DrInternal-dontShow-Patch")
@@ -231,18 +220,31 @@
           ALLpatches[patchName].push(patchInfo);
         return unpatch;
       }
-      exports.default = {
+      var patcher = {
         patch,
-        quick: (moduleToPatch, functionToPatch, callback, opts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
-        before: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "before" })),
-        instead: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "instead" })),
-        after: (id, module2, functionToPatch, callback, opts) => patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "after" })),
-        unpatchAll: (id) => {
+        before: function(id, module2, functionToPatch, callback, opts) {
+          return patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "before" }));
+        },
+        instead: function(id, module2, functionToPatch, callback, opts) {
+          return patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "instead" }));
+        },
+        after: function(id, module2, functionToPatch, callback, opts) {
+          return patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "after" }));
+        },
+        unpatchAll: function(id) {
           if (!ALLpatches[id])
             return;
           for (const patch2 of ALLpatches[id])
             patch2.unpatch();
-        },
+        }
+      };
+      exports.default = {
+        ...patcher,
+        quick: (moduleToPatch, functionToPatch, callback, opts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
+        create: (id) => Object.fromEntries(Object.keys(patcher).map((key) => [
+          key,
+          patcher[key].bind(null, id)
+        ])),
         patches: ALLpatches
       };
     }
@@ -308,7 +310,7 @@
       exports.getModule = getModule;
       exports.default = getModule;
       var listeners = new Set();
-      patcher_1.default.instead("DrInternal-webpack-Patch", webpackChunkdiscord_app, "push", ([chunk], orig) => {
+      patcher_1.default.instead("DrInternal-webpack-Patch", webpackChunkdiscord_app, "push", ([chunk]) => {
         const [, modules] = chunk;
         for (const id in modules)
           patcher_1.default.after("DrInternal-dontShow-Patch", modules, id, ([, exports2]) => {
@@ -345,11 +347,10 @@
         return mod && mod.__esModule ? mod : { "default": mod };
       };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.ReactSpring = exports.ReactDOM = exports.React = void 0;
+      exports.ReactDOM = exports.React = void 0;
       var getModule_1 = __importDefault(require_getModule());
       exports.React = (0, getModule_1.default)(["createElement", "Component"]);
       exports.ReactDOM = (0, getModule_1.default)(["render", "findDOMNode"]);
-      exports.ReactSpring = (0, getModule_1.default)(["useSpring", "animated"]);
       exports.default = exports.React;
     }
   });
@@ -365,8 +366,7 @@
           return window.localStorage;
         const frame = document.getElementById("dr-frame");
         let localStorage = Object.getOwnPropertyDescriptor(frame.contentWindow, "localStorage");
-        Object.defineProperty(window, "localStorage", localStorage);
-        return window.localStorage;
+        return Reflect.apply(localStorage.get, window, []);
       })();
       exports.localStorage.setItem("dr-storage", (() => {
         let res = JSON.parse(exports.localStorage.getItem("dr-storage") ?? "{}");
@@ -439,7 +439,7 @@
       }
       function update(type) {
         return (id, css) => {
-          const style = document.querySelector(`style[dr-${type}-css="${id}"]`);
+          const style = document.querySelector(`style[dr-${type}-css=${JSON.stringify(id)}]`);
           if (style)
             style.innerHTML = css;
           else
@@ -448,7 +448,7 @@
       }
       function uninject(type) {
         return (id) => {
-          const style = document.querySelector(`style[dr-${type}-css="${id}"]`);
+          const style = document.querySelector(`style[dr-${type}-css=${JSON.stringify(id)}]`);
           if (style)
             style.remove();
         };
@@ -785,7 +785,7 @@
         return react_1.React.createElement("div", { ref, ...props });
       });
       styling_1.internalStyling.inject("settings", `.dr-editor-header { background-color: var(--background-secondary); display: flex; flex-direction: row; padding: 2px 4px; border-radius: 6px 6px 0 0 }
-.dr-editor-header-button { color: red; margin-right: 5px; width: 26px; height: 26px; color: var(--interactive-normal); position: relative }
+.dr-editor-header-button { margin-right: 5px; width: 26px; height: 26px; color: var(--interactive-normal); position: relative }
 .dr-editor-header-button:hover { color: var(--interactive-hover) }
 .dr-editor-header-button:active { color: var(--interactive-active) }
 .dr-editor-header-button > * { width: 22px; height: 22px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) }
@@ -794,42 +794,38 @@
       var DrIcon = react_1.React.memo(() => react_1.React.createElement("svg", { width: 24, height: 24, viewBox: "0 0 22 22" }, react_1.React.createElement("path", { d: "M11.1903 7.802C11.1903 8.426 11.1003 9.092 10.9203 9.8C10.7403 10.496 10.4883 11.192 10.1643 11.888C9.84032 12.572 9.43832 13.232 8.95832 13.868C8.49032 14.492 7.95632 15.044 7.35632 15.524C6.75632 15.992 6.09632 16.37 5.37632 16.658C4.66832 16.946 3.91232 17.09 3.10832 17.09C2.94032 17.09 2.77232 17.078 2.60432 17.054C2.43632 17.042 2.26832 17.024 2.10032 17C2.42432 15.344 2.74232 13.73 3.05432 12.158C3.17432 11.498 3.30032 10.814 3.43232 10.106C3.56432 9.386 3.69032 8.678 3.81032 7.982C3.93032 7.286 4.04432 6.62 4.15232 5.984C4.27232 5.348 4.36832 4.772 4.44032 4.256C4.95632 4.16 5.47832 4.07 6.00632 3.986C6.53432 3.902 7.07432 3.86 7.62632 3.86C8.27432 3.86 8.82032 3.962 9.26432 4.166C9.72032 4.37 10.0863 4.652 10.3623 5.012C10.6503 5.372 10.8603 5.792 10.9923 6.272C11.1243 6.752 11.1903 7.262 11.1903 7.802ZM6.94232 6.398C6.81032 7.106 6.67232 7.784 6.52832 8.432C6.38432 9.08 6.24032 9.734 6.09632 10.394C5.95232 11.054 5.80832 11.744 5.66432 12.464C5.52032 13.184 5.38232 13.97 5.25032 14.822C5.53832 14.63 5.81432 14.372 6.07832 14.048C6.35432 13.712 6.61232 13.328 6.85232 12.896C7.09232 12.464 7.30832 12.008 7.50032 11.528C7.70432 11.048 7.87832 10.58 8.02232 10.124C8.16632 9.668 8.27432 9.242 8.34632 8.846C8.43032 8.45 8.47232 8.108 8.47232 7.82C8.47232 7.376 8.34632 7.028 8.09432 6.776C7.85432 6.524 7.47032 6.398 6.94232 6.398ZM10.0456 17.018C10.3696 15.422 10.6816 13.862 10.9816 12.338C11.0896 11.69 11.2096 11.018 11.3416 10.322C11.4736 9.614 11.5936 8.918 11.7016 8.234C11.8216 7.538 11.9296 6.872 12.0256 6.236C12.1336 5.588 12.2176 5 12.2776 4.472C12.9616 4.256 13.6996 4.1 14.4916 4.004C15.2836 3.896 16.0696 3.842 16.8496 3.842C17.3176 3.842 17.7016 3.896 18.0016 4.004C18.3136 4.112 18.5536 4.268 18.7216 4.472C18.9016 4.664 19.0276 4.892 19.0996 5.156C19.1716 5.42 19.2076 5.714 19.2076 6.038C19.2076 6.518 19.1236 6.992 18.9556 7.46C18.7876 7.916 18.5596 8.354 18.2716 8.774C17.9956 9.182 17.6716 9.56 17.2996 9.908C16.9396 10.244 16.5496 10.52 16.1296 10.736C16.3456 11.216 16.5736 11.744 16.8136 12.32C17.0656 12.884 17.2996 13.424 17.5156 13.94C17.7556 14.54 18.0016 15.14 18.2536 15.74L15.4636 16.712C15.2236 15.944 15.0076 15.224 14.8156 14.552C14.7316 14.276 14.6476 13.994 14.5636 13.706C14.4796 13.406 14.4016 13.124 14.3296 12.86C14.2576 12.596 14.1976 12.362 14.1496 12.158C14.1016 11.942 14.0716 11.768 14.0596 11.636L13.8256 11.708C13.7536 12.092 13.6636 12.542 13.5556 13.058C13.4596 13.574 13.3696 14.072 13.2856 14.552C13.1776 15.116 13.0696 15.686 12.9616 16.262L10.0456 17.018ZM14.2756 9.206C14.5036 9.182 14.7796 9.086 15.1036 8.918C15.4396 8.75 15.7576 8.552 16.0576 8.324C16.3576 8.084 16.6156 7.838 16.8316 7.586C17.0476 7.334 17.1556 7.112 17.1556 6.92C17.1556 6.788 17.1136 6.686 17.0296 6.614C16.9456 6.53 16.8256 6.47 16.6696 6.434C16.5256 6.386 16.3636 6.356 16.1836 6.344C16.0036 6.332 15.8176 6.326 15.6256 6.326C15.4936 6.326 15.3556 6.332 15.2116 6.344C15.0796 6.344 14.9596 6.344 14.8516 6.344L14.2756 9.206Z", fill: "currentcolor" })));
       var selectedChild = () => {
       };
-      var DrDashboardButton = react_1.React.memo(() => react_1.React.createElement(react_1.React.Fragment, null, "Module Not Loaded!"));
-      (0, getModule_1.asyncGetModule)((e) => e.LinkButton).then(({ LinkButton }) => {
-        DrDashboardButton = react_1.React.memo(({ children }) => {
-          const [isSelected, setSelected] = react_1.React.useState(false);
-          let _selectedChild = children.find((e) => e?.props?.selected);
-          if (_selectedChild)
-            selectedChild = _selectedChild;
-          dispatch = function(val) {
-            if (!val) {
-              const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`);
-              if (!domNode)
-                return setSelected(val);
-              if (!selectedChild.props)
-                selectedChild.props = {};
-              selectedChild.props.selected = (0, util_1.getOwnerInstance)(domNode)._reactInternals.return.key === selectedChild.key;
-            }
-            setSelected(val);
-          };
-          return react_1.React.createElement(LinkButton, { text: i18n_1.default.name, icon: () => react_1.React.createElement(DrIcon, null), route: "/dr_dashboard", selected: isSelected, onFocus: () => {
-            if (selectedChild)
-              selectedChild.props.selected = false;
-          } });
-        });
+      var { LinkButton } = (0, getModule_1.default)(["LinkButton"]);
+      var DrDashboardButton = react_1.React.memo(({ children }) => {
+        const [isSelected, setSelected] = react_1.React.useState(false);
+        let _selectedChild = children.find((e) => e?.props?.selected);
+        if (_selectedChild)
+          selectedChild = _selectedChild;
+        dispatch = function(val) {
+          if (!val) {
+            const domNode = document.querySelector(`.channel-1Shao0 [href="${location.pathname}"]`);
+            if (!domNode)
+              return setSelected(val);
+            if (!selectedChild.props)
+              selectedChild.props = {};
+            selectedChild.props.selected = (0, util_1.getOwnerInstance)(domNode)._reactInternals.return.key === selectedChild.key;
+          }
+          setSelected(val);
+        };
+        return react_1.React.createElement(LinkButton, { text: i18n_1.default.name, icon: () => react_1.React.createElement(DrIcon, null), route: "/dr_dashboard", selected: isSelected, onFocus: () => {
+          if (selectedChild?.props)
+            selectedChild.props.selected = false;
+        } });
       });
-      var SwitchItem = react_1.React.memo(() => react_1.React.createElement(react_1.React.Fragment, null, "Module Not Loaded!"));
-      (0, getModule_1.asyncGetModule)((e) => e.default?.displayName === "SwitchItem").then((SwitchOrig) => {
-        SwitchItem = react_1.React.memo((props) => {
-          const { value, onChange = () => {
-          }, title, note, disabled = false, initialChange = true } = props;
-          const [checked, setChecked] = react_1.React.useState(value);
-          return react_1.React.createElement(SwitchOrig.default, { value: checked, onChange: () => {
-            if (initialChange)
-              setChecked(!checked);
-            onChange(!checked, setChecked);
-          }, note, disabled }, title);
-        });
+      var SwitchOrig = (0, getModule_1.default)("SwitchItem");
+      var SwitchItem = react_1.React.memo((props) => {
+        const { value, onChange = () => {
+        }, title, note, disabled = false, initialChange = true } = props;
+        const [checked, setChecked] = react_1.React.useState(value);
+        return react_1.React.createElement(SwitchOrig.default, { value: checked, onChange: () => {
+          if (initialChange)
+            setChecked(!checked);
+          onChange(!checked, setChecked);
+        }, note, disabled }, title);
       });
       (0, getModule_1.asyncGetModule)((e) => e.default?.displayName === "ConnectedPrivateChannelsList").then((ConnectedPrivateChannelsList) => {
         patcher_1.default.after("DrInternal-RouterRoutes-Patch", ConnectedPrivateChannelsList, "default", (_, res, that) => {
@@ -913,9 +909,12 @@
               props.onClick(e);
             }, className: "dr-editor-header-button" }, reactElement));
           }
-          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement("div", { className: "dr-editor-header" }, makeButton(react_1.React.createElement(OpenExternal, null), i18n_1.default.customCSS.popout, console.log), makeButton(react_1.React.createElement(Gear, null), i18n_1.default.customCSS.settings, () => (0, util_1.alert)(i18n_1.default.customCSS.settings, [
+          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement("div", { className: "dr-editor-header" }, makeButton(react_1.React.createElement(OpenExternal, null), i18n_1.default.customCSS.popout, () => (0, util_1.alert)(i18n_1.default.customCSS.settings, [
+            "Popout the css editor to use it anywhere",
+            "Not added yet"
+          ])), makeButton(react_1.React.createElement(Gear, null), i18n_1.default.customCSS.settings, () => (0, util_1.alert)(i18n_1.default.customCSS.settings, [
             "Apply and customize settings to your css",
-            "hasnt been added yet"
+            "Not added yet"
           ])), makeButton(react_1.React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24" }, react_1.React.createElement("path", { fill: "currentcolor", d: "M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" }), react_1.React.createElement("path", { fill: "currentcolor", d: "M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z" })), i18n_1.default.customCSS.changeTheme, () => {
             (0, util_1.showConfirmationModal)(i18n_1.default.customCSS.changeTheme, react_1.React.createElement(SelectTheme, { theme, setTheme: (val) => _theme = val }), {
               onConfirm: () => {
@@ -955,7 +954,6 @@
             return;
           ret.children.push(react_1.React.createElement(Route, { path: "/dr_dashboard", impressionName: "dr_dashboard", disableTrack: true, render: () => react_1.React.createElement(DashPage, null) }));
         });
-        Router.forceUpdate();
         const { app } = (0, getModule_1.default)(["app"]);
         const _domNode = await (0, util_1.waitUntil)(() => document.querySelector(`.${app}`));
         (0, util_1.findInTree)((0, util_1.getOwnerInstance)(_domNode)?._reactInternals, (n) => n?.historyUnlisten, { walkable: ["child", "stateNode"] }).forceUpdate();
@@ -1086,12 +1084,12 @@
       };
       if (window.__DR_BACKEND__.app)
         window.DiscordNative.window.setDevtoolsCallbacks(null, null);
-      function normalFunctionToNative(fun) {
+      function normalFunctionToNative(fun, name) {
         const newFunction = Object.assign(function() {
           return Reflect.apply(fun, this, arguments);
         }, fun);
         Object.defineProperty(newFunction, "toString", {
-          value: () => `function ${fun.name ? fun.name : ""}() { [native code] }`,
+          value: () => `function ${name ? name : fun.name ? fun.name : ""}() { [native code] }`,
           writable: true,
           enumerable: false,
           configurable: true
@@ -1122,6 +1120,7 @@
             patch: normalFunctionToNative(patcher_1.default.patch),
             quick: normalFunctionToNative(patcher_1.default.quick),
             unpatchAll: normalFunctionToNative(patcher_1.default.unpatchAll),
+            create: normalFunctionToNative(patcher_1.default.create),
             patches: patcher_1.default.patches
           },
           styling: {
@@ -1150,9 +1149,9 @@
           showConfirmationModal: normalFunctionToNative(util_1.showConfirmationModal),
           prompt: normalFunctionToNative(util_1.prompt),
           alert: normalFunctionToNative(util_1.alert),
-          toast: normalFunctionToNative(function(text, opts = {}) {
+          showToast: normalFunctionToNative(function(text, opts = {}) {
             return (0, toast_1.default)(text, opts);
-          }),
+          }, "showToast"),
           React: react_1.default,
           ReactDOM: react_1.ReactDOM,
           storage: {

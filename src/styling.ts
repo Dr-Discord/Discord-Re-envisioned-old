@@ -40,14 +40,14 @@ function inject(type:string) {
 }
 function update(type:string) {
   return (id:string, css:string) => {
-    const style = document.querySelector(`style[dr-${type}-css="${id}"]`)
+    const style = document.querySelector(`style[dr-${type}-css=${JSON.stringify(id)}]`)
     if (style) style.innerHTML = css
     else inject(type)(id, css)
   }
 }
 function uninject(type:string) {
   return (id:string) => {
-    const style = document.querySelector(`style[dr-${type}-css="${id}"]`)
+    const style = document.querySelector(`style[dr-${type}-css=${JSON.stringify(id)}]`)
     if (style) style.remove()
   }
 }

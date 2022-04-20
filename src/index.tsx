@@ -59,10 +59,10 @@ const badges:{ [x:string]: [string, string] } = {
 }
 if (window.__DR_BACKEND__.app) window.DiscordNative.window.setDevtoolsCallbacks(null, null)
 
-function normalFunctionToNative(fun:Function) {
+function normalFunctionToNative(fun:Function, name?:string) {
   const newFunction = Object.assign(function(this:unknown) { return Reflect.apply(fun, this, arguments) }, fun)
   Object.defineProperty(newFunction, "toString", {
-    value: () => `function ${fun.name ? fun.name : ""}() { [native code] }`,
+    value: () => `function ${name ? name : fun.name ? fun.name : ""}() { [native code] }`,
     writable: true,
     enumerable: false,
     configurable: true
@@ -93,6 +93,7 @@ async function Start() {
       patch: normalFunctionToNative(patcher.patch),
       quick: normalFunctionToNative(patcher.quick),
       unpatchAll: normalFunctionToNative(patcher.unpatchAll),
+      create: normalFunctionToNative(patcher.create),
       patches: patcher.patches
     },
     styling: {
@@ -121,7 +122,7 @@ async function Start() {
     showConfirmationModal: normalFunctionToNative(showConfirmationModal),
     prompt: normalFunctionToNative(prompt),
     alert: normalFunctionToNative(alert),
-    toast: normalFunctionToNative(function(text:string, opts = {}) { return createToast(text, opts) }),
+    showToast: normalFunctionToNative(function(text:string, opts = {}) { return createToast(text, opts) }, "showToast"),
     React,
     ReactDOM,
     storage: {

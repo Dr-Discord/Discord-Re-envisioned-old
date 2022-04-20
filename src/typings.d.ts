@@ -56,6 +56,7 @@ interface DrApi {
     instead: (id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => Function
     after: (id:string|symbol, module, functionToPatch:string, callback:Function, opts?:patcherOpts) => Function
     quick: (module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => Function
+    create: (id:string|symbol) => PatcherOf
     patches: {}
   }
   React: React,
@@ -70,7 +71,7 @@ interface DrApi {
   showConfirmationModal: (title:ReactString, content:ReactString|Array<ReactString>, opts:showConfirmationModalProps) => void
   prompt: (title:string, defaultValue:string) => Promise<string|null>
   alert: (title:ReactString, content:ReactString|Array<ReactString>, options:alertOpts) => void
-  toast: (text:string, opts:toastOpts) => Node
+  showToast: (text:string, opts:toastOpts) => Node
   storage: {
     get: (plugin:string, key:string) => any
     set: (plugin:string, key:string, data:any) => void
@@ -116,14 +117,19 @@ interface Element {
   _reactInternals?:any
   click:()=>void
   nonce?:string
+  style:CSSStyleDeclaration
 }
 
 interface tooltipProps {
   "aria-label":string
   onBlur:()=>void
-  onClick:()=>void
+  onClick:(ReactOnClickEvent)=>void
   onContextMenu:()=>void
   onFocus:()=>void
   onMouseEnter:()=>void
   onMouseLeave:()=>void
+}
+
+interface SymbolConstructor {
+  drPatcher: { patch: Symbol, quick: Symbol }
 }

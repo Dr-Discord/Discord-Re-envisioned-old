@@ -13,8 +13,7 @@ export async function waitUntil(condition:Function):Promise<any> {
 export function getReactInstance(element:Element) {
   if (!element) return
   if (element.__reactInternalInstance$) return element.__reactInternalInstance$
-  // @ts-expect-error
-  return element[Object.keys(element).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber"))] || null
+  return element[Object.keys(element).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber")) as keyof typeof element] || null
 }
 export function getOwnerInstance(element:Element) {
   for (let RI = getReactInstance(element); RI; RI = RI.return) {
