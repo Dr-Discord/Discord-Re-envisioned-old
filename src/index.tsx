@@ -37,11 +37,6 @@ import { initCard } from "./addonManager"
 
 logger.log("Loading...")
 
-// document.body.appendChild(Object.assign(document.createElement("script"), {
-//   src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
-//   nonce: document.querySelector("[nonce]")?.nonce
-// }))
-
 Start()
 
 window.__DR_BACKEND__ = {
@@ -50,6 +45,7 @@ window.__DR_BACKEND__ = {
   transparent: window?.__DR_ELECTRON_BACKEND__?.transparent ?? false,
   toggleTransparency: window?.__DR_ELECTRON_BACKEND__?.toggleTransparency ?? (function() { throw new Error("tried using toggleTransparency on WEB!") }),
   isPopped: false,
+  ace: window.ace,
   logger
 }
 

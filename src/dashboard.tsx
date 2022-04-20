@@ -11,7 +11,7 @@ let dispatch = (val:boolean) => {}
 
 const Editor = React.memo(({ props = {}, editor = () => {} }:any) => {
   const ref = React.useRef<any>()
-  React.useEffect(() => editor(ace.edit(ref.current)))
+  React.useEffect(() => editor((window.ace || window.__DR_BACKEND__.ace).edit(ref.current)))
   return <div ref={ref} {...props} />
 })
 
@@ -256,7 +256,7 @@ const DashPage = React.memo(() => {
           type={TabBar.Types.TOP_PILL}
           onItemSelect={(e:string) => setPage(e)}
           selectedItem={page}
-        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key} disabled={key === "customcss" && (!window.ace || window.__DR_BACKEND__.isPopped)}>{val}</TabBar.Item>)}</TabBar>
+        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key} disabled={key === "customcss" && (!(window.ace || window.__DR_BACKEND__.ace) || window.__DR_BACKEND__.isPopped)}>{val}</TabBar.Item>)}</TabBar>
       </Header>
       <div className={content}><div className={auto} style={{ padding: "16px 12px" }}><Page /></div></div>
     </div>
