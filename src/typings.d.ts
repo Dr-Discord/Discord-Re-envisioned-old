@@ -26,8 +26,8 @@ interface toastOpts {
   closeButton?: boolean
 }
 
-type setImmediate = (callback:()=>void)=>number
-const setImmediate:setImmediate
+const setImmediate = (callback:()=>void, ...args:any[])=>number
+const clearImmediate = (id:number) => void 0
 
 type React = typeof import("react")
 type ReactDOM = typeof import("react-dom")
@@ -96,7 +96,7 @@ interface webpackChunkdiscord_app {
 }
 
 interface Window {
-  0: Window
+  0:Window
   DrApi:DrApi
   webpackChunkdiscord_app:webpackChunkdiscord_app
   localStorage?:localStorage|null

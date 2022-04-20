@@ -51,7 +51,7 @@ const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
     const inst = Array.from(document.querySelectorAll(`.channel-1Shao0 .link-39sEB3`))
       .map((e) => getOwnerInstance(e))
       .find(e => e._reactInternals.return.type.displayName === selectedChild.type?.displayName)
-    if (!inst?.props || inst.props.hasOwnProperty("selected")) return
+    if (!inst) return
     inst.props.selected = false
     inst.forceUpdate()
     setSelected(val)
@@ -180,13 +180,11 @@ const pages:any = {
           window.__DR_BACKEND__.devMode = val
         }}
       />
-      {window.__DR_BACKEND__.app ? <SwitchItem
+      {(window.__DR_BACKEND__.toggleTransparency && window.__DR_BACKEND__.app) ? <SwitchItem
         value={window.__DR_BACKEND__.transparent}
         title={i18n.toggleTransparency.title}
         note={i18n.toggleTransparency.note}
-        onChange={(val:boolean) => {
-          window.__DR_BACKEND__.toggleTransparency()
-        }}
+        onChange={() => window.__DR_BACKEND__.toggleTransparency()}
       /> : false}
     </>
   }),

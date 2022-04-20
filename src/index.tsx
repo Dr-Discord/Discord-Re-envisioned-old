@@ -5,7 +5,7 @@ const frame:any = document.createElement("frame")
 frame.src = "about:blank"
 frame.id = "dr-frame"
 document.body.appendChild(frame)
-
+// Main Mod
 import logger from "./logger"
 // If the location leads the dashboard we redirect
 if (location.pathname.startsWith("/dr_dashboard")) {
@@ -14,6 +14,7 @@ if (location.pathname.startsWith("/dr_dashboard")) {
   if (node) node.click()
   throw new Error("Preventing further execution")
 }
+import "./ace"
 import React, { ReactDOM } from "./react"
 import patcher from "./patcher"
 import getModule, { asyncGetModule } from "./getModule"
@@ -36,10 +37,10 @@ import { initCard } from "./addonManager"
 
 logger.log("Loading...")
 
-document.body.appendChild(Object.assign(document.createElement("script"), {
-  src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
-  nonce: document.querySelector("[nonce]")?.nonce
-}))
+// document.body.appendChild(Object.assign(document.createElement("script"), {
+//   src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
+//   nonce: document.querySelector("[nonce]")?.nonce
+// }))
 
 Start()
 
