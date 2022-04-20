@@ -802,6 +802,8 @@
           selectedChild = _selectedChild;
         dispatch = function(val) {
           const inst = Array.from(document.querySelectorAll(`.channel-1Shao0 .link-39sEB3`)).map((e) => (0, util_1.getOwnerInstance)(e)).find((e) => e._reactInternals.return.type.displayName === selectedChild.type?.displayName);
+          if (!inst?.props || inst.props.hasOwnProperty("selected"))
+            return;
           inst.props.selected = false;
           inst.forceUpdate();
           setSelected(val);

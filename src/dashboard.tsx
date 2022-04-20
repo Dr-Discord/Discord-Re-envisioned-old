@@ -51,6 +51,7 @@ const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
     const inst = Array.from(document.querySelectorAll(`.channel-1Shao0 .link-39sEB3`))
       .map((e) => getOwnerInstance(e))
       .find(e => e._reactInternals.return.type.displayName === selectedChild.type?.displayName)
+    if (!inst?.props || inst.props.hasOwnProperty("selected")) return
     inst.props.selected = false
     inst.forceUpdate()
     setSelected(val)
