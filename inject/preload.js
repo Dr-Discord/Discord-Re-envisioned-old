@@ -12,11 +12,8 @@ const transparent = ipcRenderer.sendSync("DR_TRANSPARENT")
 
 contextBridge.exposeInMainWorld("__DR_ELECTRON_BACKEND__", {
   app: true,
-  init: async function(eval) {
-    eval(`try {\n${await data}\n}catch (e) {console.error(e)}\n//# sourceURL=Discord%20Re-envisioned`)
-  },
+  init: async function(eval) { eval(`try {\n${await data}\n}catch (e) {console.error(e)}\n//# sourceURL=Discord%20Re-envisioned`) },
   transparent,
-  toggleTransparency: async function() {
-    await ipcRenderer.invoke("DR_TOGGLE_TRANSPARENCY")
-  }
+  toggleTransparency: async function() { await ipcRenderer.invoke("DR_TOGGLE_TRANSPARENCY") },
+  restart: function() { ipcRenderer.send("DR_FULL_RESTART") }
 })

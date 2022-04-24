@@ -71,6 +71,19 @@ const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
   )
 })
 
+const { transitionTo } = getModule(["transitionTo"])
+patcher.after("DrInternal-HomeButtonToDash-Patch", getModule("ConnectedTutorialIndicator"), "default", ([props]:any) => {
+  const ret = findInReactTree(props, (e: { props: { id: string }}) => e.props?.id)
+  if (!ret) return
+  if (typeof ret.type === "function") patcher.quick(ret, "type", (_:unknown, res:any) => {
+    const old = res.props.onClick
+    res.props.onClick = function(event:MouseEvent) {
+      if (event.shiftKey) return transitionTo("/dr_dashboard")
+      return Reflect.apply(old, this, arguments)
+    }
+  })
+})
+
 interface SwitchItemProps {
   value:boolean
   onChange?:Function
@@ -97,7 +110,8 @@ const SwitchItem = React.memo((props:SwitchItemProps) => {
 asyncGetModule((e: { default: { displayName: string }}) => e.default?.displayName === "ConnectedPrivateChannelsList").then(ConnectedPrivateChannelsList => {
   patcher.after("DrInternal-RouterRoutes-Patch", ConnectedPrivateChannelsList, "default", (_:unknown, res:any, that:unknown) => {
     const children = res.props.children.props.children
-    dispatch(/^\/dr_dashboard/.test(location.pathname))
+    
+    setTimeout(() => { dispatch(/^\/dr_dashboard/.test(location.pathname)) }, 1)
     if (children.find((e:any) => e && e.key === "drdashLinkButton")) return
     if (!DrDashboardButton) return
     children.unshift(<DrDashboardButton key="drdashLinkButton">{children}</DrDashboardButton>)
@@ -271,6 +285,7 @@ anonymous(async () => {
   patcher.after("DrInternal-RouterRoutes-Patch", Router?.props?.children[0], "type", (_:unknown, res:any) => {
     const ret = findInReactTree(res, (m:any) => m && Array.isArray(m.children) && m.children.length > 5)
     if (!ret?.children) return
+    
     ret.children.push(
       <Route
         path="/dr_dashboard"

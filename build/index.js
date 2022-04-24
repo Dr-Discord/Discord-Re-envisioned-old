@@ -684,8 +684,11 @@
       }
       exports.findInReactTree = findInReactTree;
       function restart(full) {
-        if (window.__DR_BACKEND__.app && full)
-          return window.__DR_BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART");
+        if (window.__DR_BACKEND__.app && full) {
+          if (!window.__DR_BACKEND__.restart())
+            return this.alert("Restart Failed", "Reinstall using the installer.");
+          return window.__DR_BACKEND__.restart();
+        }
         return location.reload();
       }
       exports.restart = restart;
@@ -814,6 +817,21 @@
             selectedChild.props.selected = false;
         } });
       });
+      var { transitionTo } = (0, getModule_1.default)(["transitionTo"]);
+      patcher_1.default.after("DrInternal-HomeButtonToDash-Patch", (0, getModule_1.default)("ConnectedTutorialIndicator"), "default", ([props]) => {
+        const ret = (0, util_1.findInReactTree)(props, (e) => e.props?.id);
+        if (!ret)
+          return;
+        if (typeof ret.type === "function")
+          patcher_1.default.quick(ret, "type", (_, res) => {
+            const old = res.props.onClick;
+            res.props.onClick = function(event) {
+              if (event.shiftKey)
+                return transitionTo("/dr_dashboard");
+              return Reflect.apply(old, this, arguments);
+            };
+          });
+      });
       var SwitchOrig = (0, getModule_1.default)("SwitchItem");
       var SwitchItem = react_1.React.memo((props) => {
         const { value, onChange = () => {
@@ -828,7 +846,9 @@
       (0, getModule_1.asyncGetModule)((e) => e.default?.displayName === "ConnectedPrivateChannelsList").then((ConnectedPrivateChannelsList) => {
         patcher_1.default.after("DrInternal-RouterRoutes-Patch", ConnectedPrivateChannelsList, "default", (_, res, that) => {
           const children = res.props.children.props.children;
-          dispatch(/^\/dr_dashboard/.test(location.pathname));
+          setTimeout(() => {
+            dispatch(/^\/dr_dashboard/.test(location.pathname));
+          }, 1);
           if (children.find((e) => e && e.key === "drdashLinkButton"))
             return;
           if (!DrDashboardButton)
@@ -1075,6 +1095,9 @@
           throw new Error("tried using toggleTransparency on WEB!");
         },
         isPopped: false,
+        restart: window?.__DR_ELECTRON_BACKEND__?.restart ?? function() {
+          throw new Error("tried using restart on WEB!");
+        },
         logger: logger_1.default
       };
       var badges = {

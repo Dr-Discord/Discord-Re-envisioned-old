@@ -154,8 +154,11 @@ export function findInReactTree(tree:any, searchFilter:Function):any {
   })
 }
 
-export function restart(full:boolean) {
-  if (window.__DR_BACKEND__.app && full) return window.__DR_BACKEND__.require("electron").ipcRenderer.send("DR_FULL_RESTART")
+export function restart(this:any, full:boolean) {
+  if (window.__DR_BACKEND__.app && full) {
+    if (!window.__DR_BACKEND__.restart()) return this.alert("Restart Failed", "Reinstall using the installer.")
+    return window.__DR_BACKEND__.restart()
+  }
   return location.reload()
 }
 

@@ -5,7 +5,7 @@ const frame:any = document.createElement("frame")
 frame.src = "about:blank"
 frame.id = "dr-frame"
 document.body.appendChild(frame)
-// Main Mod
+
 import logger from "./logger"
 // If the location leads the dashboard we redirect
 if (location.pathname.startsWith("/dr_dashboard")) {
@@ -52,6 +52,7 @@ window.__DR_BACKEND__ = {
   transparent: window?.__DR_ELECTRON_BACKEND__?.transparent ?? false,
   toggleTransparency: window?.__DR_ELECTRON_BACKEND__?.toggleTransparency ?? (function() { throw new Error("tried using toggleTransparency on WEB!") }),
   isPopped: false,
+  restart: window?.__DR_ELECTRON_BACKEND__?.restart ?? (function() { throw new Error("tried using restart on WEB!") }),
   logger
 }
 
