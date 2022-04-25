@@ -784,7 +784,7 @@
       var Editor = react_1.React.memo(({ props = {}, editor = () => {
       } }) => {
         const ref = react_1.React.useRef();
-        react_1.React.useEffect(() => editor((window.ace || window.__DR_BACKEND__.ace).edit(ref.current)));
+        react_1.React.useEffect(() => editor(window.ace.edit(ref.current)));
         return react_1.React.createElement("div", { ref, ...props });
       });
       styling_1.internalStyling.inject("settings", `.dr-editor-header { background-color: var(--background-secondary); display: flex; flex-direction: row; padding: 2px 4px; border-radius: 6px 6px 0 0 }
@@ -818,19 +818,15 @@
         } });
       });
       var { transitionTo } = (0, getModule_1.default)(["transitionTo"]);
-      patcher_1.default.after("DrInternal-HomeButtonToDash-Patch", (0, getModule_1.default)("ConnectedTutorialIndicator"), "default", ([props]) => {
-        const ret = (0, util_1.findInReactTree)(props, (e) => e.props?.id);
-        if (!ret)
+      patcher_1.default.before("DrInternal-HomeButtonToDash-Patch", (0, getModule_1.default)("NavItem"), "default", ([props]) => {
+        if (props["data-list-item-id"] !== "guildsnav___home")
           return;
-        if (typeof ret.type === "function")
-          patcher_1.default.quick(ret, "type", (_, res) => {
-            const old = res.props.onClick;
-            res.props.onClick = function(event) {
-              if (event.shiftKey)
-                return transitionTo("/dr_dashboard");
-              return Reflect.apply(old, this, arguments);
-            };
-          });
+        const oldOnClick = props.onClick;
+        props.onClick = function({ shiftKey }) {
+          if (shiftKey)
+            return transitionTo("/dr_dashboard");
+          return Reflect.apply(oldOnClick, this, arguments);
+        };
       });
       var SwitchOrig = (0, getModule_1.default)("SwitchItem");
       var SwitchItem = react_1.React.memo((props) => {
@@ -958,7 +954,7 @@
       var DashPage = react_1.React.memo(() => {
         const [page, setPage] = react_1.React.useState("general");
         const Page = pages[page] ?? react_1.React.memo(() => react_1.React.createElement(react_1.React.Fragment, null, "ERROR | This page may not be added"));
-        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, { color: "#F52590" }) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => setPage(e), selectedItem: page }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key, disabled: key === "customcss" && (!(window.ace || window.__DR_BACKEND__.ace) || window.__DR_BACKEND__.isPopped) }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
+        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, { color: "#F52590" }) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => setPage(e), selectedItem: page }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key, disabled: key === "customcss" && (!window.ace || window.__DR_BACKEND__.isPopped) }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
       });
       (0, util_1.anonymous)(async () => {
         const domNode = await (0, util_1.waitUntil)(() => document.querySelector(`.${container}`));
@@ -1082,8 +1078,8 @@
       document.body.appendChild(Object.assign(document.createElement("script"), {
         src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
         nonce: document.querySelector("[nonce]")?.nonce,
-        onload: () => {
-          window.__DR_BACKEND__.ace = window.ace;
+        onload: function() {
+          this.remove();
         }
       }));
       Start();

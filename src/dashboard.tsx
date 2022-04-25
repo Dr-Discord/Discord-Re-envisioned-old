@@ -11,7 +11,7 @@ let dispatch = (val:boolean) => {}
 
 const Editor = React.memo(({ props = {}, editor = () => {} }:any) => {
   const ref = React.useRef<any>()
-  React.useEffect(() => editor((window.ace || window.__DR_BACKEND__.ace).edit(ref.current)))
+  React.useEffect(() => editor(window.ace.edit(ref.current)))
   return <div ref={ref} {...props} />
 })
 
@@ -72,16 +72,13 @@ const DrDashboardButton = React.memo(({ children }:DrDashboardButton) => {
 })
 
 const { transitionTo } = getModule(["transitionTo"])
-patcher.after("DrInternal-HomeButtonToDash-Patch", getModule("ConnectedTutorialIndicator"), "default", ([props]:any) => {
-  const ret = findInReactTree(props, (e: { props: { id: string }}) => e.props?.id)
-  if (!ret) return
-  if (typeof ret.type === "function") patcher.quick(ret, "type", (_:unknown, res:any) => {
-    const old = res.props.onClick
-    res.props.onClick = function(event:MouseEvent) {
-      if (event.shiftKey) return transitionTo("/dr_dashboard")
-      return Reflect.apply(old, this, arguments)
-    }
-  })
+patcher.before("DrInternal-HomeButtonToDash-Patch", getModule("NavItem"), "default", ([props]:any) => {
+  if (props["data-list-item-id"] !== "guildsnav___home") return
+  const oldOnClick = props.onClick
+  props.onClick = function({ shiftKey }:MouseEvent) {
+    if (shiftKey) return transitionTo("/dr_dashboard")
+    return Reflect.apply(oldOnClick, this, arguments)
+  }
 })
 
 interface SwitchItemProps {
@@ -270,7 +267,7 @@ const DashPage = React.memo(() => {
           type={TabBar.Types.TOP_PILL}
           onItemSelect={(e:string) => setPage(e)}
           selectedItem={page}
-        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key} disabled={key === "customcss" && (!(window.ace || window.__DR_BACKEND__.ace) || window.__DR_BACKEND__.isPopped)}>{val}</TabBar.Item>)}</TabBar>
+        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key} disabled={key === "customcss" && (!window.ace || window.__DR_BACKEND__.isPopped)}>{val}</TabBar.Item>)}</TabBar>
       </Header>
       <div className={content}><div className={auto} style={{ padding: "16px 12px" }}><Page /></div></div>
     </div>

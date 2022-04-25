@@ -36,11 +36,12 @@ import { initCard } from "./addonManager"
 
 logger.log("Loading...")
 
+
 document.body.appendChild(Object.assign(document.createElement("script"), {
   src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
   nonce: document.querySelector("[nonce]")?.nonce,
-  onload: () => {
-    window.__DR_BACKEND__.ace = window.ace
+  onload: function(this:HTMLScriptElement) {
+    this.remove()
   }
 }))
 
