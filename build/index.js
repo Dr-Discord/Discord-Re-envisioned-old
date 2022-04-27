@@ -723,27 +723,24 @@
       }
       exports.copyText = copyText;
       var Platform = (0, getModule_1.default)(["getPlatform"]);
-      var UserPlatform = Platform.getPlatform();
-      var { getWindow } = (0, getModule_1.default)(["getWindow", "getName", "getIsAlwaysOnTop"]);
+      var PopoutWindowStore = (0, getModule_1.default)(["getWindow", "getName", "getIsAlwaysOnTop"]);
       var dispatcher = (0, getModule_1.default)(["dirtyDispatch"]);
-      var Titlebar = (0, getModule_1.default)((e) => e.default?.toString().includes("macOSFrame")).default;
+      var PopoutWindow = (0, getModule_1.default)((e) => e.default?.toString().indexOf("DndProvider") > -1 && react_1.React.isValidElement(e.default())).default;
+      var { useStateFromStores } = (0, getModule_1.default)(["useStateFromStores"]);
       function openPopout(renderFunction, features = {}) {
-        const Theme = [...document.documentElement.classList].find((e) => e.startsWith("theme"));
-        const windowKey = "DISCORD_CHANNEL_CALL_POPOUT";
+        const windowKey = "DISCORD_CUSTOMCSS";
         dispatcher.dirtyDispatch({
           type: "POPOUT_WINDOW_OPEN",
           key: windowKey,
           render: () => react_1.React.createElement(Popout, null),
           features
         });
-        const popoutWindow = getWindow(windowKey);
         function Popout() {
-          const [isFocused, setFocused] = react_1.React.useState(false);
-          react_1.React.useEffect(() => {
-            popoutWindow.onfocus = () => setFocused(true);
-            popoutWindow.onblur = () => setFocused(false);
-          });
-          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement("div", { className: `${Theme} platform-${UserPlatform.toLowerCase()} font-size-16 ${isFocused ? " mouse-mode" : ""}full-motion${isFocused ? " app-focused" : ""}` }, react_1.React.createElement(Titlebar, { type: UserPlatform, focused: isFocused, macOSFrame: UserPlatform === Platform.PlatformTypes.OSX, windowKey }), renderFunction(windowKey, popoutWindow, UserPlatform)));
+          const windowInstance = useStateFromStores([PopoutWindowStore], () => PopoutWindowStore.getWindow(windowKey));
+          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement(PopoutWindow, { windowKey, withTitleBar: true, title: "Custom CSS" }, renderFunction({
+            key: windowKey,
+            window: windowInstance
+          })));
         }
       }
       exports.openPopout = openPopout;
@@ -959,50 +956,64 @@
       };
       var Spinner = (0, getModule_1.default)("Spinner").default;
       var { macDragRegion } = (0, getModule_1.default)(["macDragRegion"]);
-      function CSSPopout({ key, popoutWindow, os }) {
+      function CSSPopout({ popoutWindow }) {
         const [hasAceLoaded, setHasAceLoaded] = react_1.React.useState(false);
         const Ref = react_1.React.useRef(null);
         const Theme = storage_1.internal.get("editorTheme") ?? "monokai";
-        setImmediate(() => popoutWindow.document.querySelector(`.${macDragRegion}`)?.remove());
         react_1.React.useEffect(() => {
-          popoutWindow.document.body.appendChild(Object.assign(document.createElement("script"), {
-            src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
-            nonce: document.querySelector("[nonce]")?.nonce,
-            onload: function() {
-              this.remove();
-              setHasAceLoaded(true);
-              const editor = popoutWindow.ace.edit(Ref.current);
-              editor.setTheme(`ace/theme/${Theme}`);
-              editor.getSession().setMode("ace/mode/css");
-              editor.setValue(storage_1.internal.get("customCSS") ?? "");
-              editor.on("change", () => {
-                const value = editor.getValue();
-                (0, styling_1.updateCustomCSS)(value);
-                storage_1.internal.set("customCSS", value);
-              });
-            }
-          }));
+          setImmediate(() => {
+            setHasAceLoaded(true);
+            const editor = ace.edit(Ref.current);
+            editor.setTheme(`ace/theme/${Theme}`);
+            editor.getSession().setMode("ace/mode/css");
+            editor.setValue(storage_1.internal.get("customCSS") ?? "");
+            editor.on("change", () => {
+              const value = editor.getValue();
+              (0, styling_1.updateCustomCSS)(value);
+              storage_1.internal.set("customCSS", value);
+            });
+            popoutWindow.document.body.appendChild(Object.assign(document.createElement("style"), {
+              textContent: [...document.getElementsByTagName("style")].filter((e) => !e.id.startsWith("dr")).reduce((styles, style) => styles += style.textContent, "")
+            }));
+          });
         });
         return react_1.React.createElement("div", { ref: Ref, style: {
-          height: `calc(100vh - ${os === "LINUX" ? 0 : "22px"})`
-        } }, hasAceLoaded ? null : react_1.React.createElement(Spinner, { style: { marginTop: `${`calc(50vh - ${os === "LINUX" ? 0 : "22px"} - 16px)`}` } }));
+          height: "calc(100vh - 22px)",
+          width: "100vw"
+        } }, hasAceLoaded ? null : react_1.React.createElement(Spinner, null));
       }
-      function openCSSPopout() {
-        (0, util_1.openPopout)((key, popoutWindow, os) => {
-          return react_1.React.createElement(CSSPopout, { key, popoutWindow, os });
-        });
-      }
-      setTimeout(() => window.__DR_BACKEND__.openCSSPopout = () => openCSSPopout(), 4e3);
       var { content } = (0, getModule_1.default)(["chat", "uploadArea", "threadSidebarOpen"]);
       var { auto } = (0, getModule_1.default)(["scrollerBase"]);
       var { container } = (0, getModule_1.default)(["container", "downloadProgressCircle"]);
       var Header = (0, getModule_1.default)(["Caret", "Icon", "defaultProps"]);
       var TabBar = (0, getModule_1.default)("TabBar").default;
+      var goBack = () => {
+      };
+      var toggleCustomCSSDisabled = (val) => {
+      };
       var DashPage = react_1.React.memo(() => {
         const [page, setPage] = react_1.React.useState("general");
+        const [isCustomCSSDisabled, setCustomCSSDisabled] = react_1.React.useState(!window.ace || window.__DR_BACKEND__.isPopped);
         const Page = pages[page] ?? react_1.React.memo(() => react_1.React.createElement(react_1.React.Fragment, null, "ERROR | This page may not be added"));
-        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, { color: "#F52590" }) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => setPage(e), selectedItem: page }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key, disabled: key === "customcss" && (!window.ace || window.__DR_BACKEND__.isPopped) }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
+        react_1.React.useEffect(() => {
+          goBack = () => setPage("general");
+          toggleCustomCSSDisabled = (val) => setCustomCSSDisabled(val);
+        });
+        return react_1.React.createElement("div", { className: (0, getModule_1.default)(["maxWidthWithToolbar", "container", "inviteToolbar"]).container }, react_1.React.createElement(Header, { toolbar: react_1.React.createElement(react_1.React.Fragment, null) }, react_1.React.createElement(Header.Icon, { icon: () => react_1.React.createElement(DrIcon, { color: "#F52590" }) }), react_1.React.createElement(Header.Title, null, i18n_1.default.name), react_1.React.createElement(Header.Divider, null), react_1.React.createElement(TabBar, { type: TabBar.Types.TOP_PILL, onItemSelect: (e) => {
+          goBack = () => setPage(page);
+          setPage(e);
+        }, selectedItem: page }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key, disabled: key === "customcss" && isCustomCSSDisabled }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
       });
+      function openCSSPopout() {
+        toggleCustomCSSDisabled(true);
+        goBack();
+        (0, util_1.openPopout)(({ window: popoutWindow }) => {
+          popoutWindow.addEventListener("unload", () => {
+            toggleCustomCSSDisabled(false);
+          });
+          return react_1.React.createElement(CSSPopout, { popoutWindow });
+        });
+      }
       (0, util_1.anonymous)(async () => {
         const domNode = await (0, util_1.waitUntil)(() => document.querySelector(`.${container}`));
         const Router = (0, util_1.getOwnerInstance)(domNode);

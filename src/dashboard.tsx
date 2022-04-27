@@ -249,45 +249,36 @@ const pages:any = {
 const Spinner = getModule("Spinner").default
 const { macDragRegion } = getModule(["macDragRegion"])
 
-function CSSPopout({ key, popoutWindow, os }:{ key:string, popoutWindow:Window, os:string }) {
+function CSSPopout({ popoutWindow }:{ popoutWindow:Window }) {
   const [hasAceLoaded, setHasAceLoaded] = React.useState(false)
   const Ref = React.useRef<HTMLDivElement>(null)
 
   const Theme = internal.get("editorTheme") ?? "monokai"
-  setImmediate(() => popoutWindow.document.querySelector(`.${macDragRegion}`)?.remove())
   
   React.useEffect(() => {
-    popoutWindow.document.body.appendChild(Object.assign(document.createElement("script"), {
-      src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
-      nonce: document.querySelector("[nonce]")?.nonce,
-      onload: function(this:HTMLScriptElement) {
-        this.remove()
-        setHasAceLoaded(true)
-        const editor = popoutWindow.ace.edit(Ref.current)
-        editor.setTheme(`ace/theme/${Theme}`)
-        editor.getSession().setMode("ace/mode/css")
-        editor.setValue(internal.get("customCSS") ?? "")
-        editor.on("change", () => {
-          const value = editor.getValue()
-          updateCustomCSS(value)
-          internal.set("customCSS", value)
-        })
-      }
-    }))
+    setImmediate(() => {
+      setHasAceLoaded(true)
+      // Errors without this
+      const editor = ace.edit(Ref.current as HTMLElement)
+      editor.setTheme(`ace/theme/${Theme}`)
+      editor.getSession().setMode("ace/mode/css")
+      editor.setValue(internal.get("customCSS") ?? "")
+      editor.on("change", () => {
+        const value = editor.getValue()
+        updateCustomCSS(value)
+        internal.set("customCSS", value)
+      })
+      popoutWindow.document.body.appendChild(Object.assign(document.createElement("style"), {
+        textContent: [...document.getElementsByTagName("style") as any].filter(e => !e.id.startsWith("dr")).reduce((styles, style) => styles += style.textContent, "")
+      }))
+    })
   })
 
   return <div ref={Ref} style={{
-    height: `calc(100vh - ${os === "LINUX" ? 0 : "22px"})`,
-  }}>{hasAceLoaded ? null : <Spinner style={{ marginTop: `${`calc(50vh - ${os === "LINUX" ? 0 : "22px"} - 16px)`}` }}/>}</div>
+    height: "calc(100vh - 22px)",
+    width: "100vw"
+  }}>{hasAceLoaded ? null : <Spinner />}</div>
 }
-
-function openCSSPopout() {
-  openPopout((key:string, popoutWindow:Window, os:string) => {
-    return <CSSPopout key={key} popoutWindow={popoutWindow} os={os}/>
-  })
-}
-// If something happens and the user cant access css
-setTimeout(() => window.__DR_BACKEND__.openCSSPopout = () => openCSSPopout(), 4000)
 
 const { content } = getModule(["chat", "uploadArea", "threadSidebarOpen"])
 const { auto } = getModule(["scrollerBase"])
@@ -295,9 +286,18 @@ const { container } = getModule(["container", "downloadProgressCircle"])
 const Header = getModule(["Caret", "Icon", "defaultProps"])
 const TabBar = getModule("TabBar").default
 
+let goBack = () => {}
+let toggleCustomCSSDisabled = (val:boolean) => {}
 const DashPage = React.memo(() => {
   const [page, setPage]:any = React.useState("general")
+  const [isCustomCSSDisabled, setCustomCSSDisabled]:any = React.useState(!window.ace || window.__DR_BACKEND__.isPopped)
   const Page = pages[page] ?? React.memo(() => <>ERROR | This page may not be added</>)
+
+  React.useEffect(() => {
+    goBack = () => setPage("general")
+    toggleCustomCSSDisabled = (val:boolean) => setCustomCSSDisabled(val)
+  })
+
   return (
     <div className={getModule(["maxWidthWithToolbar", "container", "inviteToolbar"]).container}>
       <Header toolbar={<React.Fragment />}>
@@ -306,14 +306,30 @@ const DashPage = React.memo(() => {
         <Header.Divider />
         <TabBar
           type={TabBar.Types.TOP_PILL}
-          onItemSelect={(e:string) => setPage(e)}
+          onItemSelect={(e:string) => {
+            goBack = () => setPage(page)
+            setPage(e)
+          }}
           selectedItem={page}
-        >{Object.entries(i18n.settingTabs).map(([key, val]) => <TabBar.Item id={key} disabled={key === "customcss" && (!window.ace || window.__DR_BACKEND__.isPopped)}>{val}</TabBar.Item>)}</TabBar>
+        >
+          {Object.entries(i18n.settingTabs).map(([key, val]) => (
+            <TabBar.Item id={key} disabled={key === "customcss" && isCustomCSSDisabled}>{val}</TabBar.Item>
+          ))}
+        </TabBar>
       </Header>
       <div className={content}><div className={auto} style={{ padding: "16px 12px" }}><Page /></div></div>
     </div>
   )
 })
+
+function openCSSPopout() {
+  toggleCustomCSSDisabled(true)
+  goBack()
+  openPopout(({ window:popoutWindow }:{ window:Window }) => {
+    popoutWindow.addEventListener("unload", () => { toggleCustomCSSDisabled(false) })
+    return <CSSPopout popoutWindow={popoutWindow} />
+  })
+}
 
 anonymous(async () => {
   const domNode:Element = await waitUntil(() => document.querySelector(`.${container}`))
