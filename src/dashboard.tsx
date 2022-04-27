@@ -320,10 +320,14 @@ const DashPage = React.memo(() => {
 })
 
 function openCSSPopout() {
+  window.__DR_BACKEND__.isPopped = true
   toggleCustomCSSDisabled(true)
   goBack()
   openPopout(({ window:popoutWindow }:{ window:Window }) => {
-    popoutWindow.addEventListener("unload", () => { toggleCustomCSSDisabled(false) })
+    popoutWindow.addEventListener("unload", () => {
+      window.__DR_BACKEND__.isPopped = false
+      toggleCustomCSSDisabled(false)
+    })
     return <CSSPopout popoutWindow={popoutWindow} />
   })
 }

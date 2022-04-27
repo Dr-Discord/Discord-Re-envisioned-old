@@ -1003,10 +1003,12 @@
         }, selectedItem: page }, Object.entries(i18n_1.default.settingTabs).map(([key, val]) => react_1.React.createElement(TabBar.Item, { id: key, disabled: key === "customcss" && isCustomCSSDisabled }, val)))), react_1.React.createElement("div", { className: content }, react_1.React.createElement("div", { className: auto, style: { padding: "16px 12px" } }, react_1.React.createElement(Page, null))));
       });
       function openCSSPopout() {
+        window.__DR_BACKEND__.isPopped = true;
         toggleCustomCSSDisabled(true);
         goBack();
         (0, util_1.openPopout)(({ window: popoutWindow }) => {
           popoutWindow.addEventListener("unload", () => {
+            window.__DR_BACKEND__.isPopped = false;
             toggleCustomCSSDisabled(false);
           });
           return react_1.React.createElement(CSSPopout, { popoutWindow });
