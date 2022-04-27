@@ -246,20 +246,17 @@ const pages:any = {
   })
 }
 
-const Spinner = getModule("Spinner").default
 const { macDragRegion } = getModule(["macDragRegion"])
-
 function CSSPopout({ popoutWindow }:{ popoutWindow:Window }) {
-  const [hasAceLoaded, setHasAceLoaded] = React.useState(false)
   const Ref = React.useRef<HTMLDivElement>(null)
 
   const Theme = internal.get("editorTheme") ?? "monokai"
   
   React.useEffect(() => {
-    setImmediate(() => {
-      setHasAceLoaded(true)
+    popoutWindow.ace = window.ace
+    setTimeout(() => {
       // Errors without this
-      const editor = ace.edit(Ref.current as HTMLElement)
+      const editor = popoutWindow.ace.edit(Ref.current as HTMLElement)
       editor.setTheme(`ace/theme/${Theme}`)
       editor.getSession().setMode("ace/mode/css")
       editor.setValue(internal.get("customCSS") ?? "")
@@ -269,15 +266,15 @@ function CSSPopout({ popoutWindow }:{ popoutWindow:Window }) {
         internal.set("customCSS", value)
       })
       popoutWindow.document.body.appendChild(Object.assign(document.createElement("style"), {
-        textContent: [...document.getElementsByTagName("style") as any].filter(e => !e.id.startsWith("dr")).reduce((styles, style) => styles += style.textContent, "")
+        textContent: `${[...document.getElementsByTagName("style") as any].filter(e => !e.id.startsWith("dr")).reduce((styles, style) => styles += style.textContent, "")}.${macDragRegion} { display: none }`
       }))
-    })
+    }, 0)
   })
 
   return <div ref={Ref} style={{
     height: "calc(100vh - 22px)",
     width: "100vw"
-  }}>{hasAceLoaded ? null : <Spinner />}</div>
+  }}/>
 }
 
 const { content } = getModule(["chat", "uploadArea", "threadSidebarOpen"])
@@ -330,6 +327,7 @@ function openCSSPopout() {
     return <CSSPopout popoutWindow={popoutWindow} />
   })
 }
+setImmediate(() => window.__DR_BACKEND__.openCSSPopout = openCSSPopout)
 
 anonymous(async () => {
   const domNode:Element = await waitUntil(() => document.querySelector(`.${container}`))

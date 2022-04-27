@@ -954,16 +954,14 @@
           } }));
         })
       };
-      var Spinner = (0, getModule_1.default)("Spinner").default;
       var { macDragRegion } = (0, getModule_1.default)(["macDragRegion"]);
       function CSSPopout({ popoutWindow }) {
-        const [hasAceLoaded, setHasAceLoaded] = react_1.React.useState(false);
         const Ref = react_1.React.useRef(null);
         const Theme = storage_1.internal.get("editorTheme") ?? "monokai";
         react_1.React.useEffect(() => {
-          setImmediate(() => {
-            setHasAceLoaded(true);
-            const editor = ace.edit(Ref.current);
+          popoutWindow.ace = window.ace;
+          setTimeout(() => {
+            const editor = popoutWindow.ace.edit(Ref.current);
             editor.setTheme(`ace/theme/${Theme}`);
             editor.getSession().setMode("ace/mode/css");
             editor.setValue(storage_1.internal.get("customCSS") ?? "");
@@ -973,14 +971,14 @@
               storage_1.internal.set("customCSS", value);
             });
             popoutWindow.document.body.appendChild(Object.assign(document.createElement("style"), {
-              textContent: [...document.getElementsByTagName("style")].filter((e) => !e.id.startsWith("dr")).reduce((styles, style) => styles += style.textContent, "")
+              textContent: `${[...document.getElementsByTagName("style")].filter((e) => !e.id.startsWith("dr")).reduce((styles, style) => styles += style.textContent, "")}.${macDragRegion} { display: none }`
             }));
-          });
+          }, 0);
         });
         return react_1.React.createElement("div", { ref: Ref, style: {
           height: "calc(100vh - 22px)",
           width: "100vw"
-        } }, hasAceLoaded ? null : react_1.React.createElement(Spinner, null));
+        } });
       }
       var { content } = (0, getModule_1.default)(["chat", "uploadArea", "threadSidebarOpen"]);
       var { auto } = (0, getModule_1.default)(["scrollerBase"]);
@@ -1014,6 +1012,7 @@
           return react_1.React.createElement(CSSPopout, { popoutWindow });
         });
       }
+      setImmediate(() => window.__DR_BACKEND__.openCSSPopout = openCSSPopout);
       (0, util_1.anonymous)(async () => {
         const domNode = await (0, util_1.waitUntil)(() => document.querySelector(`.${container}`));
         const Router = (0, util_1.getOwnerInstance)(domNode);
