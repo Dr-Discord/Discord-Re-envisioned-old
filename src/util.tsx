@@ -214,3 +214,46 @@ export function copyText(text:string) {
   })
   else copyModule.copy(text)
 }
+
+const Platform = getModule(["getPlatform"])
+const UserPlatform = Platform.getPlatform()
+const { getWindow } = getModule(["getWindow", "getName", "getIsAlwaysOnTop"])
+const dispatcher = getModule(["dirtyDispatch"])
+const Titlebar = getModule((e: { default: Function }) => e.default?.toString().includes("macOSFrame")).default
+
+export function openPopout(renderFunction:Function, features:Object = {}) {
+  const Theme:string = [...document.documentElement.classList as any].find(e => e.startsWith("theme"))
+  const windowKey:string = "DISCORD_CHANNEL_CALL_POPOUT"
+
+  dispatcher.dirtyDispatch({
+    type: "POPOUT_WINDOW_OPEN",
+    key: windowKey,
+    render: () => <Popout />,
+    features
+  })
+
+  const popoutWindow:Window = getWindow(windowKey)
+
+  function Popout() {
+    const [isFocused, setFocused] = React.useState(false)
+    
+    React.useEffect(() => {
+      popoutWindow.onfocus = () => setFocused(true)
+      popoutWindow.onblur = () => setFocused(false)
+    })
+
+    return <>
+      <div 
+        className={`${Theme} platform-${UserPlatform.toLowerCase()} font-size-16 ${isFocused ? " mouse-mode" : ""}full-motion${isFocused ? " app-focused" : ""}`}
+      >
+        <Titlebar 
+          type={UserPlatform}
+          focused={isFocused}
+          macOSFrame={UserPlatform === Platform.PlatformTypes.OSX}
+          windowKey={windowKey}
+        />
+        {renderFunction(windowKey, popoutWindow, UserPlatform)}
+      </div>
+    </>
+  }
+}

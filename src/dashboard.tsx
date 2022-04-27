@@ -1,5 +1,5 @@
 import { React } from "./react"
-import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal, openSetting as initOpenSettings, anonymous, alert } from "./util"
+import { findInReactTree, findInTree, waitUntil, getOwnerInstance, showConfirmationModal, openPopout, anonymous, alert } from "./util"
 import getModule, { asyncGetModule } from "./getModule"
 import patcher from "./patcher"
 import i18n from "./i18n"
@@ -216,9 +216,7 @@ const pages:any = {
 
     return <>
       <div className="dr-editor-header">
-        {makeButton(<OpenExternal />, i18n.customCSS.popout, () => alert(i18n.customCSS.settings, [
-          "Popout the css editor to use it anywhere", "Not added yet"
-        ]))}
+        {makeButton(<OpenExternal />, i18n.customCSS.popout, () => openCSSPopout())}
         {makeButton(<Gear />, i18n.customCSS.settings, () => alert(i18n.customCSS.settings, [
           "Apply and customize settings to your css", "Not added yet"
         ]))}
@@ -247,6 +245,49 @@ const pages:any = {
     </>
   })
 }
+
+const Spinner = getModule("Spinner").default
+const { macDragRegion } = getModule(["macDragRegion"])
+
+function CSSPopout({ key, popoutWindow, os }:{ key:string, popoutWindow:Window, os:string }) {
+  const [hasAceLoaded, setHasAceLoaded] = React.useState(false)
+  const Ref = React.useRef<HTMLDivElement>(null)
+
+  const Theme = internal.get("editorTheme") ?? "monokai"
+  setImmediate(() => popoutWindow.document.querySelector(`.${macDragRegion}`)?.remove())
+  
+  React.useEffect(() => {
+    popoutWindow.document.body.appendChild(Object.assign(document.createElement("script"), {
+      src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
+      nonce: document.querySelector("[nonce]")?.nonce,
+      onload: function(this:HTMLScriptElement) {
+        this.remove()
+        setHasAceLoaded(true)
+        const editor = popoutWindow.ace.edit(Ref.current)
+        editor.setTheme(`ace/theme/${Theme}`)
+        editor.getSession().setMode("ace/mode/css")
+        editor.setValue(internal.get("customCSS") ?? "")
+        editor.on("change", () => {
+          const value = editor.getValue()
+          updateCustomCSS(value)
+          internal.set("customCSS", value)
+        })
+      }
+    }))
+  })
+
+  return <div ref={Ref} style={{
+    height: `calc(100vh - ${os === "LINUX" ? 0 : "22px"})`,
+  }}>{hasAceLoaded ? null : <Spinner style={{ marginTop: `${`calc(50vh - ${os === "LINUX" ? 0 : "22px"} - 16px)`}` }}/>}</div>
+}
+
+function openCSSPopout() {
+  openPopout((key:string, popoutWindow:Window, os:string) => {
+    return <CSSPopout key={key} popoutWindow={popoutWindow} os={os}/>
+  })
+}
+// If something happens and the user cant access css
+setTimeout(() => window.__DR_BACKEND__.openCSSPopout = () => openCSSPopout(), 4000)
 
 const { content } = getModule(["chat", "uploadArea", "threadSidebarOpen"])
 const { auto } = getModule(["scrollerBase"])

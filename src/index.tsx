@@ -27,7 +27,8 @@ import {
   findInReactTree, 
   findInTree, 
   prompt,
-  alert
+  alert,
+  openPopout
 } from "./util"
 import { internal, plugins } from "./storage"
 import "./dashboard"
@@ -54,7 +55,7 @@ window.__DR_BACKEND__ = {
   toggleTransparency: window?.__DR_ELECTRON_BACKEND__?.toggleTransparency ?? (function() { throw new Error("tried using toggleTransparency on WEB!") }),
   isPopped: false,
   restart: window?.__DR_ELECTRON_BACKEND__?.restart ?? (function() { throw new Error("tried using restart on WEB!") }),
-  logger
+  logger, openPopout
 }
 
 const badges:{ [x:string]: [string, string] } = {

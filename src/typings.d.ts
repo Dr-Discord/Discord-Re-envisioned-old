@@ -88,7 +88,7 @@ interface localStorage {
   removeItem: (key:string) => void
   [x:string]: string|Function
 }
-interface webpackChunkdiscord_app {
+interface webpackChunkdiscord_app  {
   [x:string]:any
   push: (chunk:Array<any>) => void
   webpackExports?:any

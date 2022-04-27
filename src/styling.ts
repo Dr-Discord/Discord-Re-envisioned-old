@@ -5,24 +5,13 @@ document.head.appendChild(DrHead)
 
 interface eles { [x:string]:Element }
 
-function removeNotes(css:string) {
-  let spl = css.split("\n")
-  let matches = spl.map(e => e.match(/\/\/(\D|\d)+/))
-  for (const id in matches) {
-    const match = matches[id]
-    if (!match) continue
-    spl[id] = spl[id].replace(match[0], "")
-  }
-  return spl.join("\n")
-}
-
 const Dr_ele:eles = {
   internal: document.createElement("dr-internal"),
   plugin: document.createElement("dr-plugin"),
   theme: document.createElement("dr-theme"),
   customcss: Object.assign(document.createElement("style"), {
     id: "dr-customcss",
-    innerHTML: removeNotes(internal.get("customCSS") ?? "")
+    innerHTML: internal.get("customCSS") ?? ""
   }),
   csssettings: Object.assign(document.createElement("style"), {
     id: "dr-csssettings"
@@ -70,5 +59,5 @@ export const internalStyling = {
 }
 
 export function updateCustomCSS(css:string) {
-  Dr_ele.customcss.innerHTML = removeNotes(css)
+  Dr_ele.customcss.innerHTML = css
 }

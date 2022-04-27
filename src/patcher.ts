@@ -9,7 +9,7 @@ const ALLpatches:any = {}
 type PatcherOf = typeof patcher
 type PatcherKeys = keyof PatcherOf
 
-function patch(this:PatcherOf, patchName:string|symbol, moduleToPatch:any, functionToPatch:string, callback:Function, opts:patcherOpts) {
+function patch(this:PatcherOf, patchName:string|symbol, moduleToPatch:any, functionToPatch:keyof typeof moduleToPatch|string, callback:Function, opts:patcherOpts) {
   let { method = "after", id, index = 0 } = opts
 
   if (!moduleToPatch) throw new Error("moduleToPatch is required/is undefined")

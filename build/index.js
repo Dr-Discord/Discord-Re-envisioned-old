@@ -404,24 +404,13 @@
       var storage_1 = require_storage();
       var DrHead = document.createElement("dr-styles");
       document.head.appendChild(DrHead);
-      function removeNotes(css) {
-        let spl = css.split("\n");
-        let matches = spl.map((e) => e.match(/\/\/(\D|\d)+/));
-        for (const id in matches) {
-          const match = matches[id];
-          if (!match)
-            continue;
-          spl[id] = spl[id].replace(match[0], "");
-        }
-        return spl.join("\n");
-      }
       var Dr_ele = {
         internal: document.createElement("dr-internal"),
         plugin: document.createElement("dr-plugin"),
         theme: document.createElement("dr-theme"),
         customcss: Object.assign(document.createElement("style"), {
           id: "dr-customcss",
-          innerHTML: removeNotes(storage_1.internal.get("customCSS") ?? "")
+          innerHTML: storage_1.internal.get("customCSS") ?? ""
         }),
         csssettings: Object.assign(document.createElement("style"), {
           id: "dr-csssettings"
@@ -469,7 +458,7 @@
         uninject: uninject("internal")
       };
       function updateCustomCSS(css) {
-        Dr_ele.customcss.innerHTML = removeNotes(css);
+        Dr_ele.customcss.innerHTML = css;
       }
       exports.updateCustomCSS = updateCustomCSS;
     }
@@ -572,7 +561,7 @@
         return mod && mod.__esModule ? mod : { "default": mod };
       };
       Object.defineProperty(exports, "__esModule", { value: true });
-      exports.copyText = exports.anonymous = exports.openSetting = exports.restart = exports.findInReactTree = exports.findInTree = exports.prompt = exports.alert = exports.showConfirmationModal = exports.getOwnerInstance = exports.getReactInstance = exports.waitUntil = exports.sleep = void 0;
+      exports.openPopout = exports.copyText = exports.anonymous = exports.openSetting = exports.restart = exports.findInReactTree = exports.findInTree = exports.prompt = exports.alert = exports.showConfirmationModal = exports.getOwnerInstance = exports.getReactInstance = exports.waitUntil = exports.sleep = void 0;
       var react_1 = require_react();
       var getModule_1 = __importDefault(require_getModule());
       var sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
@@ -733,6 +722,31 @@
           copyModule.copy(text);
       }
       exports.copyText = copyText;
+      var Platform = (0, getModule_1.default)(["getPlatform"]);
+      var UserPlatform = Platform.getPlatform();
+      var { getWindow } = (0, getModule_1.default)(["getWindow", "getName", "getIsAlwaysOnTop"]);
+      var dispatcher = (0, getModule_1.default)(["dirtyDispatch"]);
+      var Titlebar = (0, getModule_1.default)((e) => e.default?.toString().includes("macOSFrame")).default;
+      function openPopout(renderFunction, features = {}) {
+        const Theme = [...document.documentElement.classList].find((e) => e.startsWith("theme"));
+        const windowKey = "DISCORD_CHANNEL_CALL_POPOUT";
+        dispatcher.dirtyDispatch({
+          type: "POPOUT_WINDOW_OPEN",
+          key: windowKey,
+          render: () => react_1.React.createElement(Popout, null),
+          features
+        });
+        const popoutWindow = getWindow(windowKey);
+        function Popout() {
+          const [isFocused, setFocused] = react_1.React.useState(false);
+          react_1.React.useEffect(() => {
+            popoutWindow.onfocus = () => setFocused(true);
+            popoutWindow.onblur = () => setFocused(false);
+          });
+          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement("div", { className: `${Theme} platform-${UserPlatform.toLowerCase()} font-size-16 ${isFocused ? " mouse-mode" : ""}full-motion${isFocused ? " app-focused" : ""}` }, react_1.React.createElement(Titlebar, { type: UserPlatform, focused: isFocused, macOSFrame: UserPlatform === Platform.PlatformTypes.OSX, windowKey }), renderFunction(windowKey, popoutWindow, UserPlatform)));
+        }
+      }
+      exports.openPopout = openPopout;
     }
   });
 
@@ -921,10 +935,7 @@
               props.onClick(e);
             }, className: "dr-editor-header-button" }, reactElement));
           }
-          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement("div", { className: "dr-editor-header" }, makeButton(react_1.React.createElement(OpenExternal, null), i18n_1.default.customCSS.popout, () => (0, util_1.alert)(i18n_1.default.customCSS.settings, [
-            "Popout the css editor to use it anywhere",
-            "Not added yet"
-          ])), makeButton(react_1.React.createElement(Gear, null), i18n_1.default.customCSS.settings, () => (0, util_1.alert)(i18n_1.default.customCSS.settings, [
+          return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement("div", { className: "dr-editor-header" }, makeButton(react_1.React.createElement(OpenExternal, null), i18n_1.default.customCSS.popout, () => openCSSPopout()), makeButton(react_1.React.createElement(Gear, null), i18n_1.default.customCSS.settings, () => (0, util_1.alert)(i18n_1.default.customCSS.settings, [
             "Apply and customize settings to your css",
             "Not added yet"
           ])), makeButton(react_1.React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24" }, react_1.React.createElement("path", { fill: "currentcolor", d: "M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" }), react_1.React.createElement("path", { fill: "currentcolor", d: "M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z" })), i18n_1.default.customCSS.changeTheme, () => {
@@ -946,6 +957,42 @@
           } }));
         })
       };
+      var Spinner = (0, getModule_1.default)("Spinner").default;
+      var { macDragRegion } = (0, getModule_1.default)(["macDragRegion"]);
+      function CSSPopout({ key, popoutWindow, os }) {
+        const [hasAceLoaded, setHasAceLoaded] = react_1.React.useState(false);
+        const Ref = react_1.React.useRef(null);
+        const Theme = storage_1.internal.get("editorTheme") ?? "monokai";
+        setImmediate(() => popoutWindow.document.querySelector(`.${macDragRegion}`)?.remove());
+        react_1.React.useEffect(() => {
+          popoutWindow.document.body.appendChild(Object.assign(document.createElement("script"), {
+            src: "https://ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js",
+            nonce: document.querySelector("[nonce]")?.nonce,
+            onload: function() {
+              this.remove();
+              setHasAceLoaded(true);
+              const editor = popoutWindow.ace.edit(Ref.current);
+              editor.setTheme(`ace/theme/${Theme}`);
+              editor.getSession().setMode("ace/mode/css");
+              editor.setValue(storage_1.internal.get("customCSS") ?? "");
+              editor.on("change", () => {
+                const value = editor.getValue();
+                (0, styling_1.updateCustomCSS)(value);
+                storage_1.internal.set("customCSS", value);
+              });
+            }
+          }));
+        });
+        return react_1.React.createElement("div", { ref: Ref, style: {
+          height: `calc(100vh - ${os === "LINUX" ? 0 : "22px"})`
+        } }, hasAceLoaded ? null : react_1.React.createElement(Spinner, { style: { marginTop: `${`calc(50vh - ${os === "LINUX" ? 0 : "22px"} - 16px)`}` } }));
+      }
+      function openCSSPopout() {
+        (0, util_1.openPopout)((key, popoutWindow, os) => {
+          return react_1.React.createElement(CSSPopout, { key, popoutWindow, os });
+        });
+      }
+      setTimeout(() => window.__DR_BACKEND__.openCSSPopout = () => openCSSPopout(), 4e3);
       var { content } = (0, getModule_1.default)(["chat", "uploadArea", "threadSidebarOpen"]);
       var { auto } = (0, getModule_1.default)(["scrollerBase"]);
       var { container } = (0, getModule_1.default)(["container", "downloadProgressCircle"]);
@@ -1094,7 +1141,8 @@
         restart: window?.__DR_ELECTRON_BACKEND__?.restart ?? function() {
           throw new Error("tried using restart on WEB!");
         },
-        logger: logger_1.default
+        logger: logger_1.default,
+        openPopout: util_1.openPopout
       };
       var badges = {
         "515780151791976453": [i18n_1.default.badges.developer, "#F52590"],
