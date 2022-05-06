@@ -221,7 +221,9 @@
         return unpatch;
       }
       var patcher = {
-        patch,
+        patch: function(id, module2, functionToPatch, callback, opts) {
+          return patch(id, module2, functionToPatch, callback, Object.assign({}, opts));
+        },
         before: function(id, module2, functionToPatch, callback, opts) {
           return patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "before" }));
         },
@@ -230,21 +232,24 @@
         },
         after: function(id, module2, functionToPatch, callback, opts) {
           return patch(id, module2, functionToPatch, callback, Object.assign({}, opts, { method: "after" }));
-        },
-        unpatchAll: function(id) {
-          if (!ALLpatches[id])
-            return;
-          for (const patch2 of ALLpatches[id])
-            patch2.unpatch();
         }
       };
+      function unpatchAll(id) {
+        if (!ALLpatches[id])
+          return;
+        for (const patch2 of ALLpatches[id])
+          patch2.unpatch();
+      }
       exports.default = {
         ...patcher,
-        quick: (moduleToPatch, functionToPatch, callback, opts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
-        create: (id) => Object.fromEntries(Object.keys(patcher).map((key) => [
-          key,
-          patcher[key].bind(null, id)
-        ])),
+        unpatchAll,
+        quick: (module2, functionToPatch, callback, opts) => patch(Quick_Symbol, module2, functionToPatch, callback, Object.assign({}, opts)),
+        create: (id) => {
+          const keys = Object.keys(patcher);
+          const entries = keys.map((key) => [key, patcher[key].bind(patcher, id)]);
+          entries.push(["unpatchAll", unpatchAll.bind(null, id)]);
+          return Object.fromEntries(entries);
+        },
         patches: ALLpatches
       };
     }
@@ -602,19 +607,19 @@
         const { Messages } = (0, getModule_1.default)(["Messages"], false)[1];
         const emptyFunction = () => {
         };
-        const { onConfirm = emptyFunction, onCancel = emptyFunction, confirmText = Messages.OKAY, cancelText = Messages.CANCEL, danger = false } = opts;
+        const { onConfirm = emptyFunction, onCancel = emptyFunction, confirmText = Messages.OKAY, cancelText = Messages.CANCEL, danger = false, key, context } = opts;
         content = updateContent(content);
-        openModal((props) => react_1.React.createElement(ConfirmationModal, { ...props, header: title, content, onConfirm, onCancel, confirmText, cancelText, confirmButtonColor: danger ? Button.ButtonColors.RED : Button.ButtonColors.BRAND }, content));
+        openModal((props) => react_1.React.createElement(ConfirmationModal, { ...props, header: title, content, onConfirm, onCancel, confirmText, cancelText, confirmButtonColor: danger ? Button.ButtonColors.RED : Button.ButtonColors.BRAND }, content), { key }, context);
       }
       exports.showConfirmationModal = showConfirmationModal;
       function alert(title, content, options = {}) {
         const { openModal } = (0, getModule_1.default)(["openModal", "openModalLazy"]);
         const Alert = (0, getModule_1.default)("Alert").default;
         content = updateContent(content);
-        openModal((props) => react_1.React.createElement(Alert, { ...props, title, body: content, onConfirm: options.onConfirm, confirmText: options.confirmText, minorText: options.smallText, onConfirmSecondary: options.smallTextClose }));
+        openModal((props) => react_1.React.createElement(Alert, { ...props, title, body: content, onConfirm: options.onConfirm, confirmText: options.confirmText, minorText: options.smallText, onConfirmSecondary: options.smallTextClose }), {}, options.context);
       }
       exports.alert = alert;
-      function prompt(title, defaultValue) {
+      function prompt(title, defaultValue, context) {
         const TextInput = (0, getModule_1.default)("TextInput").default;
         const ConfirmationModal = (0, getModule_1.default)("ConfirmModal").default;
         const Button = (0, getModule_1.default)(["ButtonColors"]);
@@ -632,7 +637,7 @@
                 toReturn = value2;
               } });
             }));
-          });
+          }, {}, context);
         });
       }
       exports.prompt = prompt;
@@ -686,7 +691,7 @@
         const { ModalRoot, ModalSize, ModalHeader, ModalContent, ModalCloseButton } = (0, getModule_1.default)(["ModalRoot", "ModalSize"]);
         const Flex = (0, getModule_1.default)("Flex").default;
         const FormTitle = (0, getModule_1.default)("FormTitle").default;
-        const Text = (0, getModule_1.default)("Text").default;
+        const Text = (0, getModule_1.default)("LegacyText").default;
         function needsCreated(ele) {
           if (typeof ele === "string" || typeof ele.type === "string")
             return false;
@@ -722,7 +727,6 @@
           copyModule.copy(text);
       }
       exports.copyText = copyText;
-      var Platform = (0, getModule_1.default)(["getPlatform"]);
       var PopoutWindowStore = (0, getModule_1.default)(["getWindow", "getName", "getIsAlwaysOnTop"]);
       var dispatcher = (0, getModule_1.default)(["dirtyDispatch"]);
       var PopoutWindow = (0, getModule_1.default)((e) => e.default?.toString().indexOf("DndProvider") > -1 && react_1.React.isValidElement(e.default())).default;
@@ -913,6 +917,16 @@
         const [isEnabled, setEnabled] = react_1.React.useState(false);
         return react_1.React.createElement("div", { className: "dr-addon-card" });
       });
+      function changeThemeModal(theme, setTheme) {
+        let _theme = theme;
+        (0, util_1.showConfirmationModal)(i18n_1.default.customCSS.changeTheme, react_1.React.createElement(SelectTheme, { theme, setTheme: (val) => _theme = val }), {
+          onConfirm: () => {
+            setTheme(_theme);
+            storage_1.internal.set("editorTheme", _theme);
+          },
+          context: window.__DR_BACKEND__.isPopped ? "popout" : "default"
+        });
+      }
       var pages = {
         general: react_1.React.memo(() => {
           return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement(SwitchItem, { value: storage_1.internal.get("devMode") ?? false, title: i18n_1.default.devMode.title, note: i18n_1.default.devMode.note, disabled: window.__DR_BACKEND__.isDeveloperErrored, onChange: (val) => {
@@ -925,7 +939,6 @@
         }),
         customcss: react_1.React.memo(() => {
           const [theme, setTheme] = react_1.React.useState(storage_1.internal.get("editorTheme") ?? "monokai");
-          let _theme = theme;
           function makeButton(reactElement, tooltip, onClick) {
             return react_1.React.createElement(Tooltip, { text: tooltip }, (props) => react_1.React.createElement("div", { ...props, onClick: (e) => {
               onClick(e);
@@ -935,14 +948,7 @@
           return react_1.React.createElement(react_1.React.Fragment, null, react_1.React.createElement("div", { className: "dr-editor-header" }, makeButton(react_1.React.createElement(OpenExternal, null), i18n_1.default.customCSS.popout, () => openCSSPopout()), makeButton(react_1.React.createElement(Gear, null), i18n_1.default.customCSS.settings, () => (0, util_1.alert)(i18n_1.default.customCSS.settings, [
             "Apply and customize settings to your css",
             "Not added yet"
-          ])), makeButton(react_1.React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24" }, react_1.React.createElement("path", { fill: "currentcolor", d: "M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" }), react_1.React.createElement("path", { fill: "currentcolor", d: "M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z" })), i18n_1.default.customCSS.changeTheme, () => {
-            (0, util_1.showConfirmationModal)(i18n_1.default.customCSS.changeTheme, react_1.React.createElement(SelectTheme, { theme, setTheme: (val) => _theme = val }), {
-              onConfirm: () => {
-                setTheme(_theme);
-                storage_1.internal.set("editorTheme", _theme);
-              }
-            });
-          })), react_1.React.createElement(Editor, { props: { style: { height: "calc(100% - 30px)" } }, editor: (editor) => {
+          ])), makeButton(react_1.React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24" }, react_1.React.createElement("path", { fill: "currentcolor", d: "M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" }), react_1.React.createElement("path", { fill: "currentcolor", d: "M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z" })), i18n_1.default.customCSS.changeTheme, () => changeThemeModal(theme, setTheme))), react_1.React.createElement(Editor, { props: { style: { height: "calc(100% - 30px)" } }, editor: (editor) => {
             editor.setTheme(`ace/theme/${theme}`);
             editor.getSession().setMode("ace/mode/css");
             editor.setValue(storage_1.internal.get("customCSS") ?? "");
@@ -960,6 +966,7 @@
         const Theme = storage_1.internal.get("editorTheme") ?? "monokai";
         react_1.React.useEffect(() => {
           popoutWindow.ace = window.ace;
+          popoutWindow.changeThemeModal = changeThemeModal;
           setTimeout(() => {
             const editor = popoutWindow.ace.edit(Ref.current);
             editor.setTheme(`ace/theme/${Theme}`);
@@ -970,8 +977,9 @@
               (0, styling_1.updateCustomCSS)(value);
               storage_1.internal.set("customCSS", value);
             });
-            popoutWindow.document.body.appendChild(Object.assign(document.createElement("style"), {
-              textContent: `${[...document.getElementsByTagName("style")].filter((e) => !e.id.startsWith("dr")).reduce((styles, style) => styles += style.textContent, "")}.${macDragRegion} { display: none }`
+            popoutWindow.document.head.appendChild(Object.assign(document.createElement("style"), {
+              textContent: `${[...document.querySelectorAll("style")].filter((e) => e.innerHTML.includes("sourceURL=ace/")).reduce((styles, style) => styles += style.textContent, "")}.${macDragRegion}{ display: none }`,
+              id: "dr-custom-css-popout-style"
             }));
           }, 0);
         });
@@ -1047,7 +1055,7 @@
       var getModule_1 = __importDefault(require_getModule());
       var util_1 = require_util();
       var initCard = () => {
-        const Text = (0, getModule_1.default)("Text").default;
+        const Text = (0, getModule_1.default)("LegacyText").default;
         const Button = (0, getModule_1.default)(["BorderColors", "Colors"]);
         const { wrapper, content, title, titleRegion, icon, infoLink, infoIcon, buildInfo, buildDetails, subHead, copyLink, copied, copyLinkIcon } = (0, getModule_1.default)(["titleRegion"]);
         const InfoFilled = (0, getModule_1.default)("InfoFilled").default;
@@ -1255,10 +1263,9 @@
           res.props.children.push(makeBadge(content[0], content[1], Number(badgeModule.BadgeSizes[props.size].replace("SIZE_", ""))));
         });
         const Card = (0, addonManager_1.initCard)();
-        patcher_1.default.instead("DrInternal-Addoncards-Patch", (0, getModule_1.default)(["defaultRules", "astParserFor"]).defaultRules.link, "react", (props, orig) => {
+        patcher_1.default.instead("DrInternal-Addoncards-Patch", (0, getModule_1.default)(["defaultRules", "astParserFor"]).defaultRules.link, "react", (props) => {
           if (/dr:\/\/(plugin|theme)\/([A-z]|[0-9])+(\/|)/.test(props[0].target))
             return () => react_1.default.createElement(Card, { href: props[0].target });
-          return;
         });
         logger_1.default.log("Loaded!");
       }

@@ -165,9 +165,8 @@ async function Start() {
     res.props.children.push(makeBadge(content[0], content[1], Number(badgeModule.BadgeSizes[props.size].replace("SIZE_", ""))))
   })
   const Card = initCard()
-  patcher.instead("DrInternal-Addoncards-Patch", getModule(["defaultRules", "astParserFor"]).defaultRules.link, "react", (props:Array<any>, orig:Function) => {    
+  patcher.instead("DrInternal-Addoncards-Patch", getModule(["defaultRules", "astParserFor"]).defaultRules.link, "react", (props) => {    
     if (/dr:\/\/(plugin|theme)\/([A-z]|[0-9])+(\/|)/.test(props[0].target)) return () => <Card href={props[0].target} />
-    return
   })
   logger.log("Loaded!")
 }

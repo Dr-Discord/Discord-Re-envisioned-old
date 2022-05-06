@@ -178,6 +178,17 @@ const Addoncard = React.memo(({  }:any) => {
   )
 })
 
+function changeThemeModal(theme:string, setTheme:Function) {
+  let _theme = theme
+  showConfirmationModal(i18n.customCSS.changeTheme, <SelectTheme theme={theme} setTheme={(val:string) => _theme = val}/>, {
+    onConfirm: () => {
+      setTheme(_theme)
+      internal.set("editorTheme", _theme)
+    },
+    context: window.__DR_BACKEND__.isPopped ? "popout" : "default"
+  })
+}
+
 const pages:any = {
   general: React.memo(() => {
     return <>
@@ -206,7 +217,6 @@ const pages:any = {
   }),
   customcss: React.memo(() => {
     const [theme, setTheme] = React.useState(internal.get("editorTheme") ?? "monokai")
-    let _theme = theme
     function makeButton(reactElement:ReactNode, tooltip:string, onClick:Function) {
       return <Tooltip text={tooltip}>{(props:tooltipProps) => <div {...props} onClick={(e:any) => {
         onClick(e)
@@ -223,14 +233,7 @@ const pages:any = {
         {makeButton(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
   <path fill="currentcolor" d="M20.259,3.879c-1.172-1.173-3.07-1.173-4.242,0l-8.753,8.753c1.111-0.074,2.247,0.296,3.096,1.146 s1.22,1.985,1.146,3.097l8.754-8.755C20.822,7.559,21.138,6.796,21.138,6C21.138,5.204,20.822,4.442,20.259,3.879z" />
   <path fill="currentcolor" d="M3.739,15.193C0.956,17.976,4.12,19.405,1,22.526c0,0,5.163,0.656,7.945-2.127 c1.438-1.438,1.438-3.769,0-5.207C7.507,13.755,5.176,13.755,3.739,15.193z" />
-</svg>, i18n.customCSS.changeTheme, () => {
-  showConfirmationModal(i18n.customCSS.changeTheme, <SelectTheme theme={theme} setTheme={(val:string) => _theme = val}/>, {
-    onConfirm: () => {
-      setTheme(_theme)
-      internal.set("editorTheme", _theme)
-    }
-  })
-})}
+</svg>, i18n.customCSS.changeTheme, () => changeThemeModal(theme, setTheme))}
       </div>
       <Editor props={{ style: { height: "calc(100% - 30px)" } }} editor={(editor:any) => {
         editor.setTheme(`ace/theme/${theme}`)
@@ -254,6 +257,8 @@ function CSSPopout({ popoutWindow }:{ popoutWindow:Window }) {
   
   React.useEffect(() => {
     popoutWindow.ace = window.ace
+    popoutWindow.changeThemeModal = changeThemeModal
+    
     setTimeout(() => {
       // Errors without this
       const editor = popoutWindow.ace.edit(Ref.current as HTMLElement)
@@ -265,8 +270,9 @@ function CSSPopout({ popoutWindow }:{ popoutWindow:Window }) {
         updateCustomCSS(value)
         internal.set("customCSS", value)
       })
-      popoutWindow.document.body.appendChild(Object.assign(document.createElement("style"), {
-        textContent: `${[...document.getElementsByTagName("style") as any].filter(e => !e.id.startsWith("dr")).reduce((styles, style) => styles += style.textContent, "")}.${macDragRegion} { display: none }`
+      popoutWindow.document.head.appendChild(Object.assign(document.createElement("style"), {
+        textContent: `${[...document.querySelectorAll("style") as any].filter(e => e.innerHTML.includes("sourceURL=ace/")).reduce((styles, style) => styles += style.textContent, "")}.${macDragRegion}{ display: none }`,
+        id: "dr-custom-css-popout-style"
       }))
     }, 0)
   })

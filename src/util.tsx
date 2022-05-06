@@ -22,22 +22,13 @@ export function getOwnerInstance(element:Element) {
   }
 }
 
-interface showConfirmationModalProps {
-  onConfirm?:() => void
-  onCancel?:() => void
-  confirmText?:string
-  cancelText?:string
-  danger?:boolean
-  key?:string|undefined
-}
-
 function updateContent(content:ReactString|Array<ReactString>):Array<react.ReactElement> {
   const Markdown = getModule((m: { default: { displayName: string; rules: any } }) => m.default?.displayName === "Markdown" && m.default.rules).default
 
   if (!Array.isArray(content)) content = [content]
   return content = content.map((c:any) => typeof(c) === "string" ? <Markdown>{c}</Markdown> : c)
 }
-export function showConfirmationModal (title:ReactString, content:ReactString|Array<ReactString>, opts:showConfirmationModalProps) {
+export function showConfirmationModal (title:ReactString, content:ReactString|Array<ReactString>, opts:showConfirmationModalOpts) {
   const ConfirmationModal = getModule("ConfirmModal").default
   const Button = getModule(["ButtonColors"])
   const { openModal } = getModule(["openModal", "openModalLazy"])
@@ -49,7 +40,9 @@ export function showConfirmationModal (title:ReactString, content:ReactString|Ar
     onCancel = emptyFunction, 
     confirmText = Messages.OKAY, 
     cancelText = Messages.CANCEL, 
-    danger = false
+    danger = false,
+    key,
+    context
   } = opts
   content = updateContent(content)
   openModal((props:any) => (
@@ -63,7 +56,7 @@ export function showConfirmationModal (title:ReactString, content:ReactString|Ar
       cancelText={cancelText}
       confirmButtonColor={danger ? Button.ButtonColors.RED : Button.ButtonColors.BRAND}
     >{content}</ConfirmationModal>
-  ))
+  ), { key }, context)
 }
 
 export function alert(title:ReactString, content:ReactString|Array<ReactString>, options:alertOpts = {}):void {
@@ -81,10 +74,10 @@ export function alert(title:ReactString, content:ReactString|Array<ReactString>,
       minorText={options.smallText}
       onConfirmSecondary={options.smallTextClose}
     />
-  ))
+  ), {}, options.context)
 }
 
-export function prompt(title:string, defaultValue:string):Promise<string|null> {
+export function prompt(title:string, defaultValue?:string, context?:string):Promise<string|null> {
   const TextInput = getModule("TextInput").default
   const ConfirmationModal = getModule("ConfirmModal").default
   const Button = getModule(["ButtonColors"])
@@ -116,7 +109,7 @@ export function prompt(title:string, defaultValue:string):Promise<string|null> {
           />
         })}
       </ConfirmationModal>
-    })
+    }, {}, context)
   })
 }
 
@@ -167,7 +160,7 @@ export function openSetting(this:any) {
   const { ModalRoot, ModalSize, ModalHeader, ModalContent, ModalCloseButton } = getModule(["ModalRoot", "ModalSize"])
   const Flex = getModule("Flex").default
   const FormTitle = getModule("FormTitle").default
-  const Text = getModule("Text").default
+  const Text = getModule("LegacyText").default
 
   function needsCreated(ele:any):boolean {
     if (typeof ele === "string" || typeof ele.type === "string") return false
@@ -215,7 +208,6 @@ export function copyText(text:string) {
   else copyModule.copy(text)
 }
 
-const Platform = getModule(["getPlatform"])
 const PopoutWindowStore = getModule(["getWindow", "getName", "getIsAlwaysOnTop"])
 const dispatcher = getModule(["dirtyDispatch"])
 const PopoutWindow = getModule((e: { default:Function }) => e.default?.toString().indexOf("DndProvider") > -1 && React.isValidElement(e.default())).default

@@ -3,6 +3,8 @@ interface patcherOpts {
   id?:string|symbol
   index?:number
 }
+
+type modalContext = "popout"|"default"|null
 interface showConfirmationModalOpts {
   onConfirm?:()=>void
   onCancel?:()=>void
@@ -10,6 +12,7 @@ interface showConfirmationModalOpts {
   cancelText?:string
   danger?:boolean
   key?:string|undefined
+  context?:modalContext
 }
 interface alertOpts {
   confirmText?: String
@@ -18,6 +21,7 @@ interface alertOpts {
   onConfirm?: Function
   cancelText?: String
   onCancel?: Function
+  context?:modalContext
 }
 interface toastOpts {
   type?:"success"|"error"|"info"|"warning"

@@ -6,10 +6,10 @@ Symbol.drPatcher = { patch: Patch_Symbol, quick: Quick_Symbol }
 
 const ALLpatches:any = {}
 
-type PatcherOf = typeof patcher
-type PatcherKeys = keyof PatcherOf
 
-function patch(this:PatcherOf, patchName:string|symbol, moduleToPatch:any, functionToPatch:keyof typeof moduleToPatch|string, callback:Function, opts:patcherOpts) {
+type patchCallback<T> = (args:IArguments, responce_OriginalFunction_This:Function|ThisType<T>|void|undefined, thisItem: |ThisType<T>|void) => Function|void
+
+function patch(patchName:string|symbol, moduleToPatch:any, functionToPatch:keyof typeof moduleToPatch|string, callback:patchCallback<typeof moduleToPatch>, opts:patcherOpts) {
   let { method = "after", id, index = 0 } = opts
 
   if (!moduleToPatch) throw new Error("moduleToPatch is required/is undefined")
@@ -90,22 +90,37 @@ function patch(this:PatcherOf, patchName:string|symbol, moduleToPatch:any, funct
   return unpatch
 }
 
-const patcher:any = {
-  patch,
-  before: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "before" })) },
-  instead: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "instead" })) },
-  after: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:Function, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "after" })) },
-  unpatchAll: function(this:PatcherOf, id:string|symbol) {
-    if (!ALLpatches[id]) return
-    for (const patch of ALLpatches[id]) patch.unpatch()
-  },
+type PatcherOf = typeof patcher
+type PatcherKeys = keyof PatcherOf
+
+type patcherFunction = (this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:patchCallback<typeof module>, opts?:patcherOpts) => Function
+
+const patcher: {
+  patch: patcherFunction
+  before: patcherFunction
+  instead: patcherFunction
+  after: patcherFunction
+} = {
+  patch: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:patchCallback<typeof module>, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts)) },
+  before: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:patchCallback<typeof module>, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "before" })) },
+  instead: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:patchCallback<typeof module>, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "instead" })) },
+  after: function(this:PatcherOf, id:string|symbol, module:any, functionToPatch:string, callback:patchCallback<typeof module>, opts?:patcherOpts) { return patch(id, module, functionToPatch, callback, Object.assign({}, opts, { method: "after" })) },
+}
+
+function unpatchAll(id:string|symbol) {
+  if (!ALLpatches[id]) return
+  for (const patch of ALLpatches[id]) patch.unpatch()
 }
 
 export default {
   ...patcher,
-  quick: (moduleToPatch:any, functionToPatch:string, callback:Function, opts?:patcherOpts) => patch(Quick_Symbol, moduleToPatch, functionToPatch, callback, Object.assign({}, opts)),
-  create: (id:string|symbol) => Object.fromEntries(Object.keys(patcher).map((key:PatcherKeys) => [
-    key, patcher[key].bind(null, id)
-  ])),
+  unpatchAll,
+  quick: (module:any, functionToPatch:string, callback:patchCallback<typeof module>, opts?:patcherOpts) => patch(Quick_Symbol, module, functionToPatch, callback, Object.assign({}, opts)),
+  create: (id:string|symbol) => {
+    const keys = Object.keys(patcher) as PatcherKeys[]
+    const entries:Array<[PatcherKeys|"unpatchAll", Function]> = keys.map(key => [ key, patcher[key].bind(patcher, id) ])
+    entries.push([ "unpatchAll", unpatchAll.bind(null, id) ])
+    return Object.fromEntries(entries)
+  },
   patches: ALLpatches
 }

@@ -45,7 +45,7 @@ export default getModule
 // Idk how it really works
 const listeners = new Set<Function>()
 
-patcher.instead("DrInternal-webpack-Patch", webpackChunkdiscord_app, "push", ([chunk]:Array<Array<any>>) => {
+patcher.instead("DrInternal-webpack-Patch", webpackChunkdiscord_app, "push", ([chunk]) => {
   const [, modules] = chunk
   for (const id in modules) patcher.after("DrInternal-dontShow-Patch", modules, id, ([, exports]:any) => {
     for (const ite of [...listeners]) ite(exports)

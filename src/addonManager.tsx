@@ -3,7 +3,7 @@ import getModule from "./getModule"
 import { alert, copyText } from "./util"
 
 export const initCard = () => {
-  const Text = getModule("Text").default
+  const Text = getModule("LegacyText").default
   const Button = getModule(["BorderColors", "Colors"])
   const {
     wrapper,
